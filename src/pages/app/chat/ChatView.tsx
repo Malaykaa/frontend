@@ -1,0 +1,549 @@
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { ArrowLeft, Zap } from "lucide-react";
+import { toast } from "sonner";
+import { MessageBubble, StreamingBubble } from "@/components/chat/MessageBubble";
+import { StreamingIndicator } from "@/components/chat/StreamingIndicator";
+import { AnimatedDots } from "@/components/chat/AnimatedDots";
+import { ActionProgressView } from "@/components/chat/ActionProgressView";
+import { DeliverableCard } from "@/components/chat/DeliverableCard";
+import { DocumentViewer } from "@/components/chat/DocumentViewer";
+import { PlanPanel } from "@/components/chat/PlanPanel";
+import { ChatInput } from "@/components/chat/ChatInput";
+import { Button } from "@/components/ui/button";
+import { fetchThreadWithMessages, streamMessage } from "@/services/api/chat.api";
+import {
+  streamActionGeneration,
+  PRESET_LABELS,
+  type AgentStep,
+} from "@/services/api/actions.api";
+import { ApiError } from "@/shared/api/client";
+import { isActionThread } from "@/hooks/queries/use-chat-threads";
+import type { ChatThread, ChatMessage } from "@/shared/types";
+import { cn } from "@/shared/lib/utils";
+
+// ── États de streaming chat ────────────────────────────────────────────────
+type StreamPhase = "idle" | "thinking" | "streaming" | "error";
+
+interface StreamState {
+  phase: StreamPhase;
+  content: string;
+  agentName: string | null;
+  errorMsg: string | null;
+}
+
+const STREAM_IDLE: StreamState = {
+  phase: "idle",
+  content: "",
+  agentName: null,
+  errorMsg: null,
+};
+
+// ── États de génération de document ───────────────────────────────────────
+type GenPhase = "idle" | "generating" | "done" | "error";
+
+interface GenState {
+  phase: GenPhase;
+  steps: AgentStep[];
+  content: string;
+  documentId: string | null;
+}
+
+const GEN_IDLE: GenState = {
+  phase: "idle",
+  steps: [],
+  content: "",
+  documentId: null,
+};
+
+// ── Gestion erreurs ────────────────────────────────────────────────────────
+function getErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 429) return "Trop de requêtes. Attends un moment.";
+    if (err.status === 503) return "Service IA temporairement indisponible.";
+    if (err.status >= 500)  return "Erreur serveur. Réessaie dans quelques instants.";
+    if (err.status === 401) return "Session expirée. Reconnecte-toi.";
+  }
+  if (err instanceof TypeError && err.message.includes("fetch")) {
+    return "Connexion perdue. Vérifie ta connexion internet.";
+  }
+  return "Une erreur est survenue. Réessaie.";
+}
+
+// ── Squelettes ─────────────────────────────────────────────────────────────
+function MessageSkeleton({ side }: { side: "left" | "right" }) {
+  return (
+    <div className={cn("flex gap-2.5 px-4 py-1.5", side === "right" && "justify-end")}>
+      {side === "left" && <div className="h-8 w-8 shrink-0 rounded-full bg-muted animate-pulse" />}
+      <div
+        className={cn(
+          "h-10 rounded-2xl bg-muted animate-pulse",
+          side === "left" ? "w-48 rounded-tl-sm" : "w-36 rounded-tr-sm"
+        )}
+      />
+    </div>
+  );
+}
+
+// ── WelcomeState — adapté selon le type de thread ─────────────────────────
+const WELCOME_CHIPS = [
+  { label: "Dis-moi comment commencer", message: (title: string) => `Comment commencer pour : ${title} ?` },
+  { label: "Quelles sont mes options ?", message: (title: string) => `Quelles sont mes options pour : ${title} ?` },
+  { label: "Crée un plan d'action", message: (title: string) => `Crée un plan d'action détaillé pour : ${title}` },
+];
+
+function WelcomeState({
+  thread,
+  onGenerate,
+  onSend,
+}: {
+  thread: ChatThread;
+  onGenerate?: () => void;
+  onSend?: (text: string) => void;
+}) {
+  const isAction = isActionThread(thread);
+  const presetLabel = thread.preset_key ? PRESET_LABELS[thread.preset_key] : null;
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-5 px-8 text-center py-12">
+      <div
+        className={cn(
+          "flex h-14 w-14 items-center justify-center rounded-2xl",
+          isAction ? "bg-amber-100" : "bg-black"
+        )}
+      >
+        {isAction
+          ? <Zap className="h-7 w-7 text-amber-600" />
+          : <img src="/icon.png" alt="" className="h-9 w-9 object-contain" />}
+      </div>
+
+      <div>
+        <p className="font-bold text-base">{thread.title}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground max-w-xs">
+          {isAction
+            ? `Prêt à générer ton ${presetLabel ?? "document"} avec l'IA.`
+            : "Décris ta situation et tes objectifs. L'IA va t'accompagner."}
+        </p>
+      </div>
+
+      {isAction && onGenerate ? (
+        <Button
+          size="lg"
+          className="gap-2 bg-amber-500 hover:bg-amber-600 text-white"
+          onClick={onGenerate}
+        >
+          <Zap className="h-4 w-4" />
+          Générer le document
+        </Button>
+      ) : (
+        <div className="flex flex-wrap gap-2 justify-center">
+          {WELCOME_CHIPS.map(({ label, message }) => (
+            <button
+              key={label}
+              className="rounded-full border bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-colors"
+              onClick={() => onSend?.(message(thread.title))}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Composant principal ────────────────────────────────────────────────────
+export default function ChatView() {
+  const { threadId } = useParams<{ threadId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const navTitle = (location.state as { title?: string } | null)?.title;
+
+  const [thread, setThread]   = useState<ChatThread | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stream, setStream]   = useState<StreamState>(STREAM_IDLE);
+  const [gen, setGen]             = useState<GenState>(GEN_IDLE);
+  const [showDoc, setShowDoc]     = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  // Viewer pour les livrables générés dans les threads objectif (via chat)
+  const [viewingDoc, setViewingDoc] = useState<{ content: string; title: string } | null>(null);
+  const [completedStepKeys, setCompletedStepKeys] = useState<Set<string>>(new Set());
+
+  const bottomRef      = useRef<HTMLDivElement>(null);
+  const isActiveRef    = useRef(false);
+
+  // ── Chargement initial ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!threadId) return;
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const { thread: t, messages: msgs } = await fetchThreadWithMessages(threadId);
+        if (!cancelled) { setThread(t); setMessages(msgs); }
+      } catch {
+        if (!cancelled) toast.error("Impossible de charger la conversation");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void load();
+    return () => { cancelled = true; };
+  }, [threadId]);
+
+  // ── Auto-scroll ─────────────────────────────────────────────────────────
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    bottomRef.current?.scrollIntoView({ behavior, block: "end" });
+  }, []);
+
+  useEffect(() => { scrollToBottom("instant"); }, [loading, scrollToBottom]);
+  useEffect(() => { scrollToBottom(); }, [messages.length, stream.content, gen.steps.length, scrollToBottom]);
+
+  // ── Envoi message classique ─────────────────────────────────────────────
+  const handleSend = useCallback(
+    async (content: string, attachmentKeys: string[]) => {
+      if (!threadId || isActiveRef.current) return;
+
+      const userMsg: ChatMessage = {
+        id: `local-${Date.now()}`,
+        thread_id: threadId,
+        role: "user",
+        content,
+        created_at: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, userMsg]);
+      isActiveRef.current = true;
+      setStream({ phase: "thinking", content: "", agentName: null, errorMsg: null });
+
+      try {
+        let firstToken = true;
+        let accumulated = "";
+        let isDeliverable = false;
+
+        for await (const token of streamMessage(
+          threadId, content, attachmentKeys,
+          ({ isDeliverable: flag }) => { isDeliverable = flag; },
+          // Callback sections : affiché quand l'orchestrateur génère un document via chat
+          (label, status) => {
+            setGen((g) => {
+              const existing = g.steps.findIndex((s) => s.agent === label);
+              const step = { agent: label, status };
+              if (existing >= 0) {
+                const updated = [...g.steps];
+                updated[existing] = step;
+                return { ...g, phase: "generating", steps: updated };
+              }
+              return { ...g, phase: "generating", steps: [...g.steps, step] };
+            });
+          },
+        )) {
+          if (!isActiveRef.current) break;
+          if (firstToken) { firstToken = false; setStream((s) => ({ ...s, phase: "streaming" })); }
+          accumulated += token;
+          setStream((s) => ({ ...s, content: accumulated }));
+        }
+
+        if (accumulated) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `ai-${Date.now()}`,
+              thread_id: threadId,
+              role: "assistant",
+              content: accumulated,
+              created_at: new Date().toISOString(),
+              is_deliverable: isDeliverable,
+            },
+          ]);
+        }
+        // Remettre gen à idle (les sections étaient un affichage de progression temporaire)
+        setGen(GEN_IDLE);
+        setStream(STREAM_IDLE);
+      } catch (err) {
+        const errMsg = getErrorMessage(err);
+        setMessages((prev) => [
+          ...prev,
+          { id: `err-${Date.now()}`, thread_id: threadId, role: "assistant", content: `⚠️ ${errMsg}`, created_at: new Date().toISOString() },
+        ]);
+        setStream(STREAM_IDLE);
+      } finally {
+        isActiveRef.current = false;
+      }
+    },
+    [threadId]
+  );
+
+  // ── Génération de document ──────────────────────────────────────────────
+  const handleGenerate = useCallback(async () => {
+    if (!thread?.preset_key || isActiveRef.current) return;
+
+    isActiveRef.current = true;
+    setGen({ phase: "generating", steps: [], content: "", documentId: null });
+    setShowDoc(false);
+
+    try {
+      const content = await streamActionGeneration({
+        preset: thread.preset_key,
+        threadId,
+        objectiveContext: thread.title,
+        onProgress: (step) => {
+          setGen((g) => {
+            const existing = g.steps.findIndex((s) => s.agent === step.agent);
+            if (existing >= 0) {
+              const updated = [...g.steps];
+              updated[existing] = step;
+              return { ...g, steps: updated };
+            }
+            return { ...g, steps: [...g.steps, step] };
+          });
+        },
+        onDone: (documentId) => {
+          setGen((g) => ({ ...g, documentId }));
+        },
+        onError: (err) => {
+          toast.error(err);
+        },
+      });
+
+      setGen((g) => ({ ...g, phase: "done", content }));
+      setShowDoc(true);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+      setGen(GEN_IDLE);
+    } finally {
+      isActiveRef.current = false;
+    }
+  }, [thread]);
+
+  // ── Complétion d'étape plan d'action ────────────────────────────────────
+  const handleStepComplete = useCallback(
+    (compositeKey: string, text: string) => {
+      setCompletedStepKeys((prev) => new Set([...prev, compositeKey]));
+      void handleSend(text, []);
+    },
+    [handleSend]
+  );
+
+  // ── Cleanup ─────────────────────────────────────────────────────────────
+  useEffect(() => () => { isActiveRef.current = false; }, []);
+
+  const isBusy = stream.phase !== "idle" || gen.phase === "generating";
+  const isAction = isActionThread(thread);
+  const presetLabel = thread?.preset_key ? PRESET_LABELS[thread.preset_key] : undefined;
+  const hasContent = messages.length > 0 || gen.phase !== "idle" || stream.phase !== "idle";
+
+  return (
+    <div className="flex h-screen flex-col bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-background/90 px-3 py-3 backdrop-blur-sm">
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+
+        <div className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+          isAction ? "bg-amber-100" : "bg-black"
+        )}>
+          {isAction
+            ? <Zap className="h-4 w-4 text-amber-600" />
+            : <img src="/icon.png" alt="" className="h-5 w-5 object-contain" />}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p className="truncate text-sm font-semibold leading-tight">
+            {thread?.title ?? navTitle ?? "…"}
+          </p>
+          {isBusy && (
+            <span className="flex items-center mt-0.5">
+              <AnimatedDots size="sm" />
+            </span>
+          )}
+        </div>
+
+        {/* Bouton Générer (header, pour les threads action) */}
+        {isAction && messages.length > 0 && !isBusy && gen.phase !== "done" && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 shrink-0 border-amber-300 text-amber-700 hover:bg-amber-50"
+            onClick={handleGenerate}
+          >
+            <Zap className="h-3.5 w-3.5" />
+            Générer
+          </Button>
+        )}
+      </header>
+
+      {/* Plan d'action (threads objectif uniquement, pas les actions) */}
+      {!isAction && threadId && (
+        <PlanPanel threadId={threadId} />
+      )}
+
+      {/* Zone messages */}
+      <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="space-y-1 py-4">
+            <MessageSkeleton side="right" />
+            <MessageSkeleton side="left" />
+            <MessageSkeleton side="right" />
+            <MessageSkeleton side="left" />
+          </div>
+        ) : !hasContent && thread ? (
+          <WelcomeState
+            thread={thread}
+            onGenerate={isAction ? handleGenerate : undefined}
+            onSend={(text) => void handleSend(text, [])}
+          />
+        ) : (
+          <div className="py-4">
+            {/* Messages historiques */}
+            {messages.map((msg) => {
+              // Livrable généré dans un thread objectif → carte document
+              if (msg.role === "assistant" && msg.is_deliverable) {
+                // Strip any @@MARKER@@ patterns that may have leaked into stored content
+                const cleanContent = msg.content.replace(/@@\w+@@[^\n]*/g, "").trim();
+                const docTitle = cleanContent.match(/^#\s+(.+)$/m)?.[1]?.trim()
+                  ?? thread?.title
+                  ?? "Document";
+                return (
+                  <DeliverableCard
+                    key={msg.id}
+                    presetLabel={docTitle}
+                    content={cleanContent}
+                    onView={() => setViewingDoc({ content: cleanContent, title: docTitle })}
+                  />
+                );
+              }
+              return (
+                <MessageBubble
+                  key={msg.id}
+                  message={msg}
+                  onSend={(text) => void handleSend(text, [])}
+                  completedStepKeys={completedStepKeys}
+                  onStepComplete={handleStepComplete}
+                />
+              );
+            })}
+
+            {/* Indicateur "En réflexion" (chat classique) */}
+            {stream.phase === "thinking" && (
+              <StreamingIndicator />
+            )}
+
+            {/* Streaming chat en cours */}
+            {stream.phase === "streaming" && stream.content && (
+              <StreamingBubble content={stream.content} />
+            )}
+
+            {/* Progression de la génération — titres de sections seulement */}
+            {gen.phase === "generating" && (
+              <ActionProgressView
+                steps={gen.steps}
+                isRunning
+                presetLabel={presetLabel}
+              />
+            )}
+
+            {/* Carte "livrable prêt" */}
+            {showDoc && gen.phase === "done" && gen.content && (
+              <>
+                {/* Récap de progression terminé */}
+                <ActionProgressView
+                  steps={gen.steps.map((s) => ({ ...s, status: "complete" }))}
+                  isRunning={false}
+                  presetLabel={presetLabel}
+                />
+                {/* Carte livrable */}
+                <DeliverableCard
+                  presetLabel={presetLabel ?? "Document"}
+                  content={gen.content}
+                  documentId={gen.documentId}
+                  onView={() => setViewerOpen(true)}
+                />
+              </>
+            )}
+
+            {/* Bannière "Générer" — visible dans la zone messages pour les threads action */}
+            {isAction && messages.length > 0 && !isBusy && gen.phase === "idle" && (
+              <div className="px-4 py-3">
+                <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 dark:bg-amber-950/20 p-4 flex flex-col gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50">
+                      <Zap className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                        Prêt à générer {presetLabel ? `ton ${presetLabel}` : "le document"} ?
+                      </p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400">
+                        Réponds aux questions ci-dessus ou génère directement.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    className="w-full gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold"
+                    onClick={handleGenerate}
+                  >
+                    <Zap className="h-4 w-4" />
+                    Générer le document
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div ref={bottomRef} className="h-4" />
+          </div>
+        )}
+      </div>
+
+      {/* Zone de saisie */}
+      <ChatInput
+        onSend={handleSend}
+        disabled={isBusy}
+        placeholder={
+          isAction && !hasContent
+            ? "Donne des instructions à l'IA ou génère directement…"
+            : messages.length === 0
+            ? "Décris ta situation ou pose une question…"
+            : "Écris ton message…"
+        }
+      />
+
+      {/* Viewer — livrables des threads action (handleGenerate) */}
+      {gen.content && (
+        <DocumentViewer
+          open={viewerOpen}
+          onClose={() => setViewerOpen(false)}
+          title={presetLabel ?? thread?.title ?? "Document"}
+          initialContent={gen.content}
+          isAction={isAction}
+          onRegenerate={isAction ? () => {
+            setViewerOpen(false);
+            setGen(GEN_IDLE);
+            setShowDoc(false);
+            void handleGenerate();
+          } : undefined}
+        />
+      )}
+
+      {/* Viewer — livrables générés dans les threads objectif (chat) */}
+      {viewingDoc && (
+        <DocumentViewer
+          open={Boolean(viewingDoc)}
+          onClose={() => setViewingDoc(null)}
+          title={viewingDoc.title}
+          initialContent={viewingDoc.content}
+          isAction={false}
+        />
+      )}
+    </div>
+  );
+}
