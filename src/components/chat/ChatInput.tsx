@@ -5,6 +5,7 @@ import {
   type KeyboardEvent,
   type ChangeEvent,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { Send, Paperclip, X, Loader2, FileText, Image } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/utils";
@@ -25,10 +26,12 @@ interface ChatInputProps {
 export function ChatInput({
   onSend,
   disabled = false,
-  placeholder = "Écris ton message…",
+  placeholder,
 }: ChatInputProps) {
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const resolvedPlaceholder = placeholder ?? t("chat.placeholder");
 
   const [text, setText]             = useState("");
   const [uploading, setUploading]   = useState(false);
@@ -73,7 +76,7 @@ export function ChatInput({
 
     const MAX_MB = 10;
     if (file.size > MAX_MB * 1024 * 1024) {
-      toast.error(`Le fichier dépasse ${MAX_MB} Mo`);
+      toast.error(t("chat.file_too_large", { max: MAX_MB }));
       return;
     }
 
@@ -86,9 +89,9 @@ export function ChatInput({
         body: form,
       });
       setAttachments((prev) => [...prev, result]);
-      toast.success("Fichier joint");
+      toast.success(t("chat.file_attached"));
     } catch {
-      toast.error("Impossible de joindre le fichier");
+      toast.error(t("chat.file_attach_error"));
     } finally {
       setUploading(false);
     }
@@ -141,7 +144,7 @@ export function ChatInput({
             "mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors",
             uploading ? "cursor-wait opacity-50" : "hover:bg-muted text-muted-foreground hover:text-foreground"
           )}
-          title="Joindre un fichier"
+          title={t("chat.attach")}
         >
           {uploading
             ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -155,7 +158,7 @@ export function ChatInput({
           onChange={handleTextChange}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder={disabled ? "En cours de génération…" : placeholder}
+          placeholder={disabled ? t("chat.generating_placeholder") : resolvedPlaceholder}
           rows={1}
           className={cn(
             "flex-1 resize-none bg-transparent py-1 text-sm leading-relaxed outline-none",
@@ -176,7 +179,7 @@ export function ChatInput({
               ? "bg-primary text-white hover:bg-primary/90 scale-100"
               : "bg-muted text-muted-foreground scale-90 cursor-not-allowed"
           )}
-          title="Envoyer (Entrée)"
+          title={t("chat.send_tooltip")}
         >
           <Send className="h-4 w-4" />
         </button>
@@ -192,7 +195,7 @@ export function ChatInput({
       />
 
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
-        Entrée pour envoyer · Maj+Entrée pour nouvelle ligne
+        {t("chat.shortcut_hint")}
       </p>
     </div>
   );

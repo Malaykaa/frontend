@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, CheckCircle2, Zap, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/utils";
 import { useThreadPlan, useCompleteStep } from "@/hooks/queries/use-plan";
@@ -28,6 +29,7 @@ interface StepRowProps {
 }
 
 function StepRow({ step, isCompleting, onComplete }: StepRowProps) {
+  const { t } = useTranslation();
   const done = isStepDone(step);
 
   return (
@@ -49,7 +51,7 @@ function StepRow({ step, isCompleting, onComplete }: StepRowProps) {
             ? "border-muted cursor-wait"
             : "border-muted-foreground/30 hover:border-primary cursor-pointer"
         )}
-        title={done ? "Étape terminée" : "Marquer comme terminée"}
+        title={done ? t("plan.step_done_tooltip") : t("plan.step_mark_done")}
       >
         {done ? (
           <CheckCircle2 className="h-3.5 w-3.5 text-white" strokeWidth={3} />
@@ -64,7 +66,7 @@ function StepRow({ step, isCompleting, onComplete }: StepRowProps) {
           {step.isMission && (
             <span className="flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
               <Zap className="h-2.5 w-2.5" />
-              Mission
+              {t("plan.mission")}
             </span>
           )}
           <p
@@ -85,7 +87,7 @@ function StepRow({ step, isCompleting, onComplete }: StepRowProps) {
 
         {done && step.completedAt && (
           <p className="mt-0.5 text-[10px] text-emerald-600 font-medium">
-            ✓ Terminé
+            {t("plan.completed")}
           </p>
         )}
       </div>
@@ -132,13 +134,15 @@ export function PlanPanel({ threadId }: PlanPanelProps) {
 
   const { done, total, pct } = steps ? computeProgress(steps) : { done: 0, total: 0, pct: 0 };
 
+  const { t } = useTranslation();
+
   const handleComplete = async (stepId: string) => {
     setCompletingId(stepId);
     try {
       await complete(stepId);
-      toast.success("Étape marquée comme terminée !");
+      toast.success(t("plan.done_success"));
     } catch {
-      toast.error("Impossible de valider l'étape");
+      toast.error(t("plan.done_error"));
     } finally {
       setCompletingId(null);
     }
@@ -155,7 +159,7 @@ export function PlanPanel({ threadId }: PlanPanelProps) {
         {/* Titre + compteur */}
         <div className="flex flex-1 items-center gap-2 min-w-0">
           <span className="text-xs font-semibold text-muted-foreground">
-            Plan d'action
+            {t("plan.title")}
           </span>
           {!isLoading && (
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary tabular-nums">
@@ -193,7 +197,7 @@ export function PlanPanel({ threadId }: PlanPanelProps) {
               <div className="mb-3 space-y-1">
                 <ProgressBar pct={pct} />
                 <p className="text-center text-xs text-muted-foreground">
-                  {done} étape{done !== 1 ? "s" : ""} terminée{done !== 1 ? "s" : ""} sur {total}
+                  {t(done !== 1 ? "plan.steps_progress_other" : "plan.steps_progress_one", { done, total })}
                   {pct === 100 && " 🎉"}
                 </p>
               </div>

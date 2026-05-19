@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { X, Bell } from "lucide-react";
 import { AiAvatar } from "@/components/chat/AiAvatar";
 import { cn } from "@/shared/lib/utils";
@@ -16,6 +17,7 @@ function NotificationItem({
   onClose: () => void;
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleClick = () => {
     onClose();
@@ -29,13 +31,12 @@ function NotificationItem({
     >
       <AiAvatar className="mt-0.5" />
 
-      {/* Contenu */}
       <div className="flex-1 min-w-0">
         <p className="truncate text-sm font-semibold">{thread.title}</p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {thread.message_count > 0
             ? `${thread.message_count} message${thread.message_count > 1 ? "s" : ""}`
-            : "Nouvelle conversation"}
+            : t("app.new_conversation")}
         </p>
       </div>
 
@@ -65,6 +66,7 @@ interface NotificationPanelProps {
 
 export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
   const { data: threads } = useChatThreads();
+  const { t } = useTranslation();
 
   // Threads avec activité récente (message_count > 0 ou récemment créés)
   const activeThreads = (threads ?? [])
@@ -94,14 +96,14 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
         )}
         role="dialog"
         aria-modal="true"
-        aria-label="Notifications"
+        aria-label={t("settings.notifications")}
       >
         {/* Header */}
         <div className="flex items-center gap-3 border-b px-4 py-3.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
             <Bell className="h-4 w-4 text-primary" />
           </div>
-          <span className="flex-1 font-bold">Notifications</span>
+          <span className="flex-1 font-bold">{t("settings.notifications")}</span>
           {activeThreads.length > 0 && (
             <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">
               {activeThreads.length}
@@ -123,16 +125,16 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
                 <Bell className="h-6 w-6 text-muted-foreground" />
               </div>
               <div>
-                <p className="font-semibold text-sm">Aucune notification</p>
+                <p className="font-semibold text-sm">{t("app.no_notifications")}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Tes conversations et activités récentes apparaîtront ici.
+                  {t("app.no_notifications_hint")}
                 </p>
               </div>
             </div>
           ) : (
             <div>
               <p className="px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b">
-                Objectifs avec activité
+                {t("app.active_threads")}
               </p>
               {activeThreads.map((thread) => (
                 <NotificationItem

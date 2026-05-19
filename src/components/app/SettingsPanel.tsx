@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   X, ChevronDown, ChevronUp, Loader2, Check,
   User, Lock, Globe, Sliders, Bell, LogOut,
@@ -18,7 +19,6 @@ import {
 } from "@/services/api/profile.api";
 import { setLanguage } from "@/i18n";
 import { cn } from "@/shared/lib/utils";
-import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/shared/api/client";
 
 // ── Accordion section ──────────────────────────────────────────────────────
@@ -68,13 +68,8 @@ function AvatarDisplay({ name }: { name: string }) {
 
 // ── Section Profil ─────────────────────────────────────────────────────────
 
-const ROLES = [
-  { value: "student",      label: "Étudiant(e)",        Icon: GraduationCap },
-  { value: "professional", label: "Professionnel(le)",  Icon: Briefcase     },
-  { value: "jobseeker",    label: "Chercheur d'emploi", Icon: Search        },
-] as const;
-
 function ProfileSection() {
+  const { t } = useTranslation();
   const { profile, refreshProfile } = useAuth();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -86,6 +81,12 @@ function ProfileSection() {
     city:         profile?.city       ?? "",
     primary_role: profile?.primary_role ?? "",
   });
+
+  const ROLES = [
+    { value: "student",      label: t("onboarding.role_student"),      Icon: GraduationCap },
+    { value: "professional", label: t("onboarding.role_professional"), Icon: Briefcase     },
+    { value: "jobseeker",    label: t("onboarding.role_jobseeker"),    Icon: Search        },
+  ] as const;
 
   const handleSave = async () => {
     setSaving(true);
@@ -101,9 +102,9 @@ function ProfileSection() {
       };
       await updateProfile(payload);
       await refreshProfile();
-      toast.success("Profil mis à jour !");
+      toast.success(t("settings.profile_saved"));
     } catch {
-      toast.error("Impossible de sauvegarder le profil");
+      toast.error(t("settings.profile_save_error"));
     } finally {
       setSaving(false);
     }
@@ -113,26 +114,25 @@ function ProfileSection() {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs">Prénom</Label>
+          <Label className="text-xs">{t("settings.first_name")}</Label>
           <Input
             value={form.first_name}
             onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))}
-            placeholder="Kofi"
+            placeholder={t("onboarding.first_name_placeholder")}
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs">Nom</Label>
+          <Label className="text-xs">{t("settings.last_name")}</Label>
           <Input
             value={form.last_name}
             onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))}
-            placeholder="Mensah"
+            placeholder={t("onboarding.last_name_placeholder")}
           />
         </div>
       </div>
 
-      {/* Rôle */}
       <div className="space-y-1.5">
-        <Label className="text-xs">Ton profil</Label>
+        <Label className="text-xs">{t("settings.your_profile")}</Label>
         <div className="grid grid-cols-3 gap-2">
           {ROLES.map(({ value, label, Icon }) => (
             <button
@@ -153,14 +153,13 @@ function ProfileSection() {
         </div>
       </div>
 
-      {/* Genre */}
       <div className="space-y-1.5">
-        <Label className="text-xs">Genre</Label>
+        <Label className="text-xs">{t("settings.gender")}</Label>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { value: "male",   label: "Homme" },
-            { value: "female", label: "Femme" },
-            { value: "other",  label: "Autre" },
+            { value: "male",   label: t("settings.gender_male")   },
+            { value: "female", label: t("settings.gender_female") },
+            { value: "other",  label: t("settings.gender_other")  },
           ].map((g) => (
             <button
               key={g.value}
@@ -179,9 +178,8 @@ function ProfileSection() {
         </div>
       </div>
 
-      {/* Année de naissance */}
       <div className="space-y-1.5">
-        <Label className="text-xs">Année de naissance</Label>
+        <Label className="text-xs">{t("settings.birth_year")}</Label>
         <Input
           type="number"
           value={form.birth_year}
@@ -192,29 +190,27 @@ function ProfileSection() {
         />
       </div>
 
-      {/* Pays */}
       <div className="space-y-1.5">
-        <Label className="text-xs">Pays</Label>
+        <Label className="text-xs">{t("settings.country")}</Label>
         <CountrySelect
           value={form.country}
           onChange={(code) => setForm((f) => ({ ...f, country: code }))}
-          placeholder="Sélectionner ton pays"
+          placeholder={t("settings.country_placeholder")}
         />
       </div>
 
-      {/* Ville */}
       <div className="space-y-1.5">
-        <Label className="text-xs">Ville</Label>
+        <Label className="text-xs">{t("settings.city")}</Label>
         <Input
           value={form.city}
           onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-          placeholder="Abidjan, Dakar…"
+          placeholder={t("settings.city_placeholder")}
         />
       </div>
 
       <Button className="w-full gap-2" onClick={handleSave} disabled={saving}>
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-        Enregistrer le profil
+        {t("settings.save_profile")}
       </Button>
     </div>
   );
@@ -223,6 +219,7 @@ function ProfileSection() {
 // ── Section Compte (mot de passe) ─────────────────────────────────────────
 
 function AccountSection() {
+  const { t } = useTranslation();
   const [showOld, setShowOld]     = useState(false);
   const [showNew, setShowNew]     = useState(false);
   const [saving, setSaving]       = useState(false);
@@ -238,10 +235,10 @@ function AccountSection() {
         method: "POST",
         body: JSON.stringify({ old_password: form.old, new_password: form.new }),
       });
-      toast.success("Mot de passe modifié !");
+      toast.success(t("settings.password_changed"));
       setForm({ old: "", new: "", confirm: "" });
     } catch {
-      toast.error("Impossible de modifier le mot de passe. Vérifie l'ancien.");
+      toast.error(t("settings.password_change_error"));
     } finally {
       setSaving(false);
     }
@@ -279,7 +276,7 @@ function AccountSection() {
   return (
     <div className="space-y-4">
       <PasswordInput
-        label="Ancien mot de passe"
+        label={t("settings.old_password")}
         value={form.old}
         show={showOld}
         onToggle={() => setShowOld((v) => !v)}
@@ -287,7 +284,7 @@ function AccountSection() {
         onChange={(v) => setForm((f) => ({ ...f, old: v }))}
       />
       <PasswordInput
-        label="Nouveau mot de passe (8 car. min)"
+        label={t("settings.new_password")}
         value={form.new}
         show={showNew}
         onToggle={() => setShowNew((v) => !v)}
@@ -295,7 +292,7 @@ function AccountSection() {
         onChange={(v) => setForm((f) => ({ ...f, new: v }))}
       />
       <div className="space-y-1.5">
-        <Label className="text-xs">Confirmer le nouveau mot de passe</Label>
+        <Label className="text-xs">{t("settings.confirm_new_password")}</Label>
         <Input
           type="password"
           value={form.confirm}
@@ -304,11 +301,11 @@ function AccountSection() {
           className={cn(form.confirm && form.new !== form.confirm && "border-destructive")}
         />
         {form.confirm && form.new !== form.confirm && (
-          <p className="text-xs text-destructive">Les mots de passe ne correspondent pas</p>
+          <p className="text-xs text-destructive">{t("onboarding.passwords_mismatch")}</p>
         )}
       </div>
       <Button className="w-full" onClick={handleSave} disabled={!valid || saving}>
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Modifier le mot de passe"}
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : t("settings.change_password")}
       </Button>
     </div>
   );
@@ -317,7 +314,7 @@ function AccountSection() {
 // ── Section Langue ─────────────────────────────────────────────────────────
 
 function LanguageSection() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { refreshProfile } = useAuth();
   const [saving, setSaving] = useState(false);
 
@@ -327,9 +324,9 @@ function LanguageSection() {
     try {
       await updateProfile({ language: lang });
       await refreshProfile();
-      toast.success(lang === "fr" ? "Langue changée en Français" : "Language changed to English");
+      toast.success(lang === "fr" ? t("settings.language_changed_fr") : t("settings.language_changed_en"));
     } catch {
-      // Pas bloquant — la langue est déjà changée localement
+      // Not blocking — language is already changed locally
     } finally {
       setSaving(false);
     }
@@ -339,7 +336,7 @@ function LanguageSection() {
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">Langue de l'interface</p>
+      <p className="text-xs text-muted-foreground">{t("settings.interface_language")}</p>
       <div className="grid grid-cols-2 gap-2">
         {([
           { code: "fr" as const, label: "🇫🇷 Français" },
@@ -371,6 +368,7 @@ function LanguageSection() {
 // ── Section Préférences ────────────────────────────────────────────────────
 
 function PreferencesSection() {
+  const { t } = useTranslation();
   const { profile, refreshProfile } = useAuth();
   const [theme, setTheme] = useState<Theme>(getTheme);
   const [interests, setInterests] = useState(profile?.preferred_content ?? "");
@@ -387,9 +385,9 @@ function PreferencesSection() {
     try {
       await updateProfile({ preferred_content: interests || null });
       await refreshProfile();
-      toast.success("Préférences sauvegardées !");
+      toast.success(t("settings.preferences_saved"));
     } catch {
-      toast.error("Impossible de sauvegarder");
+      toast.error(t("settings.preferences_save_error"));
     } finally {
       setSaving(false);
     }
@@ -397,12 +395,11 @@ function PreferencesSection() {
 
   return (
     <div className="space-y-4">
-      {/* Thème */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium">Thème</p>
+          <p className="text-sm font-medium">{t("settings.theme")}</p>
           <p className="text-xs text-muted-foreground">
-            {theme === "light" ? "Mode clair" : "Mode sombre"}
+            {theme === "light" ? t("settings.theme_light") : t("settings.theme_dark")}
           </p>
         </div>
         <button
@@ -425,13 +422,12 @@ function PreferencesSection() {
         </button>
       </div>
 
-      {/* Centres d'intérêt */}
       <div className="space-y-1.5">
-        <Label className="text-xs">Centres d'intérêt & contenu préféré</Label>
+        <Label className="text-xs">{t("settings.interests")}</Label>
         <textarea
           value={interests}
           onChange={(e) => setInterests(e.target.value)}
-          placeholder="Ex: entrepreneuriat, technologie, bourses internationales…"
+          placeholder={t("settings.interests_placeholder")}
           rows={3}
           className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
         />
@@ -439,7 +435,7 @@ function PreferencesSection() {
 
       <Button className="w-full gap-2" onClick={handleSave} disabled={saving}>
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-        Enregistrer
+        {t("settings.save_btn")}
       </Button>
     </div>
   );
@@ -448,6 +444,7 @@ function PreferencesSection() {
 // ── Section Notifications ─────────────────────────────────────────────────
 
 function NotificationsSection() {
+  const { t } = useTranslation();
   const [permission, setPermission] = useState<NotificationPermission>(getPushPermission);
   const [requesting, setRequesting] = useState(false);
 
@@ -456,25 +453,24 @@ function NotificationsSection() {
     const result = await requestPushPermission();
     setPermission(result);
     if (result === "granted") {
-      toast.success("Notifications activées !");
+      toast.success(t("settings.notif_enabled_toast"));
     } else if (result === "denied") {
-      toast.error("Notifications refusées. Active-les dans les paramètres du navigateur.");
+      toast.error(t("settings.notif_denied_toast"));
     }
     setRequesting(false);
   };
 
   return (
     <div className="space-y-4">
-      {/* Push browser */}
       <div className="flex items-center justify-between rounded-xl border bg-card p-3.5">
         <div>
-          <p className="text-sm font-medium">Notifications navigateur</p>
+          <p className="text-sm font-medium">{t("settings.browser_notifications")}</p>
           <p className="text-xs text-muted-foreground">
             {permission === "granted"
-              ? "✅ Activées"
+              ? t("settings.notif_enabled")
               : permission === "denied"
-              ? "❌ Bloquées (modifier dans le navigateur)"
-              : "En attente d'autorisation"}
+              ? t("settings.notif_blocked")
+              : t("settings.notif_pending")}
           </p>
         </div>
         {permission !== "granted" && permission !== "denied" && (
@@ -484,13 +480,13 @@ function NotificationsSection() {
             onClick={handleRequestPermission}
             disabled={requesting}
           >
-            {requesting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Activer"}
+            {requesting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("settings.notif_enable_btn")}
           </Button>
         )}
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        Les alertes WhatsApp sont configurées depuis tes objectifs.
+        {t("settings.notif_whatsapp_hint")}
       </p>
     </div>
   );
@@ -507,18 +503,19 @@ function LogoutConfirm({
   onCancel: () => void;
   loading: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-sm rounded-2xl border bg-background p-5 space-y-4 shadow-xl">
         <div className="text-center">
-          <p className="font-bold">Se déconnecter ?</p>
+          <p className="font-bold">{t("settings.logout_title")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Tu devras te reconnecter pour accéder à Malayka.
+            {t("settings.logout_hint")}
           </p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="flex-1" onClick={onCancel} disabled={loading}>
-            Annuler
+            {t("common.cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -527,7 +524,7 @@ function LogoutConfirm({
             disabled={loading}
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-            Déconnexion
+            {t("settings.logout")}
           </Button>
         </div>
       </div>
@@ -544,11 +541,11 @@ interface SettingsPanelProps {
 
 export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const { user, profile, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [logoutConfirm, setLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut]       = useState(false);
 
-  // Bloquer le scroll quand ouvert
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -556,12 +553,12 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
 
   const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ")
     || user?.email
-    || "Mon compte";
+    || t("settings.my_account");
 
   const role =
-    profile?.primary_role === "student" ? "Étudiant(e)"
-    : profile?.primary_role === "professional" ? "Professionnel(le)"
-    : profile?.primary_role === "jobseeker" ? "Chercheur d'emploi"
+    profile?.primary_role === "student"      ? t("onboarding.role_student")
+    : profile?.primary_role === "professional" ? t("onboarding.role_professional")
+    : profile?.primary_role === "jobseeker"    ? t("onboarding.role_jobseeker")
     : null;
 
   const handleLogout = useCallback(async () => {
@@ -574,13 +571,11 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Panel (slide depuis la droite) */}
       <div
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-background shadow-2xl",
@@ -589,9 +584,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
         )}
         role="dialog"
         aria-modal="true"
-        aria-label="Paramètres"
+        aria-label={t("settings.title")}
       >
-        {/* Header */}
         <div className="flex items-center gap-3 border-b px-5 py-4">
           <button
             onClick={onClose}
@@ -599,10 +593,9 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           >
             <X className="h-5 w-5" />
           </button>
-          <span className="font-bold">Paramètres</span>
+          <span className="font-bold">{t("settings.title")}</span>
         </div>
 
-        {/* Carte utilisateur */}
         <div className="flex items-center gap-4 border-b px-5 py-5">
           <AvatarDisplay name={fullName} />
           <div className="min-w-0">
@@ -614,26 +607,24 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </div>
         </div>
 
-        {/* Sections scrollables */}
         <div className="flex-1 overflow-y-auto">
-          <Section icon={<User className="h-4 w-4" />} title="Profil" defaultOpen>
+          <Section icon={<User className="h-4 w-4" />} title={t("settings.profile")} defaultOpen>
             <ProfileSection />
           </Section>
-          <Section icon={<Lock className="h-4 w-4" />} title="Compte">
+          <Section icon={<Lock className="h-4 w-4" />} title={t("settings.account")}>
             <AccountSection />
           </Section>
-          <Section icon={<Globe className="h-4 w-4" />} title="Langue">
+          <Section icon={<Globe className="h-4 w-4" />} title={t("settings.language")}>
             <LanguageSection />
           </Section>
-          <Section icon={<Sliders className="h-4 w-4" />} title="Préférences">
+          <Section icon={<Sliders className="h-4 w-4" />} title={t("settings.preferences")}>
             <PreferencesSection />
           </Section>
-          <Section icon={<Bell className="h-4 w-4" />} title="Notifications">
+          <Section icon={<Bell className="h-4 w-4" />} title={t("settings.notifications")}>
             <NotificationsSection />
           </Section>
         </div>
 
-        {/* Bouton déconnexion */}
         <div className="border-t px-5 py-4">
           <Button
             variant="destructive"
@@ -641,12 +632,11 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
             onClick={() => setLogoutConfirm(true)}
           >
             <LogOut className="h-4 w-4" />
-            Se déconnecter
+            {t("settings.logout")}
           </Button>
         </div>
       </div>
 
-      {/* Dialog de confirmation */}
       {logoutConfirm && (
         <LogoutConfirm
           onConfirm={handleLogout}

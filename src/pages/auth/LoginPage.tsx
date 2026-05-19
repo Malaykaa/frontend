@@ -73,7 +73,7 @@ export default function LoginPage() {
           <div className="text-center">
             <h1 className="text-2xl font-bold">{t("auth.login")}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Bienvenue ! Connecte-toi à ton compte.
+              {t("auth.login_hint")}
             </p>
           </div>
 
@@ -89,7 +89,7 @@ export default function LoginPage() {
                   type="text"
                   inputMode="email"
                   autoComplete="username"
-                  placeholder="contact@exemple.com ou +225 07..."
+                  placeholder={t("auth.identifier_placeholder")}
                   value={identifier}
                   onChange={(e) => {
                     setIdentifier(e.target.value);

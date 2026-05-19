@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Loader2, Lock, GraduationCap, Briefcase, Search, Eye, EyeOff, Upload, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,24 +40,6 @@ interface OnboardingData {
 
 const TOTAL_STEPS = 7;
 
-const GOAL_BY_ROLE: Record<Role, { label: string; icon: string; desc: string }> = {
-  student: {
-    label: "Études & Formation",
-    icon: "🎓",
-    desc: "Trouver des bourses, concours académiques et opportunités de formation.",
-  },
-  professional: {
-    label: "Avancement de carrière",
-    icon: "📈",
-    desc: "Progresser dans ta carrière, trouver des formations et certifications.",
-  },
-  jobseeker: {
-    label: "Trouver un emploi",
-    icon: "💼",
-    desc: "Identifier des offres, préparer ton CV et tes entretiens.",
-  },
-};
-
 // ── Composants d'étapes ────────────────────────────────────────────────────
 
 function StepPhone({
@@ -72,17 +55,18 @@ function StepPhone({
   loading: boolean;
   error: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Ton numéro WhatsApp</h2>
+        <h2 className="text-xl font-bold">{t("onboarding.step_phone")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Tu recevras un code de vérification sur WhatsApp.
+          {t("onboarding.phone_hint")}
         </p>
       </div>
 
       <div className="space-y-1.5">
-        <Label>Numéro de téléphone</Label>
+        <Label>{t("onboarding.phone_label")}</Label>
         <PhoneInput
           value={data.phone}
           defaultCountry={data.country}
@@ -99,7 +83,7 @@ function StepPhone({
         onClick={onNext}
         disabled={loading || data.phone.replace(/\D/g, "").length < 8}
       >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Envoyer le code"}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.send_otp")}
       </Button>
     </div>
   );
@@ -120,13 +104,13 @@ function StepOtp({
   loading: boolean;
   error: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Vérification</h2>
+        <h2 className="text-xl font-bold">{t("onboarding.step_otp")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Entre le code à 6 chiffres envoyé au{" "}
-          <span className="font-medium text-foreground">{data.phone}</span>
+          {t("onboarding.otp_sent_to", { phone: data.phone })}
         </p>
       </div>
 
@@ -142,7 +126,7 @@ function StepOtp({
         onClick={onNext}
         disabled={loading || data.otp.length !== 6}
       >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Vérifier"}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.verify_otp")}
       </Button>
 
       <button
@@ -151,7 +135,7 @@ function StepOtp({
         onClick={onResend}
         disabled={loading}
       >
-        Je n'ai pas reçu le code → <span className="text-primary font-medium">Renvoyer</span>
+        {t("onboarding.resend_code")}
       </button>
     </div>
   );
@@ -170,6 +154,7 @@ function StepPassword({
   loading: boolean;
   error: string;
 }) {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const [confirm, setConfirm] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
@@ -179,15 +164,15 @@ function StepPassword({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Crée ton mot de passe</h2>
+        <h2 className="text-xl font-bold">{t("onboarding.create_password_title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Il devra être solide pour protéger ton compte.
+          {t("onboarding.create_password_hint")}
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label>Mot de passe</Label>
+          <Label>{t("onboarding.create_password")}</Label>
           <div className="relative">
             <Input
               type={show ? "text" : "password"}
@@ -210,7 +195,7 @@ function StepPassword({
         {data.password && <PasswordStrength password={data.password} />}
 
         <div className="space-y-1.5">
-          <Label>Confirmer le mot de passe</Label>
+          <Label>{t("onboarding.confirm_password")}</Label>
           <div className="relative">
             <Input
               type={showConfirm ? "text" : "password"}
@@ -229,7 +214,7 @@ function StepPassword({
             </button>
           </div>
           {confirm && !match && (
-            <p className="text-xs text-destructive">Les mots de passe ne correspondent pas</p>
+            <p className="text-xs text-destructive">{t("onboarding.passwords_mismatch")}</p>
           )}
         </div>
       </div>
@@ -246,7 +231,7 @@ function StepPassword({
         onClick={onNext}
         disabled={loading || !valid || !match || !confirm}
       >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continuer"}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.continue")}
       </Button>
     </div>
   );
@@ -261,23 +246,24 @@ function StepPersonalInfo({
   onChange: (patch: Partial<OnboardingData>) => void;
   onNext: () => void;
 }) {
+  const { t } = useTranslation();
   const canProceed = data.firstName.trim().length >= 2 && data.lastName.trim().length >= 2;
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-bold">Comment tu t'appelles ?</h2>
+        <h2 className="text-xl font-bold">{t("onboarding.name_title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Pour personnaliser ton expérience avec Malayka.
+          {t("onboarding.name_hint")}
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label>Prénom *</Label>
+          <Label>{t("onboarding.first_name")} *</Label>
           <Input
             autoFocus
-            placeholder="Ex : Kofi"
+            placeholder={t("onboarding.first_name_placeholder")}
             value={data.firstName}
             onChange={(e) => onChange({ firstName: e.target.value })}
             onKeyDown={(e) => e.key === "Enter" && canProceed && onNext()}
@@ -286,9 +272,9 @@ function StepPersonalInfo({
         </div>
 
         <div className="space-y-1.5">
-          <Label>Nom *</Label>
+          <Label>{t("onboarding.last_name")} *</Label>
           <Input
-            placeholder="Ex : Mensah"
+            placeholder={t("onboarding.last_name_placeholder")}
             value={data.lastName}
             onChange={(e) => onChange({ lastName: e.target.value })}
             onKeyDown={(e) => e.key === "Enter" && canProceed && onNext()}
@@ -303,7 +289,7 @@ function StepPersonalInfo({
         onClick={onNext}
         disabled={!canProceed}
       >
-        Continuer
+        {t("onboarding.continue")}
       </Button>
     </div>
   );
@@ -318,33 +304,20 @@ function StepRole({
   onChange: (patch: Partial<OnboardingData>) => void;
   onNext: () => void;
 }) {
+  const { t } = useTranslation();
+
   const roles: { value: Role; label: string; desc: string; Icon: typeof GraduationCap }[] = [
-    {
-      value: "student",
-      label: "Étudiant(e)",
-      desc: "Je suis en formation ou à l'université",
-      Icon: GraduationCap,
-    },
-    {
-      value: "professional",
-      label: "Professionnel(le)",
-      desc: "Je travaille et cherche à progresser",
-      Icon: Briefcase,
-    },
-    {
-      value: "jobseeker",
-      label: "Chercheur d'emploi",
-      desc: "Je cherche activement un poste",
-      Icon: Search,
-    },
+    { value: "student",      label: t("onboarding.role_student"),      desc: t("onboarding.role_student_hint"),      Icon: GraduationCap },
+    { value: "professional", label: t("onboarding.role_professional"), desc: t("onboarding.role_professional_hint"), Icon: Briefcase     },
+    { value: "jobseeker",    label: t("onboarding.role_jobseeker"),    desc: t("onboarding.role_jobseeker_hint"),    Icon: Search        },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Ton profil</h2>
+        <h2 className="text-xl font-bold">{t("onboarding.role_title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Cela nous permet de personnaliser ton expérience.
+          {t("onboarding.role_hint")}
         </p>
       </div>
 
@@ -386,7 +359,7 @@ function StepRole({
         onClick={onNext}
         disabled={!data.role}
       >
-        Continuer
+        {t("onboarding.continue")}
       </Button>
     </div>
   );
@@ -399,15 +372,23 @@ function StepGoal({
   data: OnboardingData;
   onNext: () => void;
 }) {
+  const { t } = useTranslation();
   const role = data.role!;
+
+  const GOAL_BY_ROLE: Record<Role, { label: string; icon: string; desc: string }> = {
+    student:      { label: t("onboarding.goal_studies"),  icon: "🎓", desc: t("onboarding.goal_studies_hint")  },
+    professional: { label: t("onboarding.goal_career"),   icon: "📈", desc: t("onboarding.goal_career_hint")   },
+    jobseeker:    { label: t("onboarding.goal_job"),      icon: "💼", desc: t("onboarding.goal_job_hint")      },
+  };
+
   const goal = GOAL_BY_ROLE[role];
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Ton objectif principal</h2>
+        <h2 className="text-xl font-bold">{t("onboarding.goal_title_label")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Malayka va t'accompagner vers cet objectif.
+          {t("onboarding.goal_hint_text")}
         </p>
       </div>
 
@@ -425,11 +406,11 @@ function StepGoal({
       </div>
 
       <p className="text-center text-xs text-muted-foreground">
-        Cet objectif est déterminé par ton profil. Tu pourras en ajouter d'autres plus tard.
+        {t("onboarding.goal_note")}
       </p>
 
       <Button className="w-full" size="lg" onClick={onNext}>
-        C'est parti !
+        {t("onboarding.go")}
       </Button>
     </div>
   );
@@ -446,15 +427,16 @@ function StepDomain({
   onNext: () => void;
   loading: boolean;
 }) {
+  const { t } = useTranslation();
   const [dragOver, setDragOver] = useState(false);
 
   const handleFile = (file: File) => {
     if (file.type !== "application/pdf") {
-      toast.error("Seuls les fichiers PDF sont acceptés");
+      toast.error(t("onboarding.error_pdf_only"));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Le fichier ne doit pas dépasser 5 Mo");
+      toast.error(t("onboarding.error_file_size"));
       return;
     }
     onChange({ cvFile: file });
@@ -469,24 +451,24 @@ function StepDomain({
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-bold">Ton domaine d'études</h2>
+          <h2 className="text-xl font-bold">{t("onboarding.domain_student_title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Pour trouver les opportunités qui correspondent à ta filière.
+            {t("onboarding.domain_student_hint")}
           </p>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Filière *</Label>
+            <Label>{t("onboarding.field_label")} *</Label>
             <Input
-              placeholder="Ex: Informatique, Médecine, Droit…"
+              placeholder={t("onboarding.field_placeholder")}
               value={data.fieldOfStudy}
               onChange={(e) => onChange({ fieldOfStudy: e.target.value })}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label>Niveau d'études *</Label>
+            <Label>{t("onboarding.level_label")} *</Label>
             <div className="grid grid-cols-2 gap-2">
               {STUDY_LEVELS.map((level) => (
                 <button
@@ -508,7 +490,7 @@ function StepDomain({
         </div>
 
         <Button className="w-full" size="lg" onClick={onNext} disabled={!canProceed || loading}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Terminer l'inscription"}
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.finish")}
         </Button>
       </div>
     );
@@ -517,22 +499,20 @@ function StepDomain({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Ton domaine professionnel</h2>
+        <h2 className="text-xl font-bold">{t("onboarding.domain_pro_title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Pour des recommandations adaptées à ton secteur.
+          {t("onboarding.domain_pro_hint")}
         </p>
       </div>
 
       <div className="space-y-4">
-        {/* Domaine */}
         <div className="space-y-1.5">
-          <Label>Domaine *</Label>
+          <Label>{t("onboarding.domain_label")} *</Label>
           <Input
-            placeholder="Ex: Informatique, Marketing, Finance…"
+            placeholder={t("onboarding.domain_placeholder")}
             value={data.domain}
             onChange={(e) => onChange({ domain: e.target.value })}
           />
-          {/* Suggestions */}
           {!data.domain && (
             <div className="flex flex-wrap gap-1.5 pt-1">
               {DOMAIN_SUGGESTIONS.slice(0, 6).map((s) => (
@@ -549,25 +529,17 @@ function StepDomain({
           )}
         </div>
 
-        {/* Poste actuel */}
         <div className="space-y-1.5">
-          <Label>
-            Poste actuel{" "}
-            <span className="text-xs text-muted-foreground">(optionnel)</span>
-          </Label>
+          <Label>{t("onboarding.status_label")}</Label>
           <Input
-            placeholder="Ex: Développeur web, Commercial…"
+            placeholder={t("onboarding.status_placeholder")}
             value={data.currentStatus}
             onChange={(e) => onChange({ currentStatus: e.target.value })}
           />
         </div>
 
-        {/* Upload CV */}
         <div className="space-y-1.5">
-          <Label>
-            CV{" "}
-            <span className="text-xs text-muted-foreground">(optionnel, PDF max 5 Mo)</span>
-          </Label>
+          <Label>{t("onboarding.cv_label")}</Label>
 
           {data.cvFile ? (
             <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5">
@@ -597,10 +569,11 @@ function StepDomain({
               }}
             >
               <Upload className="h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Glisse ton CV ici ou{" "}
-                <span className="text-primary font-medium">clique pour choisir</span>
-              </p>
+              <p className="text-sm text-muted-foreground"
+                dangerouslySetInnerHTML={{
+                  __html: t("onboarding.cv_drag"),
+                }}
+              />
               <input
                 type="file"
                 accept=".pdf"
@@ -616,7 +589,7 @@ function StepDomain({
       </div>
 
       <Button className="w-full" size="lg" onClick={onNext} disabled={!canProceed || loading}>
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Terminer l'inscription"}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.finish")}
       </Button>
     </div>
   );
@@ -626,6 +599,7 @@ function StepDomain({
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { sendOtp, verifyOtpRegister, refreshProfile } = useAuth();
 
   const [step, setStep] = useState(0);
@@ -671,11 +645,11 @@ export default function OnboardingPage() {
       setStep(1);
     } catch (err) {
       if (err instanceof ApiError && err.status === 429) {
-        setError("Trop de tentatives. Attends 1 minute et réessaie.");
+        setError(t("onboarding.error_too_many"));
       } else if (err instanceof ApiError && err.status === 400) {
-        setError("Numéro invalide. Vérifie le format (ex: +225 07 00 00 00).");
+        setError(t("onboarding.error_invalid_phone"));
       } else {
-        setError("Impossible d'envoyer le code. Vérifie ta connexion.");
+        setError(t("onboarding.error_send_otp"));
       }
     } finally {
       setLoading(false);
@@ -683,13 +657,10 @@ export default function OnboardingPage() {
   };
 
   const handleVerifyOtp = () => {
-    // Le code est vérifié côté serveur lors de verify-otp-register
-    // En dev : OTP_MOCK_ACCEPT_ANY=true → tout code 6 chiffres passe
     setStep(2);
   };
 
   const handleNameStep = () => {
-    // Nom/prénom renseigné → passer au mot de passe
     setStep(3);
   };
 
@@ -697,13 +668,10 @@ export default function OnboardingPage() {
     setLoading(true);
     setError("");
     try {
-      // Créer le compte avec OTP + mot de passe
       await verifyOtpRegister(data.phone, data.otp, data.password);
 
-      // Avancer immédiatement — ne pas attendre les appels profile (peuvent être lents)
       setStep(4);
 
-      // Sauvegarder nom + prénom en arrière-plan (non bloquant)
       void apiRequest("/profile", {
         method: "PATCH",
         body: JSON.stringify({
@@ -713,14 +681,14 @@ export default function OnboardingPage() {
       }).then(() => refreshProfile()).catch(() => null);
     } catch (err) {
       if (err instanceof ApiError && err.status === 400) {
-        setError("Code OTP invalide ou expiré. Recommence depuis le début.");
+        setError(t("onboarding.error_otp_invalid"));
         setStep(0);
       } else if (err instanceof ApiError && err.status === 409) {
-        setError("Ce numéro est déjà enregistré. Va sur la page de connexion.");
+        setError(t("onboarding.error_phone_exists"));
       } else if (err instanceof ApiError && err.status === 408) {
-        setError("La connexion est lente. Réessaie.");
+        setError(t("onboarding.error_slow_connection"));
       } else {
-        setError("Erreur lors de la création du compte. Réessaie.");
+        setError(t("onboarding.error_create_account"));
       }
     } finally {
       setLoading(false);
@@ -746,7 +714,6 @@ export default function OnboardingPage() {
         body: JSON.stringify(profilePatch),
       });
 
-      // Upload CV si fourni
       if (data.cvFile) {
         const form = new FormData();
         form.append("file", data.cvFile);
@@ -754,10 +721,10 @@ export default function OnboardingPage() {
       }
 
       await refreshProfile();
-      toast.success("Compte créé avec succès ! Bienvenue sur Malayka 🎉");
+      toast.success(t("onboarding.success_account_created"));
       navigate("/app", { replace: true });
     } catch {
-      toast.error("Profil partiellement sauvegardé. Tu pourras compléter plus tard.");
+      toast.error(t("onboarding.profile_partial"));
       navigate("/app", { replace: true });
     } finally {
       setLoading(false);
@@ -767,49 +734,37 @@ export default function OnboardingPage() {
   // ── Rendu ────────────────────────────────────────────────────────────────
 
   const stepContent = [
-    // 0 — Téléphone
     <StepPhone key={0} data={data} onChange={patch} onNext={handleSendOtp} loading={loading} error={error} />,
-    // 1 — OTP
     <StepOtp key={1} data={data} onChange={patch} onNext={handleVerifyOtp} onResend={handleSendOtp} loading={loading} error={error} />,
-    // 2 — Nom + Prénom  ← collectés AVANT la création du compte
     <StepPersonalInfo key={2} data={data} onChange={patch} onNext={handleNameStep} />,
-    // 3 — Mot de passe  ← crée le compte + sauvegarde nom/prénom
     <StepPassword key={3} data={data} onChange={patch} onNext={handlePassword} loading={loading} error={error} />,
-    // 4 — Profil (rôle)
     <StepRole key={4} data={data} onChange={patch} onNext={handleRole} />,
-    // 5 — Objectif
     <StepGoal key={5} data={data} onNext={handleGoal} />,
-    // 6 — Domaine
     <StepDomain key={6} data={data} onChange={patch} onNext={handleDomain} loading={loading} />,
   ];
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* Barre de progression */}
       <StepProgress
         current={step}
         total={TOTAL_STEPS}
         onBack={step > 0 ? goBack : undefined}
       />
 
-      {/* Logo centré */}
       <div className="flex justify-center py-4">
         <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
       </div>
 
-      {/* Contenu de l'étape */}
       <main className="flex flex-1 flex-col px-6 py-4">
         <div className="mx-auto w-full max-w-sm animate-fade-in">
           {stepContent[step]}
         </div>
       </main>
 
-      {/* Lien vers login */}
       {step === 0 && (
         <p className="pb-8 text-center text-sm text-muted-foreground">
-          Déjà un compte ?{" "}
           <a href="/login" className="font-medium text-primary hover:underline">
-            Se connecter
+            {t("onboarding.have_account_login")}
           </a>
         </p>
       )}

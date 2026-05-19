@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Star, X, CheckCircle2, ExternalLink,
   MapPin, Building2, Clock,
@@ -16,6 +17,7 @@ interface RecommendationCardProps {
 }
 
 export function RecommendationCard({ offer, onDismissed }: RecommendationCardProps) {
+  const { t } = useTranslation();
   const [saved, setSaved]       = useState(false);
   const [applied, setApplied]   = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -30,7 +32,7 @@ export function RecommendationCard({ offer, onDismissed }: RecommendationCardPro
     sendFeedback(
       { offerRef: offer.offer_ref, action },
       {
-        onError: () => toast.error("Impossible d'enregistrer ton retour"),
+        onError: () => toast.error(t("recommendations.feedback_error")),
       }
     );
   };
@@ -45,14 +47,14 @@ export function RecommendationCard({ offer, onDismissed }: RecommendationCardPro
     const next = !saved;
     setSaved(next);
     handleFeedback(next ? "saved" : "ignored");
-    if (next) toast.success("Offre sauvegardée !");
+    if (next) toast.success(t("recommendations.offer_saved"));
   };
 
   const handleApplied = (e: React.MouseEvent) => {
     e.stopPropagation();
     setApplied(true);
     handleFeedback("applied");
-    toast.success("Marqué comme postulé !");
+    toast.success(t("recommendations.marked_applied"));
   };
 
   const handleDismiss = (e: React.MouseEvent) => {
@@ -100,7 +102,7 @@ export function RecommendationCard({ offer, onDismissed }: RecommendationCardPro
         {applied && (
           <span className="ml-auto flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
             <CheckCircle2 className="h-3 w-3" />
-            Postulé
+            {t("recommendations.applied")}
           </span>
         )}
 
@@ -109,7 +111,7 @@ export function RecommendationCard({ offer, onDismissed }: RecommendationCardPro
           <button
             onClick={handleDismiss}
             className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
-            title="Ne plus voir cette offre"
+            title={t("recommendations.dismiss_title")}
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -172,29 +174,27 @@ export function RecommendationCard({ offer, onDismissed }: RecommendationCardPro
               ? "border-amber-300 bg-amber-50 text-amber-700"
               : "border-input text-muted-foreground hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
           )}
-          title={saved ? "Retirer des favoris" : "Sauvegarder"}
+          title={saved ? t("recommendations.unsave_title") : t("recommendations.save_title")}
         >
           <Star className={cn("h-3.5 w-3.5", saved && "fill-amber-500")} />
-          {saved ? "Sauvegardé" : "Sauvegarder"}
+          {saved ? t("recommendations.saved") : t("recommendations.save")}
         </button>
 
-        {/* J'ai postulé */}
         {!applied && (
           <button
             onClick={handleApplied}
             className="flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 transition-all hover:bg-emerald-100"
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
-            J'ai postulé
+            {t("recommendations.apply")}
           </button>
         )}
 
-        {/* Lien externe */}
         {offer.url && (
           <button
             onClick={(e) => { e.stopPropagation(); window.open(offer.url!, "_blank", "noopener,noreferrer"); handleFeedback("clicked"); }}
             className="flex h-7 w-7 items-center justify-center rounded-lg border border-input text-muted-foreground hover:bg-muted transition-colors"
-            title="Voir l'offre"
+            title={t("recommendations.view_offer")}
           >
             <ExternalLink className="h-3.5 w-3.5" />
           </button>

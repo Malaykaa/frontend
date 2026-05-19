@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   Briefcase, GraduationCap, Banknote, Trophy, FileText,
@@ -12,19 +13,19 @@ import { cn } from "@/shared/lib/utils";
 import { useCreateThread } from "@/hooks/queries/use-chat-threads";
 import type { ChatThread } from "@/shared/types";
 
-// ── Thèmes disponibles ─────────────────────────────────────────────────────
-const TOPICS = [
-  { preset: "stage_emploi",           label: "Stage / Emploi",                  placeholder: "Ex : Trouver un stage PFE en informatique à Abidjan",          Icon: Briefcase,     color: "bg-blue-100 text-blue-600"     },
-  { preset: "bourse_etudes",          label: "Bourse d'Études · Recherches",    placeholder: "Ex : Obtenir une bourse Master en France ou au Canada",         Icon: GraduationCap, color: "bg-violet-100 text-violet-600"  },
-  { preset: "subvention_financement", label: "Subvention / Financement projet", placeholder: "Ex : Financer mon projet agritech au Sénégal",                  Icon: Banknote,      color: "bg-emerald-100 text-emerald-600"},
-  { preset: "prepa_exam",             label: "Prépa Exam / Concours",           placeholder: "Ex : Préparer le concours de la fonction publique 2025",        Icon: Trophy,        color: "bg-amber-100 text-amber-600"   },
-  { preset: "appel_offres",           label: "Appel d'offres / À proposition",  placeholder: "Ex : Répondre à l'appel d'offres BTP de la mairie",            Icon: FileText,      color: "bg-orange-100 text-orange-600" },
-  { preset: "missions_freelance",     label: "Missions Freelances",             placeholder: "Ex : Décrocher des missions design ou dev sur Upwork",          Icon: Laptop,        color: "bg-pink-100 text-pink-600"     },
-  { preset: "appels_projet",          label: "Appels à Projet / Candidature",   placeholder: "Ex : Candidater au programme Tony Elumelu 2025",               Icon: BookOpen,      color: "bg-sky-100 text-sky-600"       },
-  { preset: "orientation_carriere",   label: "Orientation de Carrière",         placeholder: "Ex : Me reconvertir dans le marketing digital ou la data",      Icon: Compass,       color: "bg-rose-100 text-rose-600"     },
+// ── Thèmes disponibles — labels et placeholders via i18n ───────────────────
+const TOPICS_CONFIG = [
+  { preset: "stage_emploi",           labelKey: "goals.topic_stage",        phKey: "goals.ph_stage",        Icon: Briefcase,     color: "bg-blue-100 text-blue-600"     },
+  { preset: "bourse_etudes",          labelKey: "goals.topic_bourse",       phKey: "goals.ph_bourse",       Icon: GraduationCap, color: "bg-violet-100 text-violet-600"  },
+  { preset: "subvention_financement", labelKey: "goals.topic_financement",  phKey: "goals.ph_financement",  Icon: Banknote,      color: "bg-emerald-100 text-emerald-600"},
+  { preset: "prepa_exam",             labelKey: "goals.topic_exam",         phKey: "goals.ph_exam",         Icon: Trophy,        color: "bg-amber-100 text-amber-600"   },
+  { preset: "appel_offres",           labelKey: "goals.topic_appel_offres", phKey: "goals.ph_appel_offres", Icon: FileText,      color: "bg-orange-100 text-orange-600" },
+  { preset: "missions_freelance",     labelKey: "goals.topic_freelance",    phKey: "goals.ph_freelance",    Icon: Laptop,        color: "bg-pink-100 text-pink-600"     },
+  { preset: "appels_projet",          labelKey: "goals.topic_appels_projet",phKey: "goals.ph_appels_projet",Icon: BookOpen,      color: "bg-sky-100 text-sky-600"       },
+  { preset: "orientation_carriere",   labelKey: "goals.topic_orientation",  phKey: "goals.ph_orientation",  Icon: Compass,       color: "bg-rose-100 text-rose-600"     },
 ] as const;
 
-type PresetKey = (typeof TOPICS)[number]["preset"];
+type PresetKey = (typeof TOPICS_CONFIG)[number]["preset"];
 
 interface NewObjectiveSheetProps {
   open: boolean;
@@ -42,10 +43,13 @@ function StepTopics({
   onSelect: (p: PresetKey) => void;
   onNext: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2">
-        {TOPICS.map(({ preset, label, Icon, color }) => (
+        {TOPICS_CONFIG.map(({ preset, labelKey, Icon, color }) => {
+          const label = t(labelKey);
+          return (
           <button
             key={preset}
             type="button"
@@ -65,7 +69,8 @@ function StepTopics({
               <Check className="ml-auto h-4 w-4 shrink-0 text-primary" />
             )}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <Button
@@ -73,7 +78,7 @@ function StepTopics({
         onClick={onNext}
         disabled={!selected}
       >
-        Suivant
+        {t("common.next")}
       </Button>
     </div>
   );
@@ -103,31 +108,30 @@ function StepDetails({
   onSubmit: () => void;
   loading: boolean;
 }) {
-  const topic = TOPICS.find((t) => t.preset === preset)!;
+  const { t } = useTranslation();
+  const topic = TOPICS_CONFIG.find((tp) => tp.preset === preset)!;
 
   return (
     <div className="space-y-5">
-      {/* Thème sélectionné */}
       <div className={cn("flex items-center gap-2.5 rounded-xl p-3", topic.color.split(" ")[0] + "/10")}>
         <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", topic.color)}>
           <topic.Icon className="h-4 w-4" />
         </div>
-        <span className="text-sm font-semibold">{topic.label}</span>
+        <span className="text-sm font-semibold">{t(topic.labelKey)}</span>
         <button
           type="button"
           className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
           onClick={onBack}
         >
-          Changer
+          {t("goals.change")}
         </button>
       </div>
 
-      {/* Titre de l'objectif */}
       <div className="space-y-1.5">
-        <Label>Titre de l'objectif</Label>
+        <Label>{t("goals.title_label")}</Label>
         <Input
           autoFocus
-          placeholder={topic.placeholder}
+          placeholder={t(topic.phKey)}
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           maxLength={80}
@@ -135,9 +139,8 @@ function StepDetails({
         <p className="text-right text-xs text-muted-foreground">{title.length}/80</p>
       </div>
 
-      {/* Préférence de notification */}
       <div className="space-y-2">
-        <Label>Notifications IA</Label>
+        <Label>{t("goals.notif_ia")}</Label>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -150,9 +153,9 @@ function StepDetails({
             onClick={() => onNotifModeChange("realtime")}
           >
             <Bell className={cn("h-5 w-5", notifMode === "realtime" ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-xs font-semibold">Temps réel</span>
+            <span className="text-xs font-semibold">{t("goals.notif_realtime")}</span>
             <span className="text-[10px] text-muted-foreground leading-tight">
-              Dès qu'une réponse arrive
+              {t("goals.notif_realtime_hint")}
             </span>
           </button>
 
@@ -167,16 +170,16 @@ function StepDetails({
             onClick={() => onNotifModeChange("scheduled")}
           >
             <Clock className={cn("h-5 w-5", notifMode === "scheduled" ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-xs font-semibold">Planifié</span>
+            <span className="text-xs font-semibold">{t("goals.notif_scheduled")}</span>
             <span className="text-[10px] text-muted-foreground leading-tight">
-              Résumé à une heure fixe
+              {t("goals.notif_scheduled_hint")}
             </span>
           </button>
         </div>
 
         {notifMode === "scheduled" && (
           <div className="flex items-center gap-2">
-            <Label className="shrink-0 text-xs">Heure de notification</Label>
+            <Label className="shrink-0 text-xs">{t("goals.notif_time")}</Label>
             <input
               type="time"
               value={notifTime}
@@ -187,10 +190,9 @@ function StepDetails({
         )}
       </div>
 
-      {/* Actions */}
       <div className="flex gap-2">
         <Button variant="outline" className="flex-1" onClick={onBack} disabled={loading}>
-          Retour
+          {t("common.back")}
         </Button>
         <Button
           className="flex-1 gap-2"
@@ -200,7 +202,7 @@ function StepDetails({
           {loading
             ? <Loader2 className="h-4 w-4 animate-spin" />
             : <Plus className="h-4 w-4" />}
-          Créer
+          {t("goals.create_btn")}
         </Button>
       </div>
     </div>
@@ -214,6 +216,7 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
   const [title, setTitle]         = useState("");
   const [notifMode, setNotifMode] = useState<"realtime" | "scheduled">("realtime");
   const [notifTime, setNotifTime] = useState("18:00");
+  const { t } = useTranslation();
 
   const { mutateAsync, isPending } = useCreateThread();
 
@@ -244,11 +247,11 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
         notif_mode: notifMode,
         notif_time: notifMode === "scheduled" ? notifTime : null,
       });
-      toast.success("Objectif créé !");
+      toast.success(t("goals.create_success"));
       onCreated?.(thread);
       resetAndClose();
     } catch {
-      toast.error("Impossible de créer l'objectif. Réessaie.");
+      toast.error(t("goals.create_error"));
     }
   };
 
@@ -256,11 +259,11 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
     <BottomSheet
       open={open}
       onClose={resetAndClose}
-      title={step === 1 ? "Nouvel objectif" : "Détails"}
+      title={step === 1 ? t("goals.new_goal_title") : t("goals.sheet_details_title")}
       description={
         step === 1
-          ? "Choisis le thème de ton objectif"
-          : "Personnalise ton objectif"
+          ? t("goals.sheet_choose_hint")
+          : t("goals.sheet_details_hint")
       }
       maxHeight="max-h-[85vh]"
     >

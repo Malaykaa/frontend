@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Plus, FileText, Building2, TrendingUp, PieChart,
   FolderKanban, BarChart3, GraduationCap, ClipboardCheck, Mic,
@@ -14,29 +15,29 @@ import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { toast } from "sonner";
 import type { ChatThread } from "@/shared/types";
 
-// ── Catalogue des actions ──────────────────────────────────────────────────
-const ACTIONS = [
-  { Icon: Building2,       label: "Business Plan",             color: "bg-purple-100 text-purple-600",   desc: "Rédige un plan d'affaires complet",          preset: "business_plan"      },
-  { Icon: TrendingUp,      label: "Plan Marketing",             color: "bg-orange-100 text-orange-600",   desc: "Stratégie marketing sur mesure",             preset: "marketing_plan"     },
-  { Icon: PieChart,        label: "Étude de Marché",            color: "bg-sky-100 text-sky-600",          desc: "Analyse approfondie de ton marché",          preset: "market_study"       },
-  { Icon: FolderKanban,    label: "Montage de Projet",          color: "bg-violet-100 text-violet-600",   desc: "Structure ton projet de A à Z",              preset: "project_setup"      },
-  { Icon: BarChart3,       label: "Rapports",                   color: "bg-emerald-100 text-emerald-600", desc: "Rapports professionnels clés en main",       preset: "report"             },
-  { Icon: GraduationCap,   label: "Mini Mémoire",               color: "bg-amber-100 text-amber-600",     desc: "Structure ton mémoire académique",           preset: "thesis"             },
-  { Icon: ClipboardCheck,  label: "Analyse & Amélioration CV",  color: "bg-teal-100 text-teal-600",        desc: "Optimise et améliore ton CV",                preset: "cv_analysis"        },
-  { Icon: Mic,             label: "Simulation Entretien",       color: "bg-pink-100 text-pink-600",        desc: "Prépare-toi pour ton entretien",             preset: "interview_sim"      },
-  { Icon: HandshakeIcon,   label: "Proposition Commerciale",    color: "bg-fuchsia-100 text-fuchsia-600", desc: "Rédige une offre commerciale percutante",    preset: "commercial_proposal"},
-  { Icon: FileSignature,   label: "Proposition de Contrat",     color: "bg-yellow-100 text-yellow-600",   desc: "Rédige un contrat professionnel",            preset: "contract_proposal"  },
+// ── Catalogue des actions — labels via i18n ────────────────────────────────
+const ACTIONS_CONFIG = [
+  { Icon: Building2,      labelKey: "actions.label_business_plan",      descKey: "actions.desc_business_plan",      color: "bg-purple-100 text-purple-600",   preset: "business_plan"       },
+  { Icon: TrendingUp,     labelKey: "actions.label_marketing_plan",     descKey: "actions.desc_marketing_plan",     color: "bg-orange-100 text-orange-600",   preset: "marketing_plan"      },
+  { Icon: PieChart,       labelKey: "actions.label_market_study",       descKey: "actions.desc_market_study",       color: "bg-sky-100 text-sky-600",          preset: "market_study"        },
+  { Icon: FolderKanban,   labelKey: "actions.label_project_setup",      descKey: "actions.desc_project_setup",      color: "bg-violet-100 text-violet-600",   preset: "project_setup"       },
+  { Icon: BarChart3,      labelKey: "actions.label_report",             descKey: "actions.desc_report",             color: "bg-emerald-100 text-emerald-600", preset: "report"              },
+  { Icon: GraduationCap,  labelKey: "actions.label_thesis",             descKey: "actions.desc_thesis",             color: "bg-amber-100 text-amber-600",     preset: "thesis"              },
+  { Icon: ClipboardCheck, labelKey: "actions.label_cv_analysis",        descKey: "actions.desc_cv_analysis",        color: "bg-teal-100 text-teal-600",        preset: "cv_analysis"         },
+  { Icon: Mic,            labelKey: "actions.label_interview_sim",      descKey: "actions.desc_interview_sim",      color: "bg-pink-100 text-pink-600",        preset: "interview_sim"       },
+  { Icon: HandshakeIcon,  labelKey: "actions.label_commercial_proposal",descKey: "actions.desc_commercial_proposal",color: "bg-fuchsia-100 text-fuchsia-600", preset: "commercial_proposal" },
+  { Icon: FileSignature,  labelKey: "actions.label_contract_proposal",  descKey: "actions.desc_contract_proposal",  color: "bg-yellow-100 text-yellow-600",   preset: "contract_proposal"   },
 ] as const;
 
-type ActionPreset = (typeof ACTIONS)[number]["preset"];
+type ActionPreset = (typeof ACTIONS_CONFIG)[number]["preset"];
 
 // ── Icône par preset ───────────────────────────────────────────────────────
-const PRESET_ICON: Record<string, (typeof ACTIONS)[number]["Icon"]> = Object.fromEntries(
-  ACTIONS.map(({ preset, Icon }) => [preset, Icon])
+const PRESET_ICON: Record<string, (typeof ACTIONS_CONFIG)[number]["Icon"]> = Object.fromEntries(
+  ACTIONS_CONFIG.map(({ preset, Icon }) => [preset, Icon])
 );
 
 const PRESET_COLOR: Record<string, string> = Object.fromEntries(
-  ACTIONS.map(({ preset, color }) => [preset, color])
+  ACTIONS_CONFIG.map(({ preset, color }) => [preset, color])
 );
 
 // ── Sheet de sélection ─────────────────────────────────────────────────────
@@ -50,10 +51,12 @@ interface ActionSheetProps {
 
 function ActionSheet({ open, onClose, onSelect, loading, creatingPreset }: ActionSheetProps) {
   const [custom, setCustom] = useState("");
+  const { t } = useTranslation();
+  const ACTIONS = ACTIONS_CONFIG.map((a) => ({ ...a, label: t(a.labelKey), desc: t(a.descKey) }));
 
   const handleCustomSubmit = () => {
     if (!custom.trim()) return;
-    onSelect("report", custom.trim() || "Rapport personnalisé");
+    onSelect("report", custom.trim());
     setCustom("");
   };
 
@@ -61,15 +64,14 @@ function ActionSheet({ open, onClose, onSelect, loading, creatingPreset }: Actio
     <BottomSheet
       open={open}
       onClose={onClose}
-      title="Nouveau livrable"
-      description="Choisis un type de document à générer"
+      title={t("actions.sheet_title")}
+      description={t("actions.sheet_desc")}
       maxHeight="max-h-[90vh]"
     >
       <div className="space-y-4 pb-4">
-        {/* Tâche libre */}
         <div className="flex gap-2">
           <Input
-            placeholder="Décris ta tâche personnalisée…"
+            placeholder={t("actions.custom_placeholder")}
             value={custom}
             onChange={(e) => setCustom(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCustomSubmit()}
@@ -83,7 +85,7 @@ function ActionSheet({ open, onClose, onSelect, loading, creatingPreset }: Actio
             {loading && creatingPreset === null ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              "Go"
+              t("actions.go_btn")
             )}
           </Button>
         </div>
@@ -93,7 +95,7 @@ function ActionSheet({ open, onClose, onSelect, loading, creatingPreset }: Actio
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">ou choisir</span>
+            <span className="bg-background px-2 text-muted-foreground">{t("actions.or_choose")}</span>
           </div>
         </div>
 
@@ -141,6 +143,9 @@ function EmptyTopicGrid({
   loading: boolean;
   creatingPreset: string | null;
 }) {
+  const { t } = useTranslation();
+  const ACTIONS = ACTIONS_CONFIG.map((a) => ({ ...a, label: t(a.labelKey), desc: t(a.descKey) }));
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border-2 border-dashed border-muted p-5 text-center space-y-2">
@@ -149,9 +154,9 @@ function EmptyTopicGrid({
             <Zap className="h-6 w-6 text-amber-600" />
           </div>
         </div>
-        <p className="font-semibold text-sm">Génère ton premier livrable</p>
+        <p className="font-semibold text-sm">{t("actions.empty_title")}</p>
         <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-          Choisis un type de document ci-dessous. L'IA le rédige pour toi en quelques instants.
+          {t("actions.empty_hint")}
         </p>
       </div>
 
@@ -238,6 +243,7 @@ function Skeleton() {
 // ── Onglet principal ───────────────────────────────────────────────────────
 export default function ActionsTab() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { mutateAsync: createThread, isPending } = useCreateThread();
   const { threads, hasThreads, isLoading } = useActionThreads();
 
@@ -251,7 +257,7 @@ export default function ActionsTab() {
       const thread = await createThread({ title, preset_key: preset });
       navigate(`/app/chat/${thread.id}`, { state: { title: thread.title } });
     } catch {
-      toast.error("Impossible de créer le livrable. Réessaie.");
+      toast.error(t("actions.create_error"));
     } finally {
       setCreatingPreset(null);
     }
@@ -262,11 +268,11 @@ export default function ActionsTab() {
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold">Livrables</h1>
+          <h1 className="text-lg font-bold">{t("actions.title")}</h1>
           <p className="text-sm text-muted-foreground">
             {hasThreads
-              ? "Tes documents générés par l'IA"
-              : "Génère des documents professionnels en quelques secondes"}
+              ? t("actions.ai_docs")
+              : t("actions.gen_docs")}
           </p>
         </div>
 
@@ -283,7 +289,7 @@ export default function ActionsTab() {
             ) : (
               <Plus className="h-4 w-4" />
             )}
-            Nouveau
+            {t("actions.new_btn")}
           </Button>
         )}
       </div>

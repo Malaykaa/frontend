@@ -1,16 +1,17 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "@/shared/lib/utils";
 import { Check, X } from "lucide-react";
 
-interface Rule {
-  label: string;
+type Rule = {
+  labelKey: string;
   test: (pw: string) => boolean;
-}
+};
 
 const RULES: Rule[] = [
-  { label: "8 caractères minimum", test: (p) => p.length >= 8 },
-  { label: "Une majuscule", test: (p) => /[A-Z]/.test(p) },
-  { label: "Un chiffre", test: (p) => /\d/.test(p) },
-  { label: "Un caractère spécial", test: (p) => /[^A-Za-z0-9]/.test(p) },
+  { labelKey: "auth.password_min",     test: (p) => p.length >= 8 },
+  { labelKey: "auth.password_upper",   test: (p) => /[A-Z]/.test(p) },
+  { labelKey: "auth.password_digit",   test: (p) => /\d/.test(p) },
+  { labelKey: "auth.password_special", test: (p) => /[^A-Za-z0-9]/.test(p) },
 ];
 
 export function getPasswordStrength(password: string): number {
@@ -29,20 +30,26 @@ const STRENGTH_COLORS = [
   "bg-emerald-500",
 ];
 
-const STRENGTH_LABELS = ["", "Trop faible", "Faible", "Moyen", "Fort"];
+const STRENGTH_LABEL_KEYS = [
+  "",
+  "auth.strength_too_weak",
+  "auth.strength_weak",
+  "auth.strength_medium",
+  "auth.strength_strong",
+];
 
 interface PasswordStrengthProps {
   password: string;
 }
 
 export function PasswordStrength({ password }: PasswordStrengthProps) {
+  const { t } = useTranslation();
   const strength = getPasswordStrength(password);
 
   if (!password) return null;
 
   return (
     <div className="space-y-2">
-      {/* Barre de force */}
       <div className="flex gap-1">
         {[1, 2, 3, 4].map((i) => (
           <div
@@ -55,7 +62,6 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
         ))}
       </div>
 
-      {/* Label */}
       {strength > 0 && (
         <p
           className={cn(
@@ -63,16 +69,15 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
             strength < 3 ? "text-destructive" : strength < 4 ? "text-amber-500" : "text-emerald-600"
           )}
         >
-          {STRENGTH_LABELS[strength]}
+          {t(STRENGTH_LABEL_KEYS[strength])}
         </p>
       )}
 
-      {/* Règles */}
       <ul className="space-y-1">
         {RULES.map((rule) => {
           const ok = rule.test(password);
           return (
-            <li key={rule.label} className="flex items-center gap-2">
+            <li key={rule.labelKey} className="flex items-center gap-2">
               {ok ? (
                 <Check className="h-3 w-3 text-emerald-500" />
               ) : (
@@ -84,7 +89,7 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
                   ok ? "text-emerald-600" : "text-muted-foreground"
                 )}
               >
-                {rule.label}
+                {t(rule.labelKey)}
               </span>
             </li>
           );

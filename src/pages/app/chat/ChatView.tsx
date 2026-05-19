@@ -5,6 +5,7 @@ import {
   useCallback,
 } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { MessageBubble, StreamingBubble } from "@/components/chat/MessageBubble";
@@ -62,17 +63,17 @@ const GEN_IDLE: GenState = {
 };
 
 // ── Gestion erreurs ────────────────────────────────────────────────────────
-function getErrorMessage(err: unknown): string {
+function getErrorMessage(err: unknown, t: (key: string) => string): string {
   if (err instanceof ApiError) {
-    if (err.status === 429) return "Trop de requêtes. Attends un moment.";
-    if (err.status === 503) return "Service IA temporairement indisponible.";
-    if (err.status >= 500)  return "Erreur serveur. Réessaie dans quelques instants.";
-    if (err.status === 401) return "Session expirée. Reconnecte-toi.";
+    if (err.status === 429) return t("chat.error_rate_limit");
+    if (err.status === 503) return t("chat.error_unavailable");
+    if (err.status >= 500)  return t("chat.error_server");
+    if (err.status === 401) return t("chat.error_session");
   }
   if (err instanceof TypeError && err.message.includes("fetch")) {
-    return "Connexion perdue. Vérifie ta connexion internet.";
+    return t("chat.error_network");
   }
-  return "Une erreur est survenue. Réessaie.";
+  return t("chat.error_generic");
 }
 
 // ── Squelettes ─────────────────────────────────────────────────────────────
@@ -91,12 +92,6 @@ function MessageSkeleton({ side }: { side: "left" | "right" }) {
 }
 
 // ── WelcomeState — adapté selon le type de thread ─────────────────────────
-const WELCOME_CHIPS = [
-  { label: "Dis-moi comment commencer", message: (title: string) => `Comment commencer pour : ${title} ?` },
-  { label: "Quelles sont mes options ?", message: (title: string) => `Quelles sont mes options pour : ${title} ?` },
-  { label: "Crée un plan d'action", message: (title: string) => `Crée un plan d'action détaillé pour : ${title}` },
-];
-
 function WelcomeState({
   thread,
   onGenerate,
@@ -106,8 +101,15 @@ function WelcomeState({
   onGenerate?: () => void;
   onSend?: (text: string) => void;
 }) {
+  const { t } = useTranslation();
   const isAction = isActionThread(thread);
   const presetLabel = thread.preset_key ? PRESET_LABELS[thread.preset_key] : null;
+
+  const chips = [
+    { label: t("chat.starter_how_to_start"), message: t("chat.starter_msg_start", { title: thread.title }) },
+    { label: t("chat.starter_options"),      message: t("chat.starter_msg_options", { title: thread.title }) },
+    { label: t("chat.starter_action_plan"),  message: t("chat.starter_msg_plan", { title: thread.title }) },
+  ];
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 px-8 text-center py-12">
@@ -126,8 +128,8 @@ function WelcomeState({
         <p className="font-bold text-base">{thread.title}</p>
         <p className="mt-1.5 text-sm text-muted-foreground max-w-xs">
           {isAction
-            ? `Prêt à générer ton ${presetLabel ?? "document"} avec l'IA.`
-            : "Décris ta situation et tes objectifs. L'IA va t'accompagner."}
+            ? (presetLabel ? t("chat.ready_generate", { label: presetLabel }) : t("chat.ready_generate_doc"))
+            : t("chat.describe_hint")}
         </p>
       </div>
 
@@ -138,15 +140,15 @@ function WelcomeState({
           onClick={onGenerate}
         >
           <Zap className="h-4 w-4" />
-          Générer le document
+          {t("chat.generate_btn")}
         </Button>
       ) : (
         <div className="flex flex-wrap gap-2 justify-center">
-          {WELCOME_CHIPS.map(({ label, message }) => (
+          {chips.map(({ label, message }) => (
             <button
               key={label}
               className="rounded-full border bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-colors"
-              onClick={() => onSend?.(message(thread.title))}
+              onClick={() => onSend?.(message)}
             >
               {label}
             </button>
@@ -162,6 +164,7 @@ export default function ChatView() {
   const { threadId } = useParams<{ threadId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const navTitle = (location.state as { title?: string } | null)?.title;
 
   const [thread, setThread]   = useState<ChatThread | null>(null);
@@ -189,7 +192,7 @@ export default function ChatView() {
         const { thread: t, messages: msgs } = await fetchThreadWithMessages(threadId);
         if (!cancelled) { setThread(t); setMessages(msgs); }
       } catch {
-        if (!cancelled) toast.error("Impossible de charger la conversation");
+        if (!cancelled) toast.error(t("chat.load_error"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -268,7 +271,7 @@ export default function ChatView() {
         setGen(GEN_IDLE);
         setStream(STREAM_IDLE);
       } catch (err) {
-        const errMsg = getErrorMessage(err);
+        const errMsg = getErrorMessage(err, t);
         setMessages((prev) => [
           ...prev,
           { id: `err-${Date.now()}`, thread_id: threadId, role: "assistant", content: `⚠️ ${errMsg}`, created_at: new Date().toISOString() },
@@ -316,7 +319,7 @@ export default function ChatView() {
       setGen((g) => ({ ...g, phase: "done", content }));
       setShowDoc(true);
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      toast.error(getErrorMessage(err, t));
       setGen(GEN_IDLE);
     } finally {
       isActiveRef.current = false;
@@ -377,7 +380,7 @@ export default function ChatView() {
             onClick={handleGenerate}
           >
             <Zap className="h-3.5 w-3.5" />
-            Générer
+            {t("chat.generate")}
           </Button>
         )}
       </header>
@@ -481,10 +484,10 @@ export default function ChatView() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                        Prêt à générer {presetLabel ? `ton ${presetLabel}` : "le document"} ?
+                        {presetLabel ? t("chat.ready_generate_q", { label: presetLabel }) : t("chat.ready_generate_doc_q")}
                       </p>
                       <p className="text-xs text-amber-700 dark:text-amber-400">
-                        Réponds aux questions ci-dessus ou génère directement.
+                        {t("chat.generate_hint")}
                       </p>
                     </div>
                   </div>
@@ -493,7 +496,7 @@ export default function ChatView() {
                     onClick={handleGenerate}
                   >
                     <Zap className="h-4 w-4" />
-                    Générer le document
+                    {t("chat.generate_btn")}
                   </Button>
                 </div>
               </div>
@@ -510,10 +513,10 @@ export default function ChatView() {
         disabled={isBusy}
         placeholder={
           isAction && !hasContent
-            ? "Donne des instructions à l'IA ou génère directement…"
+            ? t("chat.placeholder_action")
             : messages.length === 0
-            ? "Décris ta situation ou pose une question…"
-            : "Écris ton message…"
+            ? t("chat.placeholder_new")
+            : t("chat.placeholder")
         }
       />
 

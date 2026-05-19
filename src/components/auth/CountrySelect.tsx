@@ -14,7 +14,7 @@ export function CountrySelect({
   value,
   onChange,
   error,
-  placeholder = "Sélectionner un pays",
+  placeholder = "Select a country",
 }: CountrySelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   X, Eye, Edit3, FileDown, FileText, Share2, RotateCcw,
   Check, Copy, Link, ExternalLink, ChevronLeft,
@@ -16,7 +17,6 @@ interface DocumentViewerProps {
   onClose: () => void;
   title: string;
   initialContent: string;
-  /** Affiché uniquement pour les threads action */
   onRegenerate?: () => void;
   isAction?: boolean;
 }
@@ -34,6 +34,7 @@ function SharePanel({
   content: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [token] = useState(() => createShareToken(title, content));
   const shareUrl = getShareUrl(token);
   const [copied, setCopied] = useState(false);
@@ -41,14 +42,14 @@ function SharePanel({
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
-    toast.success("Lien copié !");
+    toast.success(t("document.copy_link_success"));
     setTimeout(() => setCopied(false), 2500);
   };
 
   return (
     <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">Partager le document</p>
+        <p className="text-sm font-semibold">{t("document.share_panel_title")}</p>
         <button
           onClick={onClose}
           className="text-muted-foreground hover:text-foreground transition-colors"
@@ -58,7 +59,7 @@ function SharePanel({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Ce lien permet d'accéder au document sans connexion. Il est valide sur cet appareil.
+        {t("document.share_link_hint")}
       </p>
 
       <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2">
@@ -81,15 +82,13 @@ function SharePanel({
         className="flex items-center gap-1.5 text-xs text-primary hover:underline"
       >
         <ExternalLink className="h-3 w-3" />
-        Ouvrir dans un nouvel onglet
+        {t("document.open_new_tab")}
       </a>
     </div>
   );
 }
 
-// ── Barre d'outils ─────────────────────────────────────────────────────────
-
-// Icône Word SVG inline (pas de dépendance externe)
+// ── Icône Word ─────────────────────────────────────────────────────────────
 function WordIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -98,6 +97,8 @@ function WordIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+// ── Barre d'outils ─────────────────────────────────────────────────────────
 
 interface ToolbarProps {
   title: string;
@@ -122,22 +123,21 @@ function Toolbar({
   shareOpen,
   onShareToggle,
 }: ToolbarProps) {
+  const { t } = useTranslation();
+
   const handlePrint = () => {
     printDocument(title, content);
-    toast.success("Fenêtre d'impression ouverte");
+    toast.success(t("document.print_opened"));
   };
 
   return (
     <div className="flex items-center gap-2 border-b bg-background px-3 py-2.5">
-      {/* Bouton retour */}
       <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={onClose}>
         <ChevronLeft className="h-5 w-5" />
       </Button>
 
-      {/* Titre */}
       <p className="flex-1 truncate text-sm font-semibold min-w-0">{title}</p>
 
-      {/* Tabs edit/preview (mobile uniquement) */}
       {!isDesktop && (
         <div className="flex rounded-lg border bg-muted/50 p-0.5">
           <button
@@ -150,7 +150,7 @@ function Toolbar({
             onClick={() => onTabChange("edit")}
           >
             <Edit3 className="h-3 w-3" />
-            Éditer
+            {t("document.edit_tab")}
           </button>
           <button
             className={cn(
@@ -162,12 +162,11 @@ function Toolbar({
             onClick={() => onTabChange("preview")}
           >
             <Eye className="h-3 w-3" />
-            Aperçu
+            {t("document.preview_tab")}
           </button>
         </div>
       )}
 
-      {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
         {onRegenerate && (
           <Button
@@ -177,7 +176,7 @@ function Toolbar({
             onClick={onRegenerate}
           >
             <RotateCcw className="h-3 w-3" />
-            Régénérer
+            {t("document.regenerate")}
           </Button>
         )}
 
@@ -189,7 +188,7 @@ function Toolbar({
               ? "border-primary bg-primary/10 text-primary"
               : "border-input hover:bg-muted text-muted-foreground"
           )}
-          title="Partager"
+          title={t("document.share")}
         >
           <Share2 className="h-4 w-4" />
         </button>
@@ -197,15 +196,15 @@ function Toolbar({
         <button
           onClick={handlePrint}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-input hover:bg-muted text-muted-foreground transition-colors"
-          title="Exporter en PDF"
+          title={t("document.export_pdf")}
         >
           <FileDown className="h-4 w-4" />
         </button>
 
         <button
-          onClick={() => { downloadAsWord(title, content); toast.success("Téléchargement Word lancé"); }}
+          onClick={() => { downloadAsWord(title, content); toast.success(t("document.word_downloading")); }}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-input hover:bg-muted text-muted-foreground transition-colors"
-          title="Télécharger en Word (.doc)"
+          title={t("document.word_title")}
         >
           <WordIcon className="h-4 w-4" />
         </button>
@@ -224,24 +223,22 @@ export function DocumentViewer({
   onRegenerate,
   isAction = false,
 }: DocumentViewerProps) {
+  const { t } = useTranslation();
   const [content, setContent]     = useState(initialContent);
   const [activeTab, setActiveTab] = useState<ActiveTab>("preview");
   const [shareOpen, setShareOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
-  // Sync content quand le livrable est régénéré
   useEffect(() => {
     setContent(initialContent);
   }, [initialContent]);
 
-  // Responsive
   useEffect(() => {
     const handler = () => setIsDesktop(window.innerWidth >= 1024);
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
   }, []);
 
-  // Bloquer le scroll du body quand ouvert
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -263,9 +260,8 @@ export function DocumentViewer({
       className="fixed inset-0 z-50 flex flex-col bg-background animate-fade-in"
       role="dialog"
       aria-modal="true"
-      aria-label={`Document : ${title}`}
+      aria-label={t("document.aria_label", { title })}
     >
-      {/* Toolbar */}
       <Toolbar
         title={title}
         content={content}
@@ -278,7 +274,6 @@ export function DocumentViewer({
         onShareToggle={() => setShareOpen((v) => !v)}
       />
 
-      {/* Panel partage */}
       {shareOpen && (
         <div className="border-b px-4 py-3">
           <SharePanel
@@ -289,31 +284,27 @@ export function DocumentViewer({
         </div>
       )}
 
-      {/* Zone d'édition / prévisualisation */}
       <div className="flex flex-1 overflow-hidden">
         {isDesktop ? (
-          // Desktop : côte à côte
           <>
-            {/* Éditeur */}
             <div className="flex w-1/2 flex-col border-r">
               <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 py-1.5">
                 <Edit3 className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground">Éditeur</span>
+                <span className="text-xs font-medium text-muted-foreground">{t("document.editor_label")}</span>
               </div>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="flex-1 resize-none bg-background p-4 font-mono text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
-                placeholder="Contenu markdown…"
+                placeholder={t("document.markdown_placeholder")}
                 spellCheck={false}
               />
             </div>
 
-            {/* Prévisualisation */}
             <div className="flex w-1/2 flex-col overflow-hidden">
               <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 py-1.5">
                 <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground">Aperçu</span>
+                <span className="text-xs font-medium text-muted-foreground">{t("document.preview_label")}</span>
               </div>
               <div className="document-preview flex-1 overflow-y-auto p-6">
                 <MarkdownContent content={content} variant="document" />
@@ -321,14 +312,13 @@ export function DocumentViewer({
             </div>
           </>
         ) : (
-          // Mobile : tabs
           <>
             {activeTab === "edit" && (
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="flex-1 resize-none bg-background p-4 font-mono text-sm leading-relaxed outline-none"
-                placeholder="Contenu markdown…"
+                placeholder={t("document.markdown_placeholder")}
                 spellCheck={false}
               />
             )}
@@ -341,7 +331,6 @@ export function DocumentViewer({
         )}
       </div>
 
-      {/* Footer mobile (régénérer) */}
       {isAction && onRegenerate && !isDesktop && (
         <div className="border-t px-4 py-3">
           <Button
@@ -350,7 +339,7 @@ export function DocumentViewer({
             onClick={handleRegenerate}
           >
             <RotateCcw className="h-4 w-4" />
-            Régénérer le document
+            {t("document.regenerate")}
           </Button>
         </div>
       )}

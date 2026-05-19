@@ -1,14 +1,15 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Compass, FolderOpen, TrendingUp, HelpCircle, LogOut } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const TABS = [
-  { to: "/app/pour-moi",  label: "Pour Moi",  Icon: Compass,    desc: "Objectifs & recommandations" },
-  { to: "/app/actions",   label: "Livrables", Icon: FolderOpen, desc: "Documents générés par l'IA"  },
-  { to: "/app/tendances", label: "Tendances", Icon: TrendingUp, desc: "Marchés & opportunités"      },
-  { to: "/app/aide",      label: "Aide",      Icon: HelpCircle, desc: "Support & FAQ"               },
+  { to: "/app/pour-moi",  labelKey: "app.tab_pour_moi",  descKey: "app.desc_pour_moi",  Icon: Compass    },
+  { to: "/app/actions",   labelKey: "app.tab_livrables",  descKey: "app.desc_livrables", Icon: FolderOpen },
+  { to: "/app/tendances", labelKey: "app.tab_trends",     descKey: "app.desc_trends",    Icon: TrendingUp },
+  { to: "/app/aide",      labelKey: "app.tab_aide",       descKey: "app.desc_aide",      Icon: HelpCircle },
 ] as const;
 
 function SidebarAvatar({ name }: { name: string }) {
@@ -27,22 +28,23 @@ function SidebarAvatar({ name }: { name: string }) {
 
 export function Sidebar() {
   const { profile, user, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const fullName =
     [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
     user?.email ||
-    "Mon compte";
+    t("settings.my_account");
 
   const role =
-    profile?.primary_role === "student"      ? "Étudiant(e)"
-    : profile?.primary_role === "professional" ? "Professionnel(le)"
-    : profile?.primary_role === "jobseeker"    ? "Chercheur d'emploi"
+    profile?.primary_role === "student"      ? t("onboarding.role_student")
+    : profile?.primary_role === "professional" ? t("onboarding.role_professional")
+    : profile?.primary_role === "jobseeker"    ? t("onboarding.role_jobseeker")
     : null;
 
   const handleLogout = async () => {
     await logout();
-    toast.success("À bientôt !");
+    toast.success(t("app.see_you_soon"));
     navigate("/", { replace: true });
   };
 
@@ -55,7 +57,7 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        {TABS.map(({ to, label, Icon, desc }) => (
+        {TABS.map(({ to, labelKey, descKey, Icon }) => (
           <NavLink key={to} to={to}>
             {({ isActive }) => (
               <div
@@ -75,8 +77,8 @@ export function Sidebar() {
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium leading-none">{label}</p>
-                  <p className="mt-0.5 truncate text-[11px] opacity-70">{desc}</p>
+                  <p className="text-sm font-medium leading-none">{t(labelKey)}</p>
+                  <p className="mt-0.5 truncate text-[11px] opacity-70">{t(descKey)}</p>
                 </div>
               </div>
             )}
@@ -87,7 +89,7 @@ export function Sidebar() {
       {/* Footer */}
       <div className="border-t px-3 py-4 space-y-1">
         <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2">
-          <span className="text-xs text-primary/70">Crédits</span>
+          <span className="text-xs text-primary/70">{t("app.credits")}</span>
           <span className="ml-auto text-sm font-bold text-primary">0 cr.</span>
         </div>
         <div className="flex items-center gap-2.5 rounded-xl px-3 py-2">
@@ -99,7 +101,7 @@ export function Sidebar() {
           <button
             onClick={handleLogout}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-            title="Se déconnecter"
+            title={t("settings.logout")}
           >
             <LogOut className="h-4 w-4" />
           </button>

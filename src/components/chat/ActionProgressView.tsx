@@ -1,28 +1,24 @@
 import { CheckCircle2, Circle, Loader2, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AiAvatar } from "./AiAvatar";
 import { AnimatedDots } from "./AnimatedDots";
 import { cn } from "@/shared/lib/utils";
 import type { AgentStep } from "@/services/api/actions.api";
 
-const AGENT_LABELS: Record<string, string> = {
-  triage:           "Analyse de ta demande",
-  orchestrator:     "Orchestration",
-  exam_agent:       "Agent Concours",
-  scholarship_agent:"Agent Bourses",
-  funding_agent:    "Agent Financements",
-  career_agent:     "Agent Carrière",
-  freelance_agent:  "Agent Freelance",
-  tender_agent:     "Agent Appels d'offres",
-  document_agent:   "Rédaction du document",
-  cv_agent:         "Génération du CV",
-  merger:           "Finalisation",
-  execution_engine: "Moteur d'exécution",
+const AGENT_KEYS: Record<string, string> = {
+  triage:           "progress.triage",
+  orchestrator:     "progress.orchestrator",
+  exam_agent:       "progress.exam_agent",
+  scholarship_agent:"progress.scholarship_agent",
+  funding_agent:    "progress.funding_agent",
+  career_agent:     "progress.career_agent",
+  freelance_agent:  "progress.freelance_agent",
+  tender_agent:     "progress.tender_agent",
+  document_agent:   "progress.document_agent",
+  cv_agent:         "progress.cv_agent",
+  merger:           "progress.merger",
+  execution_engine: "progress.execution_engine",
 };
-
-function getAgentLabel(agent: string): string {
-  const key = agent.toLowerCase().replace(/[-\s]/g, "_");
-  return AGENT_LABELS[key] ?? agent;
-}
 
 interface ActionProgressViewProps {
   steps: AgentStep[];
@@ -31,6 +27,9 @@ interface ActionProgressViewProps {
 }
 
 function StepRow({ step }: { step: AgentStep }) {
+  const { t } = useTranslation();
+  const key = step.agent.toLowerCase().replace(/[-\s]/g, "_");
+  const label = AGENT_KEYS[key] ? t(AGENT_KEYS[key]) : step.agent;
   return (
     <div className="flex items-center gap-3">
       {step.status === "complete" && (
@@ -54,7 +53,7 @@ function StepRow({ step }: { step: AgentStep }) {
           step.status === "pending"  && "text-muted-foreground/60"
         )}
       >
-        {getAgentLabel(step.agent)}
+        {label}
       </span>
     </div>
   );

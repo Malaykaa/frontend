@@ -1,4 +1,5 @@
 import { FileText, Eye, FileDown, Copy, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AiAvatar } from "./AiAvatar";
 import { MarkdownContent } from "./MarkdownContent";
 import { useState } from "react";
@@ -30,24 +31,25 @@ function sanitizeContent(raw: string): string {
 }
 
 export function DeliverableCard({ presetLabel, content, onView }: DeliverableCardProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const clean = sanitizeContent(content);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(clean);
     setCopied(true);
-    toast.success("Contenu copié !");
+    toast.success(t("document.copy_success"));
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handlePdf = () => {
     printDocument(presetLabel, clean);
-    toast.success("Fenêtre d'impression / PDF ouverte");
+    toast.success(t("document.pdf_opened"));
   };
 
   const handleWord = () => {
     downloadAsWord(presetLabel, clean);
-    toast.success("Téléchargement Word lancé");
+    toast.success(t("document.word_downloading"));
   };
 
   return (
@@ -67,27 +69,24 @@ export function DeliverableCard({ presetLabel, content, onView }: DeliverableCar
               {presetLabel}
             </p>
             <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
-              ✓ Document prêt
+              {t("document.ready")}
             </p>
           </div>
         </div>
 
-        {/* Miniature document — aperçu réel du contenu */}
+        {/* Miniature document */}
         <div className="relative h-28 overflow-hidden bg-white dark:bg-zinc-900 px-3 pt-2.5">
-          {/* Rendu markdown en miniature */}
           <div
             className="origin-top-left pointer-events-none select-none"
             style={{ transform: "scale(0.62)", width: "161%", opacity: 0.85 }}
           >
             <MarkdownContent content={clean.slice(0, 800)} />
           </div>
-          {/* Fondu bas pour couper proprement */}
           <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white dark:from-zinc-900 to-transparent" />
-          {/* Trait de page */}
           <div className="absolute top-0 right-0 w-px h-full bg-border/30" />
         </div>
 
-        {/* Bouton principal — Voir le document */}
+        {/* Bouton principal */}
         <div className="px-3 pt-2.5 pb-1">
           <Button
             size="sm"
@@ -95,33 +94,30 @@ export function DeliverableCard({ presetLabel, content, onView }: DeliverableCar
             onClick={onView}
           >
             <Eye className="h-3.5 w-3.5" />
-            Voir le document
+            {t("document.view")}
           </Button>
         </div>
 
         {/* Actions secondaires */}
         <div className="flex items-center gap-1.5 px-3 pb-2.5 pt-1">
-          {/* PDF */}
           <button
             onClick={handlePdf}
             className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-input bg-background px-2 py-1.5 text-[10px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            title="Exporter en PDF"
+            title={t("document.export_pdf")}
           >
             <FileDown className="h-3 w-3" />
             PDF
           </button>
 
-          {/* Word */}
           <button
             onClick={handleWord}
             className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-input bg-background px-2 py-1.5 text-[10px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            title="Télécharger en Word"
+            title={t("document.word_title")}
           >
             <WordIcon className="h-3 w-3" />
             Word
           </button>
 
-          {/* Copier */}
           <button
             onClick={handleCopy}
             className={cn(
@@ -130,12 +126,12 @@ export function DeliverableCard({ presetLabel, content, onView }: DeliverableCar
                 ? "border-emerald-300 bg-emerald-50 text-emerald-600"
                 : "border-input bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
-            title="Copier le texte"
+            title={t("document.copy")}
           >
             {copied
               ? <Check className="h-3 w-3" />
               : <Copy className="h-3 w-3" />}
-            {copied ? "Copié" : "Copier"}
+            {copied ? t("document.copied") : t("document.copy")}
           </button>
         </div>
       </div>

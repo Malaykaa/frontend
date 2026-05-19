@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Plus, Sparkles, RefreshCw, ChevronDown, ChevronRight,
   Briefcase, GraduationCap, Banknote, Trophy, FileText,
@@ -16,34 +17,31 @@ import type { ChatThread } from "@/shared/types";
 // Miroir de NewObjectiveSheet.TOPICS — source de vérité pour icônes/couleurs
 
 interface TopicMeta {
-  label: string;
+  labelKey: string;
   Icon: React.ElementType;
-  color: string;   // classe bg + text (ex: "bg-blue-100 text-blue-600")
-  bg: string;      // fond seul (ex: "bg-blue-100")
-  text: string;    // texte seul (ex: "text-blue-600")
+  color: string;
+  bg: string;
+  text: string;
 }
 
 const TOPIC_META: Record<string, TopicMeta> = {
-  // ── Objectifs v2 (nouveaux preset keys) ───────────────────────────────────
-  stage_emploi:           { label: "Stage / Emploi",                  Icon: Briefcase,     color: "bg-blue-100 text-blue-600",      bg: "bg-blue-100",    text: "text-blue-600"     },
-  bourse_etudes:          { label: "Bourse d'Études · Recherches",    Icon: GraduationCap, color: "bg-violet-100 text-violet-600",  bg: "bg-violet-100",  text: "text-violet-600"   },
-  subvention_financement: { label: "Subvention / Financement projet", Icon: Banknote,      color: "bg-emerald-100 text-emerald-600",bg: "bg-emerald-100", text: "text-emerald-600"  },
-  prepa_exam:             { label: "Prépa Exam / Concours",           Icon: Trophy,        color: "bg-amber-100 text-amber-600",    bg: "bg-amber-100",   text: "text-amber-600"    },
-  appel_offres:           { label: "Appel d'offres / À proposition",  Icon: FileText,      color: "bg-orange-100 text-orange-600",  bg: "bg-orange-100",  text: "text-orange-600"   },
-  missions_freelance:     { label: "Missions Freelances",             Icon: Laptop,        color: "bg-pink-100 text-pink-600",      bg: "bg-pink-100",    text: "text-pink-600"     },
-  appels_projet:          { label: "Appels à Projet / Candidature",   Icon: BookOpen,      color: "bg-sky-100 text-sky-600",        bg: "bg-sky-100",     text: "text-sky-600"      },
-  orientation_carriere:   { label: "Orientation de Carrière",         Icon: Compass,       color: "bg-rose-100 text-rose-600",      bg: "bg-rose-100",    text: "text-rose-600"     },
-  // ── Legacy (threads créés avec les anciens preset keys) ───────────────────
-  career:       { label: "Trouver un emploi",       Icon: Briefcase,     color: "bg-blue-100 text-blue-600",      bg: "bg-blue-100",    text: "text-blue-600"     },
-  scholarship:  { label: "Bourse d'études",          Icon: GraduationCap, color: "bg-violet-100 text-violet-600",  bg: "bg-violet-100",  text: "text-violet-600"   },
-  funding:      { label: "Financement projet",       Icon: Banknote,      color: "bg-emerald-100 text-emerald-600",bg: "bg-emerald-100", text: "text-emerald-600"  },
-  exam:         { label: "Concours & Examens",       Icon: Trophy,        color: "bg-amber-100 text-amber-600",    bg: "bg-amber-100",   text: "text-amber-600"    },
-  tender:       { label: "Appels d'offres",          Icon: FileText,      color: "bg-orange-100 text-orange-600",  bg: "bg-orange-100",  text: "text-orange-600"   },
-  freelance:    { label: "Mission freelance",        Icon: Laptop,        color: "bg-pink-100 text-pink-600",      bg: "bg-pink-100",    text: "text-pink-600"     },
-  study_grant:  { label: "Bourse de recherche",      Icon: BookOpen,      color: "bg-sky-100 text-sky-600",        bg: "bg-sky-100",     text: "text-sky-600"      },
-  professional: { label: "Progression de carrière",  Icon: Compass,       color: "bg-rose-100 text-rose-600",      bg: "bg-rose-100",    text: "text-rose-600"     },
-  // ── Fallback ──────────────────────────────────────────────────────────────
-  _other:       { label: "Autres objectifs",         Icon: Sparkles,      color: "bg-muted text-muted-foreground", bg: "bg-muted",       text: "text-muted-foreground" },
+  stage_emploi:           { labelKey: "goals.topic_stage",       Icon: Briefcase,     color: "bg-blue-100 text-blue-600",      bg: "bg-blue-100",    text: "text-blue-600"     },
+  bourse_etudes:          { labelKey: "goals.topic_bourse",      Icon: GraduationCap, color: "bg-violet-100 text-violet-600",  bg: "bg-violet-100",  text: "text-violet-600"   },
+  subvention_financement: { labelKey: "goals.topic_financement", Icon: Banknote,      color: "bg-emerald-100 text-emerald-600",bg: "bg-emerald-100", text: "text-emerald-600"  },
+  prepa_exam:             { labelKey: "goals.topic_exam",        Icon: Trophy,        color: "bg-amber-100 text-amber-600",    bg: "bg-amber-100",   text: "text-amber-600"    },
+  appel_offres:           { labelKey: "goals.topic_appel_offres",Icon: FileText,      color: "bg-orange-100 text-orange-600",  bg: "bg-orange-100",  text: "text-orange-600"   },
+  missions_freelance:     { labelKey: "goals.topic_freelance",   Icon: Laptop,        color: "bg-pink-100 text-pink-600",      bg: "bg-pink-100",    text: "text-pink-600"     },
+  appels_projet:          { labelKey: "goals.topic_appels_projet",Icon: BookOpen,     color: "bg-sky-100 text-sky-600",        bg: "bg-sky-100",     text: "text-sky-600"      },
+  orientation_carriere:   { labelKey: "goals.topic_orientation", Icon: Compass,       color: "bg-rose-100 text-rose-600",      bg: "bg-rose-100",    text: "text-rose-600"     },
+  career:       { labelKey: "goals.legacy_career",      Icon: Briefcase,     color: "bg-blue-100 text-blue-600",      bg: "bg-blue-100",    text: "text-blue-600"     },
+  scholarship:  { labelKey: "goals.legacy_scholarship", Icon: GraduationCap, color: "bg-violet-100 text-violet-600",  bg: "bg-violet-100",  text: "text-violet-600"   },
+  funding:      { labelKey: "goals.legacy_funding",     Icon: Banknote,      color: "bg-emerald-100 text-emerald-600",bg: "bg-emerald-100", text: "text-emerald-600"  },
+  exam:         { labelKey: "goals.legacy_exam",        Icon: Trophy,        color: "bg-amber-100 text-amber-600",    bg: "bg-amber-100",   text: "text-amber-600"    },
+  tender:       { labelKey: "goals.legacy_tender",      Icon: FileText,      color: "bg-orange-100 text-orange-600",  bg: "bg-orange-100",  text: "text-orange-600"   },
+  freelance:    { labelKey: "goals.legacy_freelance",   Icon: Laptop,        color: "bg-pink-100 text-pink-600",      bg: "bg-pink-100",    text: "text-pink-600"     },
+  study_grant:  { labelKey: "goals.legacy_study_grant", Icon: BookOpen,     color: "bg-sky-100 text-sky-600",        bg: "bg-sky-100",     text: "text-sky-600"      },
+  professional: { labelKey: "goals.legacy_professional",Icon: Compass,      color: "bg-rose-100 text-rose-600",      bg: "bg-rose-100",    text: "text-rose-600"     },
+  _other:       { labelKey: "goals.legacy_other",       Icon: Sparkles,     color: "bg-muted text-muted-foreground", bg: "bg-muted",       text: "text-muted-foreground" },
 };
 
 // Ordre d'affichage — nouveaux keys en premier, legacy ensuite
@@ -133,8 +131,10 @@ function TopicCard({
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const { t } = useTranslation();
   const meta = TOPIC_META[topicKey] ?? TOPIC_META._other;
-  const { Icon, label, bg, text } = meta;
+  const { Icon, labelKey, bg, text } = meta;
+  const label = t(labelKey);
 
   return (
     <div className="rounded-xl border bg-card overflow-hidden">
@@ -150,7 +150,7 @@ function TopicCard({
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold leading-tight truncate">{label}</p>
           <p className={cn("text-[10px] mt-0.5", text)}>
-            {threads.length} objectif{threads.length > 1 ? "s" : ""}
+            {t(threads.length !== 1 ? "goals.objectives_count_other" : "goals.objectives_count_one", { count: threads.length })}
           </p>
         </div>
 
@@ -182,20 +182,21 @@ function TopicCard({
 
 // ── Empty state ────────────────────────────────────────────────────────────
 function EmptyState({ onNew }: { onNew: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-muted py-14 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
         <Sparkles className="h-7 w-7 text-primary" />
       </div>
       <div>
-        <p className="font-semibold">Aucun objectif pour l'instant</p>
+        <p className="font-semibold">{t("app.no_goals")}</p>
         <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-          Crée ton premier objectif et laisse l'IA t'accompagner pas à pas vers ta réussite.
+          {t("app.no_goals_long")}
         </p>
       </div>
       <Button onClick={onNew} className="gap-2">
         <Plus className="h-4 w-4" />
-        Créer mon premier objectif
+        {t("app.create_first")}
       </Button>
     </div>
   );
@@ -205,6 +206,7 @@ function EmptyState({ onNew }: { onNew: () => void }) {
 export default function PourMoiTab() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: allThreads, isLoading, isError, refetch } = useChatThreads();
 
   // Ne garder que les objectifs (exclure les livrables)
@@ -221,7 +223,7 @@ export default function PourMoiTab() {
     <div className="flex flex-col px-4 py-5 space-y-5">
       {/* En-tête */}
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">Mes Objectifs</h1>
+        <h1 className="text-lg font-bold">{t("app.my_goals")}</h1>
         <div className="flex items-center gap-2">
           {isError && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => refetch()}>
@@ -230,7 +232,7 @@ export default function PourMoiTab() {
           )}
           <Button size="sm" className="gap-1.5" onClick={() => setSheetOpen(true)}>
             <Plus className="h-4 w-4" />
-            <span>Nouvel objectif</span>
+            <span>{t("app.new_goal")}</span>
           </Button>
         </div>
       </div>
@@ -248,11 +250,11 @@ export default function PourMoiTab() {
       {isError && !isLoading && (
         <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-center space-y-2">
           <p className="text-sm font-medium text-destructive">
-            Impossible de charger les objectifs
+            {t("app.load_error")}
           </p>
           <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
             <RefreshCw className="h-3.5 w-3.5" />
-            Réessayer
+            {t("common.retry")}
           </Button>
         </div>
       )}
@@ -282,7 +284,7 @@ export default function PourMoiTab() {
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            Pour toi
+            {t("app.for_you")}
           </h2>
         </div>
         <RecommendationFeed />

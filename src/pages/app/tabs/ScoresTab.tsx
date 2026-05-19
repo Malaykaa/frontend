@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Star, ChevronDown, ChevronUp, CheckCircle2, Circle,
   Zap, Loader2, Target, TrendingUp,
@@ -24,15 +25,16 @@ function StepItem({
   const { mutateAsync: complete } = useCompleteStep(threadId);
   const [loading, setLoading] = useState(false);
   const done = isStepDone(step);
+  const { t } = useTranslation();
 
   const handleComplete = async () => {
     if (done || loading) return;
     setLoading(true);
     try {
       await complete(step.id);
-      toast.success("Étape validée !");
+      toast.success(t("app.step_validated"));
     } catch {
-      toast.error("Impossible de valider l'étape");
+      toast.error(t("app.step_error"));
     } finally {
       setLoading(false);
     }
@@ -71,7 +73,7 @@ function StepItem({
           {step.isMission && (
             <span className="flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
               <Zap className="h-2.5 w-2.5" />
-              Mission
+              {t("plan.mission")}
             </span>
           )}
           <p className={cn("text-sm leading-snug", done && "line-through text-muted-foreground")}>
@@ -134,7 +136,7 @@ function ObjectiveCard({ thread }: { thread: ChatThread }) {
             <p className="text-xs text-muted-foreground mt-0.5">
               {thread.message_count > 0
                 ? `${thread.message_count} message${thread.message_count > 1 ? "s" : ""}`
-                : "Aucun message"}
+                : t("app.no_messages")}
             </p>
           )}
         </div>
@@ -162,7 +164,7 @@ function ObjectiveCard({ thread }: { thread: ChatThread }) {
           {isLoading ? (
             <div className="flex items-center gap-2 px-4 py-3 text-xs text-muted-foreground">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Chargement du plan…
+              {t("app.plan_loading")}
             </div>
           ) : hasPlan ? (
             <div className="space-y-0.5 px-3 py-2">
@@ -172,14 +174,14 @@ function ObjectiveCard({ thread }: { thread: ChatThread }) {
             </div>
           ) : (
             <div className="px-4 py-4 text-center space-y-2">
-              <p className="text-sm text-muted-foreground">Aucun plan pour cet objectif.</p>
+              <p className="text-sm text-muted-foreground">{t("app.no_plan")}</p>
               <Button
                 size="sm"
                 variant="outline"
                 className="gap-1.5"
                 onClick={() => navigate(`/app/chat/${thread.id}`)}
               >
-                Discuter avec l'IA pour créer un plan
+                {t("app.chat_to_plan")}
               </Button>
             </div>
           )}
@@ -192,12 +194,13 @@ function ObjectiveCard({ thread }: { thread: ChatThread }) {
 // ── Carte récapitulatif ────────────────────────────────────────────────────
 
 function SummaryCard({ total }: { total: number }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-3 gap-3">
       {[
-        { Icon: Target,   label: "Objectifs actifs", value: total.toString(),   color: "text-primary bg-primary/10" },
-        { Icon: TrendingUp, label: "Progression moy.", value: "—",              color: "text-emerald-600 bg-emerald-100" },
-        { Icon: Star,     label: "Étapes validées",  value: "—",               color: "text-amber-600 bg-amber-100" },
+        { Icon: Target,   label: t("app.active_goals"),  value: total.toString(), color: "text-primary bg-primary/10" },
+        { Icon: TrendingUp, label: t("app.avg_progress"), value: "—",             color: "text-emerald-600 bg-emerald-100" },
+        { Icon: Star,     label: t("app.steps_done"),    value: "—",              color: "text-amber-600 bg-amber-100" },
       ].map(({ Icon, label, value, color }) => (
         <div key={label} className="flex flex-col items-center gap-1 rounded-xl border bg-card p-3 text-center">
           <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", color)}>
@@ -221,6 +224,7 @@ const ACTION_PRESET_SET = new Set([
 
 export default function ScoresTab() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: threads, isLoading } = useGroupedThreads();
 
   // Filtrer uniquement les threads d'objectif (pas les actions)
@@ -235,8 +239,8 @@ export default function ScoresTab() {
   return (
     <div className="flex flex-col px-4 py-5 space-y-5">
       <div>
-        <h1 className="text-lg font-bold">Scores & Progression</h1>
-        <p className="text-sm text-muted-foreground">Tes plans d'action et leur avancement</p>
+        <h1 className="text-lg font-bold">{t("app.scores_title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("app.scores_subtitle")}</p>
       </div>
 
       {/* Résumé */}
@@ -255,20 +259,20 @@ export default function ScoresTab() {
             <Star className="h-6 w-6 text-muted-foreground" />
           </div>
           <div>
-            <p className="font-semibold text-sm">Aucun objectif actif</p>
+            <p className="font-semibold text-sm">{t("app.no_active_goals")}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Crée un objectif dans "Pour Moi" pour voir ta progression ici.
+              {t("app.no_active_goals_hint")}
             </p>
           </div>
           <Button size="sm" onClick={() => navigate("/app/pour-moi")} className="gap-2">
             <Target className="h-4 w-4" />
-            Créer un objectif
+            {t("app.create_goal_btn")}
           </Button>
         </div>
       ) : (
         <div className="space-y-3">
           <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide px-1">
-            Plans d'action ({objectiveThreads.length})
+            {t("app.action_plans", { count: objectiveThreads.length })}
           </p>
           {objectiveThreads.map((thread) => (
             <ObjectiveCard key={thread.id} thread={thread} />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { X, Download, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -10,33 +11,29 @@ interface BeforeInstallPromptEvent extends Event {
 const DISMISSED_KEY = "mlk_install_dismissed";
 
 export function InstallBanner() {
+  const { t } = useTranslation();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [isIos, setIsIos] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // Déjà installée → ne pas afficher
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as unknown as { standalone?: boolean }).standalone === true;
     setIsStandalone(standalone);
     if (standalone) return;
 
-    // Déjà dismissée
     if (localStorage.getItem(DISMISSED_KEY)) return;
 
-    // iOS : pas d'event beforeinstallprompt, on montre les instructions
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
     setIsIos(ios);
 
     if (ios) {
-      // Afficher après 3s
-      const t = setTimeout(() => setShowBanner(true), 3000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setShowBanner(true), 3000);
+      return () => clearTimeout(timer);
     }
 
-    // Android/Chrome : écouter l'event
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -69,17 +66,15 @@ export function InstallBanner() {
           <Smartphone className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm">Installer Malayka</p>
+          <p className="font-semibold text-sm">{t("install.banner_title")}</p>
           {isIos ? (
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Clique sur{" "}
-              <span className="font-medium">Partager</span>{" "}
-              puis{" "}
-              <span className="font-medium">« Sur l'écran d'accueil »</span>
-            </p>
+            <p
+              className="mt-0.5 text-xs text-muted-foreground"
+              dangerouslySetInnerHTML={{ __html: t("install.banner_ios_hint") }}
+            />
           ) : (
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Accès rapide depuis ton écran d'accueil, même hors connexion.
+              {t("install.banner_android_hint")}
             </p>
           )}
         </div>
@@ -94,11 +89,11 @@ export function InstallBanner() {
       {!isIos && deferredPrompt && (
         <div className="mt-3 flex gap-2">
           <Button variant="outline" size="sm" className="flex-1" onClick={handleDismiss}>
-            Plus tard
+            {t("install.banner_later")}
           </Button>
           <Button size="sm" className="flex-1 gap-1.5" onClick={() => void handleInstall()}>
             <Download className="h-3.5 w-3.5" />
-            Installer
+            {t("install.banner_install")}
           </Button>
         </div>
       )}
