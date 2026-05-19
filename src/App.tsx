@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { InstallBanner } from "@/components/app/InstallBanner";
 import { Suspense, lazy } from "react";
 
-const LandingPage        = lazy(() => import("@/pages/LandingPage"));
+const LandingPage        = lazy(() => import("@/pages/landing"));
 const LoginPage          = lazy(() => import("@/pages/auth/LoginPage"));
 const OnboardingPage     = lazy(() => import("@/pages/auth/OnboardingPage"));
 const NotFoundPage       = lazy(() => import("@/pages/NotFoundPage"));
