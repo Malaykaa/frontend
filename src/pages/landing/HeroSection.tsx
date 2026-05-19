@@ -34,6 +34,9 @@ export function HeroSection() {
               <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                 {t("landing.hero_headline")}
               </h1>
+              <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                {t("landing.hero_headline_2")}
+              </h1>
               <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-primary sm:text-5xl lg:text-6xl">
                 {t("landing.hero_headline_accent")}
               </h1>

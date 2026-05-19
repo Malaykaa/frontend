@@ -7,7 +7,6 @@ import { HowItWorks }      from "./HowItWorks";
 import { ForWhom }         from "./ForWhom";
 import { Testimonials }    from "./Testimonials";
 import { FaqSection }      from "./FaqSection";
-import { CtaSection }      from "./CtaSection";
 import { LandingFooter }   from "./LandingFooter";
 import {
   InstallGuideSheet,
@@ -27,7 +26,6 @@ export default function LandingPage() {
       <ForWhom />
       <Testimonials />
       <FaqSection />
-      <CtaSection />
       <LandingFooter />
 
       <InstallGuideSheet

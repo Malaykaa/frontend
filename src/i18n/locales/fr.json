@@ -164,9 +164,9 @@
     "footer_tagline": "Fait avec ❤️ pour l'Afrique",
     "nav_login": "Se connecter",
     "nav_start": "Commencer — gratuit",
-    "hero_headline": "Atteins tes objectifs.",
+    "hero_headline": "Fixes tes Objectifs.",
     "hero_headline_accent": "L'IA s'occupe du reste.",
-    "hero_subtitle_v2": "Malayka est ton mentor IA personnel — plans d'action sur mesure, documents professionnels, et les meilleures opportunités livrées directement sur WhatsApp.",
+    "hero_subtitle_v2": "Un Mentor personnel IA qui accompagne les étudiants, chercheurs d'emploi, freelances et entreprises étape par étape à trouver les meilleures opportunités et à mieux exécuter leurs objectifs en analysant le web en temps réel pour détecter des opportunités pertinentes.",
     "hero_trust": "Gratuit pour commencer · Sans carte bancaire · Disponible sur mobile",
     "hero_cta_demo": "Voir comment ça marche ↓",
     "hero_social_proof": "Rejoint par 10 000+ membres en Afrique",
@@ -217,7 +217,12 @@
     "footer_signup": "Créer un compte",
     "footer_contact_label": "Contact",
     "footer_made_by": "Créé par",
-    "footer_rights": "Tous droits réservés."
+    "footer_rights": "Tous droits réservés.",
+    "hero_headline_2": "Sans limites.",
+    "how_4_title": "Accompagnement et Suivi",
+    "how_4_desc": "L'IA t'aide à postuler de manière efficace, suit ta progression et adapte ses recommandations à ton évolution en temps réel.",
+    "stat_opps": "Opportunités scrapées/jour",
+    "stat_goals_daily": "Objectifs atteints/jour"
   },
   "app": {
     "tab_pour_moi": "Pour Moi",

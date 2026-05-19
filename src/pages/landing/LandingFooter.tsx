@@ -56,22 +56,22 @@ export function LandingFooter() {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="mailto:contact@99eange.com"
+                  href="mailto:contact@malaya.co"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <Mail className="h-3.5 w-3.5 shrink-0" />
-                  contact@99eange.com
+                  contact@malaya.co
                 </a>
               </li>
               <li>
                 <a
-                  href="https://wa.me/2250141112792"
+                  href="https://wa.me/2250768026574"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <Phone className="h-3.5 w-3.5 shrink-0" />
-                  +225 01 41 11 27 92
+                  +225 07 68 02 65 74
                 </a>
               </li>
             </ul>
