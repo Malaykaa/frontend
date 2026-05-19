@@ -16,7 +16,7 @@ export function LandingFooter() {
           <div className="space-y-4 md:col-span-2">
             <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              {t("landing.hero_subtitle_v2")}
+              IA pour le développement du capital humain en Afrique.
             </p>
             <p className="text-xs text-muted-foreground">
               {t("landing.footer_tagline")}
