@@ -1,7 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import { Bell, Settings } from "lucide-react";
-import { cn } from "@/shared/lib/utils";
 import { useNotificationCount } from "@/components/app/NotificationPanel";
 
 interface AppHeaderProps {
@@ -65,18 +64,6 @@ export function AppHeader({ hideLogo = false, onOpenSettings, onOpenNotification
             </p>
           </div>
         </button>
-
-        {/* Badge crédits */}
-        <div
-          className={cn(
-            "flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1",
-            "cursor-default select-none"
-          )}
-          title={t("settings.credits_title")}
-        >
-          <span className="text-xs font-semibold text-primary">0</span>
-          <span className="text-xs text-primary/70">cr.</span>
-        </div>
 
         {/* Paramètres (icône explicite sur desktop) */}
         <button

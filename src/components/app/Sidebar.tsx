@@ -88,10 +88,6 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="border-t px-3 py-4 space-y-1">
-        <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2">
-          <span className="text-xs text-primary/70">{t("app.credits")}</span>
-          <span className="ml-auto text-sm font-bold text-primary">0 cr.</span>
-        </div>
         <div className="flex items-center gap-2.5 rounded-xl px-3 py-2">
           <SidebarAvatar name={fullName} />
           <div className="min-w-0 flex-1">
