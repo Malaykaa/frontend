@@ -171,7 +171,7 @@
     "hero_cta_demo": "Voir comment ça marche ↓",
     "hero_social_proof": "Rejoint par 10 000+ membres en Afrique",
     "how_title": "Comment ça marche",
-    "how_subtitle": "En 3 étapes simples",
+    "how_subtitle": "En 4 étapes simples",
     "how_1_title": "Crée ton profil",
     "how_1_desc": "Dis-nous qui tu es, tes objectifs et ton domaine. 2 minutes. Sans carte.",
     "how_2_title": "L'IA t'accompagne",
@@ -222,7 +222,13 @@
     "how_4_title": "Accompagnement et Suivi",
     "how_4_desc": "L'IA t'aide à postuler de manière efficace, suit ta progression et adapte ses recommandations à ton évolution en temps réel.",
     "stat_opps": "Opportunités scrapées/jour",
-    "stat_goals_daily": "Objectifs atteints/jour"
+    "stat_goals_daily": "Objectifs atteints/jour",
+    "hero_card_plan_title": "Plan d'action créé",
+    "hero_card_plan_subtitle": "Bourse d'études · 8 étapes",
+    "hero_card_match_title": "92% match",
+    "hero_card_match_subtitle": "Nouvelle opportunité",
+    "footer_mission": "IA pour le développement du capital humain en Afrique.",
+    "hero_image_alt": "Professionnelle utilisant Malayka sur mobile"
   },
   "app": {
     "tab_pour_moi": "Pour Moi",

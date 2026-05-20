@@ -7,6 +7,11 @@ export function HeroSection() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const trustItems = t("landing.hero_trust")
+    .split("·")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   return (
     <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">
       {/* Background glow */}
@@ -29,18 +34,12 @@ export function HeroSection() {
               </span>
             </div>
 
-            {/* Headline */}
-            <div className="space-y-1">
-              <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                {t("landing.hero_headline")}
-              </h1>
-              <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                {t("landing.hero_headline_2")}
-              </h1>
-              <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-primary sm:text-5xl lg:text-6xl">
-                {t("landing.hero_headline_accent")}
-              </h1>
-            </div>
+            {/* Headline — single h1 with block spans for SEO/a11y */}
+            <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+              <span className="block text-foreground">{t("landing.hero_headline")}</span>
+              <span className="block text-foreground">{t("landing.hero_headline_2")}</span>
+              <span className="block text-primary">{t("landing.hero_headline_accent")}</span>
+            </h1>
 
             {/* Subtitle */}
             <p className="text-base text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0 sm:text-lg">
@@ -67,13 +66,9 @@ export function HeroSection() {
               </Button>
             </div>
 
-            {/* Trust signals */}
+            {/* Trust signals — split hero_trust (3 bullets) */}
             <div className="flex flex-wrap justify-center md:justify-start gap-x-5 gap-y-1.5">
-              {[
-                t("landing.signup_hint").split("·")[0].trim(),
-                t("landing.signup_hint").split("·")[1]?.trim(),
-                t("landing.signup_hint").split("·")[2]?.trim(),
-              ].filter(Boolean).map((item) => (
+              {trustItems.map((item) => (
                 <span key={item} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                   {item}
@@ -85,11 +80,10 @@ export function HeroSection() {
           {/* Right — Hero image */}
           <div className="flex-shrink-0 flex justify-center md:justify-end">
             <div className="relative">
-              {/* Decorative ring */}
               <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-primary/10 to-amber-400/10 blur-2xl" />
               <img
                 src="/hero-woman.png.png"
-                alt="Malayka — Mentor IA"
+                alt={t("landing.hero_image_alt")}
                 className="relative z-10 h-[380px] w-auto object-contain drop-shadow-2xl md:h-[460px] lg:h-[520px]"
               />
 
@@ -99,8 +93,8 @@ export function HeroSection() {
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-foreground leading-none">Plan d'action créé</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Bourse d'études · 8 étapes</p>
+                  <p className="text-xs font-bold text-foreground leading-none">{t("landing.hero_card_plan_title")}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{t("landing.hero_card_plan_subtitle")}</p>
                 </div>
               </div>
 
@@ -110,8 +104,8 @@ export function HeroSection() {
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-foreground leading-none">92% match</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Nouvelle opportunité</p>
+                  <p className="text-xs font-bold text-foreground leading-none">{t("landing.hero_card_match_title")}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{t("landing.hero_card_match_subtitle")}</p>
                 </div>
               </div>
             </div>

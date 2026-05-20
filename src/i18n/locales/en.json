@@ -171,7 +171,7 @@
     "hero_cta_demo": "See how it works ↓",
     "hero_social_proof": "Joined by 10,000+ members across Africa",
     "how_title": "How it works",
-    "how_subtitle": "In 3 simple steps",
+    "how_subtitle": "In 4 simple steps",
     "how_1_title": "Create your profile",
     "how_1_desc": "Tell us who you are, your goals and your field. 2 minutes. No card.",
     "how_2_title": "The AI guides you",
@@ -222,7 +222,13 @@
     "how_4_title": "Support & Follow-up",
     "how_4_desc": "The AI helps you apply effectively, tracks your progress and adapts its recommendations to your evolution in real time.",
     "stat_opps": "Opportunities scraped/day",
-    "stat_goals_daily": "Goals reached/day"
+    "stat_goals_daily": "Goals reached/day",
+    "hero_card_plan_title": "Action plan created",
+    "hero_card_plan_subtitle": "Scholarship · 8 steps",
+    "hero_card_match_title": "92% match",
+    "hero_card_match_subtitle": "New opportunity",
+    "footer_mission": "AI for human capital development in Africa.",
+    "hero_image_alt": "Professional using Malayka on mobile"
   },
   "app": {
     "tab_pour_moi": "For Me",

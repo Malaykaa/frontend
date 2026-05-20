@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { LandingNav }      from "./LandingNav";
 import { HeroSection }     from "./HeroSection";
 import { StatsSection }    from "./StatsSection";
@@ -8,14 +7,8 @@ import { ForWhom }         from "./ForWhom";
 import { Testimonials }    from "./Testimonials";
 import { FaqSection }      from "./FaqSection";
 import { LandingFooter }   from "./LandingFooter";
-import {
-  InstallGuideSheet,
-  type InstallPlatform,
-} from "@/components/app/InstallGuideSheet";
 
 export default function LandingPage() {
-  const [installSheet, setInstallSheet] = useState<InstallPlatform | null>(null);
-
   return (
     <div className="min-h-screen bg-background">
       <LandingNav />
@@ -27,12 +20,6 @@ export default function LandingPage() {
       <Testimonials />
       <FaqSection />
       <LandingFooter />
-
-      <InstallGuideSheet
-        open={installSheet !== null}
-        platform={installSheet}
-        onClose={() => setInstallSheet(null)}
-      />
     </div>
   );
 }
