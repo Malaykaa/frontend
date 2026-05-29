@@ -54,6 +54,27 @@ export async function fetchPropositions(): Promise<ScrapedOffer[]> {
   return items.map(normalizeRecommendation);
 }
 
+// ── Browse (filtres explicites depuis Tendances) ───────────────────────────────
+
+export interface BrowseOffersParams {
+  offer_types?: string;  // ex: "scholarship,grant"
+  country?: string;
+  skill?: string;
+  max_age?: number;
+  limit?: number;
+}
+
+export async function fetchBrowseOffers(params: BrowseOffersParams): Promise<ScrapedOffer[]> {
+  const sp = new URLSearchParams();
+  if (params.offer_types) sp.set("offer_types", params.offer_types);
+  if (params.country)     sp.set("country", params.country);
+  if (params.skill)       sp.set("skill", params.skill);
+  if (params.max_age)     sp.set("max_age", String(params.max_age));
+  if (params.limit)       sp.set("limit", String(params.limit));
+  const raw = await apiRequest<RawRecommendationItem[]>(`/recommendations/browse?${sp}`);
+  return (Array.isArray(raw) ? raw : []).map(normalizeRecommendation);
+}
+
 /** Enregistre le feedback de l'utilisateur sur une offre */
 export async function sendFeedback(
   offerRef: string,

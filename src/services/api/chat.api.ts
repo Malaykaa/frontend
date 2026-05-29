@@ -211,17 +211,19 @@ export function parseStreamChunk(raw: string): string | null {
 export async function* streamMessage(
   threadId: string,
   content: string,
-  _attachmentKeys: string[] = [],
+  attachmentIds: string[] = [],
   onDone?: (meta: { isDeliverable: boolean }) => void,
   onSection?: (label: string, status: "running" | "complete") => void,
 ): AsyncGenerator<string> {
-  const body = { content };
+  const body: Record<string, unknown> = { content };
+  if (attachmentIds.length > 0) body.attachment_ids = attachmentIds;
   let _currentSectionLabel = "";
 
-  for await (const raw of apiStream(`/chat/threads/${threadId}/stream`, {
-    method: "POST",
-    body: JSON.stringify(body),
-  })) {
+  for await (const raw of apiStream(
+    `/chat/threads/${threadId}/stream`,
+    { method: "POST", body: JSON.stringify(body) },
+    180_000, // 3 min — documents longs (8-12 sections × ~10 s)
+  )) {
     if (!raw.trim() || raw === "[DONE]") continue;
 
     let parsed: StreamChunk;

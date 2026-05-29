@@ -124,6 +124,7 @@ interface PlanPanelProps {
 export function PlanPanel({ threadId }: PlanPanelProps) {
   const [expanded, setExpanded] = useState(false);
   const [completingId, setCompletingId] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const { data: steps, isLoading, isError } = useThreadPlan(threadId);
   const { mutateAsync: complete } = useCompleteStep(threadId);
@@ -133,8 +134,6 @@ export function PlanPanel({ threadId }: PlanPanelProps) {
   if (isError) return null;
 
   const { done, total, pct } = steps ? computeProgress(steps) : { done: 0, total: 0, pct: 0 };
-
-  const { t } = useTranslation();
 
   const handleComplete = async (stepId: string) => {
     setCompletingId(stepId);

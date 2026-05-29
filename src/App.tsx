@@ -52,9 +52,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) return <FullScreenLoader />;
-  if (isAuthenticated) return <Navigate to="/app" replace />;
+  if (isAuthenticated) return <Navigate to={user?.role === "admin" ? "/admin" : "/app"} replace />;
   return <>{children}</>;
 }
 

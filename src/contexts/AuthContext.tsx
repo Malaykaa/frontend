@@ -20,7 +20,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (identifier: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<User>;
   sendOtp: (phone: string) => Promise<void>;
   verifyOtpRegister: (phone: string, code: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timeout);
   }, []);
 
-  const login = useCallback(async (identifier: string, password: string) => {
+  const login = useCallback(async (identifier: string, password: string): Promise<User> => {
     const isPhone = /^\+?[\d\s\-()]{7,}$/.test(identifier.trim());
     const endpoint = isPhone ? "/auth/login-phone" : "/auth/login";
     const body = isPhone
@@ -89,15 +89,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     setToken(data.accessToken);
-    // Vider le cache React Query : données du précédent utilisateur ne doivent pas
-    // être visibles pour ce nouvel utilisateur.
     queryClient.clear();
     setState({
       user: data.user,
-      profile: data.profile,
+      profile: null,
       isLoading: false,
       isAuthenticated: true,
     });
+    return data.user;
   }, [queryClient]);
 
   const sendOtp = useCallback(async (phone: string) => {

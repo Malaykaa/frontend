@@ -70,3 +70,113 @@ export interface AdminDeliverablesParams { page?: number; size?: number; user_id
 
 export const fetchAdminDeliverables = (p: AdminDeliverablesParams = {}) =>
   apiRequest<AdminPaginated<AdminDeliverableItem>>(`/admin/deliverables${qs({ page: p.page ?? 1, size: p.size ?? 20, user_id: p.user_id })}`);
+
+// ── Sources de scraping dynamiques ────────────────────────────────────────────
+
+export type ScrapingCategory =
+  | "job_boards"
+  | "opportunities"
+  | "grants"
+  | "scholarships"
+  | "call_for_applications";
+
+export interface ScrapingSourceItem {
+  id: string;
+  url: string;
+  label: string | null;
+  category: ScrapingCategory;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ScrapingSourceCreate {
+  url: string;
+  label?: string;
+  category: ScrapingCategory;
+  notes?: string;
+}
+
+export interface ScrapingSourceUpdate {
+  label?: string;
+  category?: ScrapingCategory;
+  notes?: string;
+  is_active?: boolean;
+}
+
+export const fetchScrapingSources = () =>
+  apiRequest<ScrapingSourceItem[]>("/admin/scraping/sources");
+
+export const createScrapingSource = (payload: ScrapingSourceCreate) =>
+  apiRequest<ScrapingSourceItem>("/admin/scraping/sources", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const updateScrapingSource = (id: string, payload: ScrapingSourceUpdate) =>
+  apiRequest<ScrapingSourceItem>(`/admin/scraping/sources/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const deleteScrapingSource = (id: string) =>
+  apiRequest<void>(`/admin/scraping/sources/${id}`, { method: "DELETE" });
+
+// ── Actors Apify dynamiques ───────────────────────────────────────────────────
+
+export type NormalizerType = "indeed" | "linkedin_job" | "linkedin_post" | "google_jobs" | "facebook" | "web";
+export type RunMode = "light" | "heavy" | "both";
+
+export interface ScrapingActorItem {
+  id: string;
+  actor_id: string;
+  label: string;
+  offer_type: string;
+  source_name: string;
+  normalizer_type: NormalizerType;
+  input_json: Record<string, unknown>;
+  run_mode: RunMode;
+  is_active: boolean;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface ScrapingActorCreate {
+  actor_id: string;
+  label: string;
+  offer_type?: string;
+  source_name: string;
+  normalizer_type: NormalizerType;
+  input_json?: Record<string, unknown>;
+  run_mode?: RunMode;
+  notes?: string;
+}
+
+export interface ScrapingActorUpdate {
+  label?: string;
+  offer_type?: string;
+  source_name?: string;
+  normalizer_type?: NormalizerType;
+  input_json?: Record<string, unknown>;
+  run_mode?: RunMode;
+  is_active?: boolean;
+  notes?: string;
+}
+
+export const fetchScrapingActors = () =>
+  apiRequest<ScrapingActorItem[]>("/admin/scraping/actors");
+
+export const createScrapingActor = (payload: ScrapingActorCreate) =>
+  apiRequest<ScrapingActorItem>("/admin/scraping/actors", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const updateScrapingActor = (id: string, payload: ScrapingActorUpdate) =>
+  apiRequest<ScrapingActorItem>(`/admin/scraping/actors/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const deleteScrapingActor = (id: string) =>
+  apiRequest<void>(`/admin/scraping/actors/${id}`, { method: "DELETE" });

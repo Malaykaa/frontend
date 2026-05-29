@@ -40,7 +40,7 @@ export default function AppPage() {
       </div>
 
       {/* ── DESKTOP (≥ 1024px) ───────────────────────────── */}
-      <div className="hidden min-h-screen lg:flex">
+      <div className="hidden h-screen lg:flex overflow-hidden">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <AppHeader

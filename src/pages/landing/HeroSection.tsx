@@ -13,7 +13,7 @@ export function HeroSection() {
     .filter(Boolean);
 
   return (
-    <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">
+    <section className="relative overflow-hidden pt-16 pb-8 md:pt-20 md:pb-12">
       {/* Background glow */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/8 blur-3xl" />
@@ -36,7 +36,7 @@ export function HeroSection() {
 
             {/* Headline — single h1 with block spans for SEO/a11y */}
             <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              <span className="block text-foreground">{t("landing.hero_headline")}</span>
+              <span className="block text-primary">{t("landing.hero_headline")}</span>
               <span className="block text-foreground">{t("landing.hero_headline_2")}</span>
               <span className="block text-primary">{t("landing.hero_headline_accent")}</span>
             </h1>

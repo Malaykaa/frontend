@@ -42,7 +42,7 @@ export default function AideTab() {
         </h2>
 
         <a
-          href="https://wa.me/2250141112792"
+          href="https://wa.me/2250768026574"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 transition-colors p-4 text-white"
@@ -60,7 +60,7 @@ export default function AideTab() {
 
         <div className="grid grid-cols-2 gap-2">
           <a
-            href="mailto:contact@99eange.com"
+            href="mailto:contact@malayka.co"
             className="flex flex-col items-center gap-2 rounded-xl border bg-card p-4 hover:bg-muted/30 transition-colors text-center"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100">
@@ -69,13 +69,13 @@ export default function AideTab() {
             <div>
               <p className="text-sm font-semibold">{t("help.email")}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
-                contact@99eange.com
+                contact@malayka.co
               </p>
             </div>
           </a>
 
           <a
-            href="tel:+2250141112792"
+            href="tel:+2250768026574"
             className="flex flex-col items-center gap-2 rounded-xl border bg-card p-4 hover:bg-muted/30 transition-colors text-center"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100">
@@ -84,7 +84,7 @@ export default function AideTab() {
             <div>
               <p className="text-sm font-semibold">{t("help.phone")}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
-                +225 01 41 11 27 92
+                +225 07 68 02 65 74
               </p>
             </div>
           </a>

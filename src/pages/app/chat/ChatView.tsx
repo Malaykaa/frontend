@@ -103,7 +103,9 @@ function WelcomeState({
 }) {
   const { t } = useTranslation();
   const isAction = isActionThread(thread);
-  const presetLabel = thread.preset_key ? PRESET_LABELS[thread.preset_key] : null;
+  const presetLabel = thread.preset_key && PRESET_LABELS[thread.preset_key]
+    ? t(PRESET_LABELS[thread.preset_key])
+    : null;
 
   const chips = [
     { label: t("chat.starter_how_to_start"), message: t("chat.starter_msg_start", { title: thread.title }) },
@@ -212,7 +214,7 @@ export default function ChatView() {
 
   // ── Envoi message classique ─────────────────────────────────────────────
   const handleSend = useCallback(
-    async (content: string, attachmentKeys: string[]) => {
+    async (content: string, attachmentIds: string[]) => {
       if (!threadId || isActiveRef.current) return;
 
       const userMsg: ChatMessage = {
@@ -232,7 +234,7 @@ export default function ChatView() {
         let isDeliverable = false;
 
         for await (const token of streamMessage(
-          threadId, content, attachmentKeys,
+          threadId, content, attachmentIds,
           ({ isDeliverable: flag }) => { isDeliverable = flag; },
           // Callback sections : affiché quand l'orchestrateur génère un document via chat
           (label, status) => {
@@ -340,7 +342,9 @@ export default function ChatView() {
 
   const isBusy = stream.phase !== "idle" || gen.phase === "generating";
   const isAction = isActionThread(thread);
-  const presetLabel = thread?.preset_key ? PRESET_LABELS[thread.preset_key] : undefined;
+  const presetLabel = thread?.preset_key && PRESET_LABELS[thread.preset_key]
+    ? t(PRESET_LABELS[thread.preset_key])
+    : undefined;
   const hasContent = messages.length > 0 || gen.phase !== "idle" || stream.phase !== "idle";
 
   return (
@@ -371,18 +375,6 @@ export default function ChatView() {
           )}
         </div>
 
-        {/* Bouton Générer (header, pour les threads action) */}
-        {isAction && messages.length > 0 && !isBusy && gen.phase !== "done" && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5 shrink-0 border-amber-300 text-amber-700 hover:bg-amber-50"
-            onClick={handleGenerate}
-          >
-            <Zap className="h-3.5 w-3.5" />
-            {t("chat.generate")}
-          </Button>
-        )}
       </header>
 
       {/* Plan d'action (threads objectif uniquement, pas les actions) */}
@@ -412,7 +404,7 @@ export default function ChatView() {
               // Livrable généré dans un thread objectif → carte document
               if (msg.role === "assistant" && msg.is_deliverable) {
                 // Strip any @@MARKER@@ patterns that may have leaked into stored content
-                const cleanContent = msg.content.replace(/@@\w+@@[^\n]*/g, "").trim();
+                const cleanContent = (msg.content ?? "").replace(/@@\w+@@[^\n]*/g, "").trim();
                 const docTitle = cleanContent.match(/^#\s+(.+)$/m)?.[1]?.trim()
                   ?? thread?.title
                   ?? "Document";
@@ -474,33 +466,6 @@ export default function ChatView() {
               </>
             )}
 
-            {/* Bannière "Générer" — visible dans la zone messages pour les threads action */}
-            {isAction && messages.length > 0 && !isBusy && gen.phase === "idle" && (
-              <div className="px-4 py-3">
-                <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 dark:bg-amber-950/20 p-4 flex flex-col gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50">
-                      <Zap className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                        {presetLabel ? t("chat.ready_generate_q", { label: presetLabel }) : t("chat.ready_generate_doc_q")}
-                      </p>
-                      <p className="text-xs text-amber-700 dark:text-amber-400">
-                        {t("chat.generate_hint")}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    className="w-full gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold"
-                    onClick={handleGenerate}
-                  >
-                    <Zap className="h-4 w-4" />
-                    {t("chat.generate_btn")}
-                  </Button>
-                </div>
-              </div>
-            )}
 
             <div ref={bottomRef} className="h-4" />
           </div>

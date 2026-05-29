@@ -196,10 +196,12 @@ function LiverableItem({
   thread: ChatThread;
   onClick: () => void;
 }) {
-  const preset = thread.preset_key ?? "";
+  const { t } = useTranslation();
+  const preset   = thread.preset_key ?? "";
   const IconComp = PRESET_ICON[preset] ?? FileText;
   const color    = PRESET_COLOR[preset] ?? "bg-muted text-muted-foreground";
-  const label    = PRESET_LABELS[preset] ?? thread.title;
+  const labelKey = PRESET_LABELS[preset];
+  const label    = labelKey ? t(labelKey) : thread.title;
 
   return (
     <button

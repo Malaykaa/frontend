@@ -33,11 +33,11 @@ export function FaqSection() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-10 md:py-14">
       <div className="mx-auto max-w-3xl px-5">
 
         {/* Header */}
-        <div className="text-center mb-12 space-y-3">
+        <div className="text-center mb-7 space-y-2">
           <h2 className="text-3xl font-extrabold tracking-tight md:text-4xl">
             {t("landing.faq_title")}
           </h2>

@@ -1,5 +1,5 @@
 ﻿import { useState } from "react";
-import { Plus, Search, ShieldCheck, ShieldOff, Trash2, Eye, X } from "lucide-react";
+import { AlertCircle, Plus, RefreshCw, Search, ShieldCheck, ShieldOff, Trash2, Eye, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -130,7 +130,7 @@ export default function AdminUsers() {
   const [activeFilter, setActiveFilter] = useState<boolean | undefined>(undefined);
   const [showCreate, setShowCreate] = useState(false);
 
-  const { data, isLoading } = useAdminUsers({ page, size: 20, q: q || undefined, role: roleFilter || undefined, active: activeFilter });
+  const { data, isLoading, isError, error, refetch } = useAdminUsers({ page, size: 20, q: q || undefined, role: roleFilter || undefined, active: activeFilter });
   const updateUser = useUpdateAdminUser();
   const deleteUser = useDeleteAdminUser();
 
@@ -160,6 +160,18 @@ export default function AdminUsers() {
           <option value="">Tous les statuts</option><option value="true">Actifs</option><option value="false">Inactifs</option>
         </select>
       </div>
+
+      {isError && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 flex items-center gap-3">
+          <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
+          <p className="text-sm text-destructive flex-1">
+            {(error as { message?: string })?.message ?? "Impossible de charger la liste des utilisateurs."}
+          </p>
+          <button onClick={() => refetch()} className="flex items-center gap-1.5 text-xs text-destructive hover:underline">
+            <RefreshCw className="h-3 w-3" /> Réessayer
+          </button>
+        </div>
+      )}
 
       <div className="rounded-xl border overflow-hidden">
         <table className="w-full text-sm">

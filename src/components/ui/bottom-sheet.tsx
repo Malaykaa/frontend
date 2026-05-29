@@ -11,6 +11,8 @@ interface BottomSheetProps {
   children: ReactNode;
   /** Hauteur max du sheet (Tailwind class). Default: max-h-[90vh] */
   maxHeight?: string;
+  /** Bloque la fermeture (backdrop, Echap, bouton X) pendant un traitement en cours */
+  locked?: boolean;
 }
 
 export function BottomSheet({
@@ -20,9 +22,10 @@ export function BottomSheet({
   description,
   children,
   maxHeight = "max-h-[90vh]",
+  locked = false,
 }: BottomSheetProps) {
   return (
-    <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog.Root open={open} onOpenChange={(v) => !v && !locked && onClose()}>
       <Dialog.Portal>
         {/* Backdrop */}
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-fade-in" />
@@ -38,6 +41,8 @@ export function BottomSheet({
             "lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-lg lg:rounded-2xl lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
           )}
           aria-describedby={description ? "sheet-desc" : undefined}
+          onInteractOutside={(e) => { if (locked) e.preventDefault(); }}
+          onEscapeKeyDown={(e) => { if (locked) e.preventDefault(); }}
         >
           {/* Handle (mobile only) */}
           <div className="flex justify-center pt-3 pb-1 lg:hidden">
@@ -60,7 +65,11 @@ export function BottomSheet({
                 )}
               </div>
               <Dialog.Close
-                className="ml-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                disabled={locked}
+                className={cn(
+                  "ml-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-full hover:bg-muted transition-colors",
+                  locked && "pointer-events-none opacity-30"
+                )}
                 aria-label="Fermer"
               >
                 <X className="h-4 w-4 text-muted-foreground" />

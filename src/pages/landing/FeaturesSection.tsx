@@ -17,11 +17,11 @@ export function FeaturesSection() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-10 md:py-14">
       <div className="mx-auto max-w-6xl px-5">
 
         {/* Header */}
-        <div className="mx-auto max-w-xl text-center mb-14 space-y-3">
+        <div className="mx-auto max-w-xl text-center mb-8 space-y-2">
           <h2 className="text-3xl font-extrabold tracking-tight md:text-4xl">
             {t("landing.features_title")}
           </h2>

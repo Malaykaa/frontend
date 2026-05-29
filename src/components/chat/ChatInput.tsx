@@ -12,13 +12,15 @@ import { cn } from "@/shared/lib/utils";
 import { apiRequest } from "@/shared/api/client";
 
 interface UploadedFile {
+  attachment_id: string;
   storage_key: string;
   filename: string;
   content_type: string;
+  extracted: boolean;
 }
 
 interface ChatInputProps {
-  onSend: (content: string, attachmentKeys: string[]) => void;
+  onSend: (content: string, attachmentIds: string[]) => void;
   disabled?: boolean;
   placeholder?: string;
 }
@@ -51,7 +53,7 @@ export function ChatInput({
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
     if (!trimmed || disabled) return;
-    onSend(trimmed, attachments.map((a) => a.storage_key));
+    onSend(trimmed, attachments.map((a) => a.attachment_id));
     setText("");
     setAttachments([]);
     if (textareaRef.current) {
@@ -97,8 +99,8 @@ export function ChatInput({
     }
   };
 
-  const removeAttachment = (key: string) =>
-    setAttachments((prev) => prev.filter((a) => a.storage_key !== key));
+  const removeAttachment = (id: string) =>
+    setAttachments((prev) => prev.filter((a) => a.attachment_id !== id));
 
   const canSend = text.trim().length > 0 && !disabled;
 
@@ -109,16 +111,19 @@ export function ChatInput({
         <div className="mb-2 flex flex-wrap gap-2">
           {attachments.map((a) => (
             <div
-              key={a.storage_key}
+              key={a.attachment_id}
               className="flex items-center gap-1.5 rounded-lg border bg-muted/50 px-2.5 py-1.5 text-xs"
             >
               {a.content_type.startsWith("image/")
                 ? <Image className="h-3.5 w-3.5 text-muted-foreground" />
                 : <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
               <span className="max-w-[120px] truncate font-medium">{a.filename}</span>
+              {a.extracted && (
+                <span className="text-[9px] text-emerald-600 font-medium">PDF lu</span>
+              )}
               <button
                 type="button"
-                onClick={() => removeAttachment(a.storage_key)}
+                onClick={() => removeAttachment(a.attachment_id)}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-3 w-3" />

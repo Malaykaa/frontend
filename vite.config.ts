@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "favicon.ico", "splash.png"],
       manifest: {
-        name: "Malaykaa — Mentor IA",
-        short_name: "Malaykaa",
+        name: "Malayka — Mentor IA",
+        short_name: "Malayka",
         description: "Ton mentor IA pour la réussite professionnelle et académique",
         theme_color: "#6366f1",
         background_color: "#ffffff",

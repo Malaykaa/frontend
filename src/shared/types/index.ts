@@ -171,3 +171,146 @@ export interface PaginatedResponse<T> {
   size: number;
 }
 
+// ── Admin ────────────────────────────────────────────────────────────────────
+
+export interface AdminPaginated<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+export interface AdminStats {
+  users_total: number;
+  users_new_7d: number;
+  threads_total: number;
+  messages_today: number;
+  offers_total: number;
+  offers_active: number;
+  documents_total: number;
+  intents_total: number;
+  goals_total: number;
+}
+
+export interface AdminUserItem {
+  id: string;
+  email: string | null;
+  phone: string | null;
+  role: string;
+  is_active: boolean;
+  created_at: string;
+  first_name: string | null;
+  last_name: string | null;
+  primary_role: string | null;
+  country: string | null;
+  threads_count: number;
+  goals_count: number;
+  documents_count: number;
+}
+
+export interface AdminUserDetail extends AdminUserItem {
+  domain: string | null;
+  field_of_study: string | null;
+  city: string | null;
+  birth_year: number | null;
+  gender: string | null;
+  language: string | null;
+  recent_threads: AdminThreadItem[];
+  recent_goals: AdminGoalItem[];
+}
+
+export interface AdminUserUpdate {
+  role?: string;
+  is_active?: boolean;
+}
+
+export interface AdminOfferItem {
+  id: string;
+  source: string;
+  offer_type: string | null;
+  title: string;
+  company: string | null;
+  location: string | null;
+  url: string | null;
+  quality_score: number | null;
+  is_active: boolean;
+  has_embedding: boolean;
+  scraped_at: string;
+  posted_at: string | null;
+  expires_at: string | null;
+}
+
+export interface AdminOfferUpdate {
+  is_active?: boolean;
+  quality_score?: number | null;
+  title?: string;
+  offer_type?: string;
+  description?: string;
+  url?: string;
+  company?: string;
+  location?: string;
+  salary?: string;
+  posted_at?: string;
+  expires_at?: string;
+}
+
+export interface AdminGoalItem {
+  id: string;
+  user_id: string;
+  user_email: string | null;
+  type: string;
+  status: string;
+  preset_key: string | null;
+  created_at: string;
+  threads_count: number;
+}
+
+export interface AdminThreadItem {
+  id: string;
+  user_id: string;
+  user_email: string | null;
+  title: string | null;
+  status: string;
+  message_count: number;
+  created_at: string;
+}
+
+export interface AdminMessageItem {
+  id: string;
+  role: string;
+  content: string;
+  created_at: string;
+  agent_id: string | null;
+  processing_ms: number | null;
+  is_active: boolean;
+}
+
+export interface AdminThreadDetail extends AdminThreadItem {
+  messages: AdminMessageItem[];
+}
+
+export interface AdminDocumentItem {
+  id: string;
+  user_id: string;
+  user_email: string | null;
+  type: string;
+  version: number;
+  content_preview: string;
+  created_at: string;
+}
+
+export interface AdminIntentItem {
+  id: string;
+  user_id: string;
+  user_email: string | null;
+  intent_type: string | null;
+  intent_summary: string;
+  domain: string | null;
+  location: string | null;
+  level: string | null;
+  keywords: string[] | null;
+  version: number;
+  extracted_at: string;
+}
+

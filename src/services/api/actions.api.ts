@@ -48,23 +48,33 @@ export interface AgentStep {
   status: "pending" | "running" | "complete" | "error";
 }
 
-// ── Mapping label → preset backend ────────────────────────────────────────
+// ── Preset → backend key (les valeurs servent au routing SSE) ─────────────
 export const ACTION_PRESETS: Record<string, string> = {
-  "Business Plan":             "business_plan",
-  "Plan Marketing":            "marketing_plan",
-  "Étude de Marché":           "market_study",
-  "Montage de Projet":         "project_setup",
-  "Rapports":                  "report",
-  "Mini Mémoire":              "thesis",
-  "Analyse & Amélioration CV": "cv_analysis",
-  "Simulation Entretien":      "interview_sim",
-  "Proposition Commerciale":   "commercial_proposal",
-  "Proposition de Contrat":    "contract_proposal",
+  business_plan:       "business_plan",
+  marketing_plan:      "marketing_plan",
+  market_study:        "market_study",
+  project_setup:       "project_setup",
+  report:              "report",
+  thesis:              "thesis",
+  cv_analysis:         "cv_analysis",
+  interview_sim:       "interview_sim",
+  commercial_proposal: "commercial_proposal",
+  contract_proposal:   "contract_proposal",
 };
 
-export const PRESET_LABELS: Record<string, string> = Object.fromEntries(
-  Object.entries(ACTION_PRESETS).map(([k, v]) => [v, k])
-);
+// ── Preset → clé i18n (passer par t() avant d'afficher) ───────────────────
+export const PRESET_LABELS: Record<string, string> = {
+  business_plan:       "actions.label_business_plan",
+  marketing_plan:      "actions.label_marketing_plan",
+  market_study:        "actions.label_market_study",
+  project_setup:       "actions.label_project_setup",
+  report:              "actions.label_report",
+  thesis:              "actions.label_thesis",
+  cv_analysis:         "actions.label_cv_analysis",
+  interview_sim:       "actions.label_interview_sim",
+  commercial_proposal: "actions.label_commercial_proposal",
+  contract_proposal:   "actions.label_contract_proposal",
+};
 
 // ── Parse chunk SSE ────────────────────────────────────────────────────────
 export function parseActionChunk(raw: string): ActionProgressChunk | null {
@@ -114,10 +124,11 @@ export async function streamActionGeneration(
   let fullContent = "";
   let currentLabel = ""; // section courante pour apparier agent_done
 
-  for await (const raw of apiStream(`/ai/actions/swarm/${preset}/stream`, {
-    method: "POST",
-    body: JSON.stringify(body),
-  })) {
+  for await (const raw of apiStream(
+    `/ai/actions/swarm/${preset}/stream`,
+    { method: "POST", body: JSON.stringify(body) },
+    180_000, // 3 min — documents longs (8-12 sections × ~10 s)
+  )) {
     const chunk = parseActionChunk(raw);
     if (!chunk) continue;
 

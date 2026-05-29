@@ -8,7 +8,7 @@ export function CtaSection() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-20 md:py-28 relative overflow-hidden">
+    <section className="py-10 md:py-14 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-primary" />

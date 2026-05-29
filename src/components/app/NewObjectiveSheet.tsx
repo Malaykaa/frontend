@@ -202,7 +202,7 @@ function StepDetails({
           {loading
             ? <Loader2 className="h-4 w-4 animate-spin" />
             : <Plus className="h-4 w-4" />}
-          {t("goals.create_btn")}
+          {loading ? t("goals.creating") : t("goals.create_btn")}
         </Button>
       </div>
     </div>
@@ -266,6 +266,7 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
           : t("goals.sheet_details_hint")
       }
       maxHeight="max-h-[85vh]"
+      locked={isPending}
     >
       {step === 1 ? (
         <StepTopics

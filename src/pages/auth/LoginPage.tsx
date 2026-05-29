@@ -35,9 +35,9 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await login(identifier.trim(), password);
-      const isMobile = window.innerWidth < 1024;
-      navigate(isMobile ? "/app" : "/app", { replace: true });
+      const loggedUser = await login(identifier.trim(), password);
+      const dest = loggedUser.role === "admin" ? "/admin" : "/app";
+      navigate(dest, { replace: true });
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setError(t("auth.invalid_credentials"));

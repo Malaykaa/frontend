@@ -35,10 +35,10 @@ export function ForWhom() {
   ] as const;
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-10 md:py-14">
       <div className="mx-auto max-w-6xl px-5">
 
-        <div className="flex flex-col-reverse gap-14 md:flex-row md:items-center md:gap-16">
+        <div className="flex flex-col-reverse gap-8 md:flex-row md:items-center md:gap-12">
 
           {/* Left — profile cards */}
           <div className="flex-1 space-y-5">

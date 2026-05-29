@@ -20,6 +20,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: { componentStack: string }) {
+    console.error("[ErrorBoundary] Render crash:", error.message, error.stack);
+    console.error("[ErrorBoundary] Component stack:", info.componentStack);
     const eventId = Sentry.captureException(error, {
       extra: { componentStack: info.componentStack },
     });

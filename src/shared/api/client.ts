@@ -1,22 +1,20 @@
 const BASE_URL = import.meta.env.VITE_API_URL as string;
 
-// ── Token en mémoire (+ sessionStorage pour survive les refreshs de page) ──
+// ── Token en mémoire uniquement (jamais persisté en sessionStorage/localStorage) ──
+// XSS ne peut pas exfiltrer le token : il n'est accessible que depuis ce module.
+// La session survit aux navigations SPA (même onglet) ; un rechargement de page
+// déclenche /auth/me → le cookie httpOnly renouvelle le token en mémoire.
 let _accessToken: string | null = null;
 
 export function setToken(token: string): void {
   _accessToken = token;
-  sessionStorage.setItem("mlk_token", token);
 }
 
 export function clearToken(): void {
   _accessToken = null;
-  sessionStorage.removeItem("mlk_token");
 }
 
 export function getToken(): string | null {
-  if (!_accessToken) {
-    _accessToken = sessionStorage.getItem("mlk_token");
-  }
   return _accessToken;
 }
 

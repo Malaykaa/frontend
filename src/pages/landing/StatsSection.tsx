@@ -13,7 +13,7 @@ export function StatsSection() {
   ];
 
   return (
-    <section className="border-y bg-muted/30 py-10">
+    <section className="border-y bg-muted/30 py-6">
       <div className="mx-auto max-w-5xl px-5">
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5 md:gap-6">
           {stats.map(({ value, label, Icon, color }) => (

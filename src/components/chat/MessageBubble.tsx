@@ -56,7 +56,7 @@ function parseContent(raw: string): ParsedContent {
   // Si on appelle stripSourcesBlock avant d'extraire les marqueurs, le regex
   // $-ancré échoue car @@STEPS@@ suit Sources. En extrayant d'abord, Sources
   // devient la vraie queue du texte et le regex peut matcher correctement.
-  let text = raw;
+  let text = raw ?? "";
   const steps: ParsedStep[] = [];
   const propositions: string[] = [];
 

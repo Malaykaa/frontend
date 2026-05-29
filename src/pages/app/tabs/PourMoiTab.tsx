@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Plus, Sparkles, RefreshCw, ChevronDown, ChevronRight,
   Briefcase, GraduationCap, Banknote, Trophy, FileText,
-  Laptop, BookOpen, Compass, Target, MessageCircle,
+  Laptop, BookOpen, Compass, Target, MessageCircle, ArrowLeft,
 } from "lucide-react";
 import { RecommendationFeed } from "@/components/recommendations/RecommendationFeed";
+import { BrowseOffersFeed } from "@/components/recommendations/BrowseOffersFeed";
 import { Button } from "@/components/ui/button";
 import { NewObjectiveSheet } from "@/components/app/NewObjectiveSheet";
 import { useChatThreads, isActionThread } from "@/hooks/queries/use-chat-threads";
@@ -207,7 +208,15 @@ export default function PourMoiTab() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: allThreads, isLoading, isError, refetch } = useChatThreads();
+
+  // Filtres depuis les query params (liens depuis Tendances)
+  const filterOfferTypes = searchParams.get("offer_types") ?? undefined;
+  const filterSkill      = searchParams.get("skill") ?? undefined;
+  const filterCountry    = searchParams.get("country") ?? undefined;
+  const filterMaxAge     = Number(searchParams.get("max_age") ?? 60) || 60;
+  const hasFilter        = !!(filterOfferTypes || filterSkill || filterCountry);
 
   // Ne garder que les objectifs (exclure les livrables)
   const objectiveThreads = (allThreads ?? []).filter((t) => !isActionThread(t));
@@ -219,6 +228,39 @@ export default function PourMoiTab() {
   const visibleTopics = TOPIC_ORDER.filter((key) => (grouped.get(key)?.length ?? 0) > 0);
   const hasObjectives = visibleTopics.length > 0;
 
+  // ── Vue filtrée (depuis Tendances) ────────────────────────────────────────
+  if (hasFilter) {
+    return (
+      <div className="flex flex-col px-4 py-5 space-y-5">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSearchParams({})}
+            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <h1 className="text-lg font-bold">
+            {filterSkill
+              ? `Offres · ${filterSkill}`
+              : filterCountry
+              ? `Offres · ${filterCountry}`
+              : "Offres pour toi"}
+          </h1>
+        </div>
+        <BrowseOffersFeed
+          params={{
+            offer_types: filterOfferTypes,
+            skill: filterSkill,
+            country: filterCountry,
+            max_age: filterMaxAge,
+            limit: 100,
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ── Vue normale ────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col px-4 py-5 space-y-5">
       {/* En-tête */}
@@ -273,7 +315,7 @@ export default function PourMoiTab() {
               topicKey={key}
               threads={grouped.get(key)!}
               navigate={navigate}
-              defaultOpen={idx === 0}  // Ouvrir seulement le premier par défaut
+              defaultOpen={idx === 0}
             />
           ))}
         </div>

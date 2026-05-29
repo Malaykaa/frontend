@@ -1,22 +1,25 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Compass, FolderOpen, TrendingUp, HelpCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/shared/lib/utils";
 
-const TABS = [
-  { to: "/app/pour-moi",  label: "Pour Moi",  Icon: Compass     },
-  { to: "/app/actions",   label: "Livrables", Icon: FolderOpen  },
-  { to: "/app/tendances", label: "Tendances", Icon: TrendingUp  },
-  { to: "/app/aide",      label: "Aide",      Icon: HelpCircle  },
+const TAB_ROUTES = [
+  { to: "/app/pour-moi",  key: "app.tab_pour_moi", Icon: Compass     },
+  { to: "/app/actions",   key: "app.tab_livrables", Icon: FolderOpen  },
+  { to: "/app/tendances", key: "app.tab_trends",    Icon: TrendingUp  },
+  { to: "/app/aide",      key: "app.tab_aide",      Icon: HelpCircle  },
 ] as const;
 
 export function BottomNav() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm safe-bottom">
       <div className="flex items-stretch">
-        {TABS.map(({ to, label, Icon }) => {
+        {TAB_ROUTES.map(({ to, key, Icon }) => {
           const active = location.pathname.startsWith(to);
+          const label = t(key);
           return (
             <NavLink
               key={to}
