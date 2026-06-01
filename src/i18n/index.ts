@@ -14,7 +14,7 @@ i18n.use(initReactI18next).init({
   fallbackLng: "fr",
   // Forcer l'init synchrone avec des ressources bundlées — évite le flash
   // de clés brutes (ex: "goals.topic_exam") sur le premier rendu React.
-  initImmediate: false,
+  initAsync: false,
   interpolation: {
     escapeValue: false,
   },

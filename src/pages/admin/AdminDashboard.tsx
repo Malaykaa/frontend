@@ -1,4 +1,4 @@
-import { BarChart3, Brain, Briefcase, CheckCircle, FileText, MessageSquare, Target, TrendingUp, Users, Zap } from "lucide-react";
+import { Brain, Briefcase, CheckCircle, FileText, MessageSquare, Target, TrendingUp, Users, Zap } from "lucide-react";
 import { AdminStatCard } from "@/components/admin/AdminStatCard";
 import { useAdminStats } from "@/hooks/queries/use-admin";
 

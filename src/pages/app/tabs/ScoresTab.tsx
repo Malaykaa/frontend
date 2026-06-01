@@ -96,6 +96,7 @@ function StepItem({
 
 function ObjectiveCard({ thread }: { thread: ChatThread }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const category = getThreadCategory(thread);
   const meta     = CATEGORY_META[category];
