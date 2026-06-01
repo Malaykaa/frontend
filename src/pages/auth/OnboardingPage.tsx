@@ -649,6 +649,7 @@ export default function OnboardingPage() {
       } else if (err instanceof ApiError && err.status === 400) {
         setError(t("onboarding.error_invalid_phone"));
       } else {
+        console.error(err);
         setError(t("onboarding.error_send_otp"));
       }
     } finally {

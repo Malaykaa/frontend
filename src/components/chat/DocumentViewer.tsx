@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  X, Eye, Edit3, FileDown, FileText, Share2, RotateCcw,
+  X, Eye, Edit3, FileDown, Share2, RotateCcw,
   Check, Copy, Link, ExternalLink, ChevronLeft,
 } from "lucide-react";
 import { toast } from "sonner";

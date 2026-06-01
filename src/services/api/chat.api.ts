@@ -180,6 +180,7 @@ export interface StreamChunk {
   label?: string;
   error?: string;
   message?: string;
+  isDeliverable?: boolean;
 }
 
 /** Parse un chunk SSE — tolère plusieurs formats backend */
@@ -241,7 +242,7 @@ export async function* streamMessage(
 
     // Réponse finale : le contenu réel de l'IA est ici
     if (parsed.type === "done") {
-      onDone?.({ isDeliverable: Boolean((parsed as Record<string, unknown>).isDeliverable) });
+      onDone?.({ isDeliverable: Boolean(parsed.isDeliverable) });
       if (parsed.content) yield parsed.content;
       return;
     }
