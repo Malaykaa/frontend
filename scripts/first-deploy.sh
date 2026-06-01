@@ -13,7 +13,7 @@ set -euo pipefail
 GITHUB_OWNER="${1:?Usage: $0 <GITHUB_OWNER> <GITHUB_TOKEN>}"
 GITHUB_TOKEN="${2:?Usage: $0 <GITHUB_OWNER> <GITHUB_TOKEN>}"
 PROJECT_PATH="/opt/malaykaa/frontend"
-FRONTEND_IMAGE="ghcr.io/${GITHUB_OWNER}/malaykaa-frontend:latest"
+FRONTEND_IMAGE="ghcr.io/${GITHUB_OWNER}/frontend:latest"
 
 log() { echo -e "\n\033[1;32m▶ $*\033[0m"; }
 
@@ -43,7 +43,7 @@ docker pull "$FRONTEND_IMAGE"
 # ── 5. Démarrage du frontend ──────────────────────────────────────────────
 log "Démarrage du frontend..."
 cd "$PROJECT_PATH"
-FRONTEND_IMAGE="ghcr.io/${GITHUB_OWNER}/malaykaa-frontend" IMAGE_TAG=latest \
+FRONTEND_IMAGE="ghcr.io/${GITHUB_OWNER}/frontend" IMAGE_TAG=latest \
   docker compose up -d
 
 # ── 6. Vérification ───────────────────────────────────────────────────────
