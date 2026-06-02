@@ -241,6 +241,13 @@ export interface AdminOfferItem {
   expires_at: string | null;
 }
 
+export interface AdminOfferDetail extends AdminOfferItem {
+  description: string | null;
+  external_id: string;
+  normalized_title: string | null;
+  salary: string | null;
+}
+
 export interface AdminOfferUpdate {
   is_active?: boolean;
   quality_score?: number | null;

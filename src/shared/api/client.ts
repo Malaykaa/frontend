@@ -115,7 +115,8 @@ export async function apiRequest<T = unknown>(
     const newToken = await doRefresh();
     if (!newToken) {
       clearToken();
-      window.location.replace("/login");
+      // Émet un event que AuthContext écoute — évite window.location qui casse la PWA standalone
+      window.dispatchEvent(new CustomEvent("auth:session-expired"));
       throw new ApiError(401, { detail: "Session expirée" });
     }
     headers.set("Authorization", `Bearer ${newToken}`);

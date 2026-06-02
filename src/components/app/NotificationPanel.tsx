@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { X, Bell, ExternalLink, CheckCheck, Star } from "lucide-react";
+import { X, Bell, ExternalLink, CheckCheck, TrendingUp } from "lucide-react";
 import { AiAvatar } from "@/components/chat/AiAvatar";
 import { cn } from "@/shared/lib/utils";
 import { formatRelativeTime } from "@/shared/lib/utils";
@@ -30,6 +30,54 @@ const TYPE_COLORS: Record<string, string> = {
   formation:             "bg-amber-100 text-amber-700",
   partnership:           "bg-teal-100 text-teal-700",
 };
+
+// ── Item tendances delta ──────────────────────────────────────────────────────
+
+function TendancesDeltaItem({
+  notif,
+  onRead,
+}: {
+  notif: OfferNotification;
+  onRead: (id: string) => void;
+}) {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    if (!notif.seen) onRead(notif.id);
+    navigate("/app/tendances");
+  };
+
+  return (
+    <button
+      className={cn(
+        "flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors border-b last:border-b-0",
+        notif.seen ? "hover:bg-muted/20" : "bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100/50"
+      )}
+      onClick={handleClick}
+    >
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+        <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-0.5">
+          {!notif.seen && (
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
+          )}
+          <span className="rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-1.5 py-0 text-[10px] font-semibold shrink-0">
+            Tendances
+          </span>
+        </div>
+        <p className="text-sm font-medium leading-snug">
+          {notif.offer_title ?? "Mise à jour de tes tendances"}
+        </p>
+        {notif.created_at && (
+          <span className="text-[10px] text-muted-foreground">
+            {formatRelativeTime(notif.created_at)}
+          </span>
+        )}
+      </div>
+    </button>
+  );
+}
 
 // ── Item offre haute-pertinence ───────────────────────────────────────────────
 
@@ -158,18 +206,31 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
   const markAll = useMarkAllNotificationsRead();
   const markOne = useMarkNotificationRead();
 
-  const activeThreads = (threads ?? [])
-    .filter((th) => th.message_count > 0)
-    .sort((a, b) => {
-      const ta = a.updated_at ?? a.created_at;
-      const tb = b.updated_at ?? b.created_at;
-      return tb.localeCompare(ta);
-    })
-    .slice(0, 15);
+  // ── Fusionner toutes les notifications en une liste chronologique ──────────
+  type UnifiedItem =
+    | { kind: "offer";   data: OfferNotification; date: string }
+    | { kind: "thread";  data: ChatThread;         date: string };
 
-  const offerNotifs = (notifData?.notifications ?? []).slice(0, 15);
+  const offerItems: UnifiedItem[] = (notifData?.notifications ?? []).map((n) => ({
+    kind: "offer" as const,
+    data: n,
+    date: n.created_at ?? "",
+  }));
+
+  const threadItems: UnifiedItem[] = (threads ?? [])
+    .filter((th) => th.message_count > 0)
+    .map((th) => ({
+      kind: "thread" as const,
+      data: th,
+      date: th.updated_at ?? th.created_at ?? "",
+    }));
+
+  const allItems = [...offerItems, ...threadItems]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 30);
+
   const unreadOffers = notifData?.unread_count ?? 0;
-  const totalCount = unreadOffers + activeThreads.length;
+  const totalCount = allItems.length;
 
   if (!open) return null;
 
@@ -197,11 +258,22 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
             <Bell className="h-4 w-4 text-primary" />
           </div>
           <span className="flex-1 font-bold">{t("settings.notifications")}</span>
-          {totalCount > 0 && (
-            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">
-              {totalCount}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {unreadOffers > 0 && (
+              <button
+                onClick={() => markAll.mutate()}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors"
+              >
+                <CheckCheck className="h-3 w-3" />
+                Tout lire
+              </button>
+            )}
+            {totalCount > 0 && (
+              <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">
+                {totalCount}
+              </span>
+            )}
+          </div>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
@@ -210,7 +282,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
           </button>
         </div>
 
-        {/* Contenu scrollable */}
+        {/* Liste unifiée chronologique */}
         <div className="flex-1 overflow-y-auto">
           {totalCount === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 text-center">
@@ -225,58 +297,29 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
               </div>
             </div>
           ) : (
-            <>
-              {/* Section offres haute-pertinence */}
-              {offerNotifs.length > 0 && (
-                <section>
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b bg-muted/30">
-                    <div className="flex items-center gap-1.5">
-                      <Star className="h-3.5 w-3.5 text-primary" />
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                        Offres pour toi
-                      </p>
-                      {unreadOffers > 0 && (
-                        <span className="rounded-full bg-primary px-1.5 py-0 text-[10px] font-bold text-white">
-                          {unreadOffers}
-                        </span>
-                      )}
-                    </div>
-                    {unreadOffers > 0 && (
-                      <button
-                        onClick={() => markAll.mutate()}
-                        className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <CheckCheck className="h-3 w-3" />
-                        Tout lire
-                      </button>
-                    )}
-                  </div>
-                  {offerNotifs.map((n) => (
-                    <OfferNotificationItem
-                      key={n.id}
-                      notif={n}
-                      onRead={(id) => markOne.mutate(id)}
-                    />
-                  ))}
-                </section>
-              )}
-
-              {/* Section conversations actives */}
-              {activeThreads.length > 0 && (
-                <section>
-                  <p className="px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b bg-muted/30">
-                    {t("app.active_threads")}
-                  </p>
-                  {activeThreads.map((thread) => (
-                    <NotificationItem
-                      key={thread.id}
-                      thread={thread}
-                      onClose={onClose}
-                    />
-                  ))}
-                </section>
-              )}
-            </>
+            allItems.map((item) =>
+              item.kind === "offer" ? (
+                item.data.offer_type === "tendances_delta" ? (
+                  <TendancesDeltaItem
+                    key={item.data.id}
+                    notif={item.data}
+                    onRead={(id) => markOne.mutate(id)}
+                  />
+                ) : (
+                  <OfferNotificationItem
+                    key={item.data.id}
+                    notif={item.data}
+                    onRead={(id) => markOne.mutate(id)}
+                  />
+                )
+              ) : (
+                <NotificationItem
+                  key={item.data.id}
+                  thread={item.data}
+                  onClose={onClose}
+                />
+              )
+            )
           )}
         </div>
       </div>

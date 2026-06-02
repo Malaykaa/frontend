@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useTrendsSummary } from "@/hooks/queries/use-trends";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { SemaineAfriqueSection } from "./trends/SemaineAfriqueSection";
 import { MonPaysSection } from "./trends/MonPaysSection";
 import { CompetencesSection } from "./trends/CompetencesSection";
@@ -47,6 +48,7 @@ export default function TendancesTab() {
   const [activeTab, setActiveTab] = useState<TabId>("semaine");
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useTrendsSummary();
+  usePageTitle(t("trends.title"));
 
   return (
     <div className="flex flex-col px-4 py-5 space-y-4">

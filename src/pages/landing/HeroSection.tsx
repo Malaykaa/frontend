@@ -82,7 +82,7 @@ export function HeroSection() {
             <div className="relative">
               <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-primary/10 to-amber-400/10 blur-2xl" />
               <img
-                src="/hero-woman.png.png"
+                src="/hero-woman.png"
                 alt={t("landing.hero_image_alt")}
                 className="relative z-10 h-[380px] w-auto object-contain drop-shadow-2xl md:h-[460px] lg:h-[520px]"
               />

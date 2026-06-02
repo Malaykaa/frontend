@@ -107,13 +107,19 @@ function StepCard({ step, index, completed = false, onSend, onComplete }: StepCa
 
   const handleSendStep = () => {
     if (completed) return;
-    let text = `Traitons l'étape : **${step.title}**`;
-    if (step.description) text += `\n\nContexte : ${step.description}`;
-    if (hasSubSteps) {
-      text += `\n\nSous-plans à couvrir :\n${step.subSteps!.map((s) => `- ${s.title}`).join("\n")}`;
-    }
-    onSend?.(text);
+    // Le titre et le bouton dans la card appellent onSend directement → on envoie le contexte complet
+    // Le onComplete (depuis MessageBubble) gère la séparation display/llm
+    // Ici on délègue à onComplete si disponible (chemin normal depuis MessageBubble)
+    // sinon fallback : onSend avec contexte complet (chemin legacy)
     onComplete?.();
+    if (!onComplete) {
+      let text = `Traitons l'étape : **${step.title}**`;
+      if (step.description) text += `\n\nContexte : ${step.description}`;
+      if (hasSubSteps) {
+        text += `\n\nSous-plans à couvrir :\n${step.subSteps!.map((s) => `- ${s.title}`).join("\n")}`;
+      }
+      onSend?.(text);
+    }
   };
 
   return (
@@ -156,7 +162,7 @@ function StepCard({ step, index, completed = false, onSend, onComplete }: StepCa
         {/* Chevron expand (si sous-étapes ou description) */}
         {hasContent && !completed && (
           <button
-            className="shrink-0 rounded p-0.5 hover:bg-muted/50 transition-colors"
+            className="shrink-0 rounded p-1.5 hover:bg-muted/50 transition-colors"
             onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
           >
             {open
@@ -183,7 +189,7 @@ function StepCard({ step, index, completed = false, onSend, onComplete }: StepCa
             </div>
           )}
           <button
-            className="mt-1 w-full rounded-lg bg-primary/5 border border-primary/20 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors text-left"
+            className="mt-1 w-full rounded-lg bg-primary/5 border border-primary/20 px-3 py-2.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors text-left"
             onClick={handleSendStep}
           >
             Traiter cette étape →
@@ -212,7 +218,7 @@ function PropositionChip({
 
   return (
     <button
-      className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors text-left"
+      className="rounded-full border border-primary/30 bg-primary/5 px-3 py-2.5 text-xs font-medium text-primary hover:bg-primary/10 active:scale-[0.98] transition-all text-left"
       onClick={() => onSend?.(display)}
     >
       {display}
@@ -232,7 +238,7 @@ function CopyButton({ content }: { content: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="rounded-md p-1 text-muted-foreground/60 opacity-0 transition-opacity hover:text-muted-foreground group-hover:opacity-100"
+      className="rounded-md p-1.5 text-muted-foreground/50 transition-colors hover:text-muted-foreground active:scale-95"
       title="Copier"
     >
       {copied
@@ -249,7 +255,7 @@ interface MessageBubbleProps {
   showActions?: boolean;
   onSend?: (text: string) => void;
   completedStepKeys?: Set<string>;
-  onStepComplete?: (compositeKey: string, text: string) => void;
+  onStepComplete?: (compositeKey: string, fullContext: string, displayContent: string) => void;
 }
 
 export function MessageBubble({
@@ -270,7 +276,7 @@ export function MessageBubble({
               {message.content}
             </p>
           </div>
-          <span className="text-[10px] text-muted-foreground px-1">
+          <span className="text-[11px] text-muted-foreground px-1">
             {message.created_at ? formatRelativeTime(message.created_at) : ""}
           </span>
         </div>
@@ -305,7 +311,7 @@ export function MessageBubble({
         {/* Étapes (plan d'action) — affiche seulement les non complétées */}
         {steps.length > 0 && visibleSteps.length > 0 && (
           <div className="space-y-1.5 max-w-full">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground px-1">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground px-1">
               Plan d'action · {visibleSteps.length} étape{visibleSteps.length > 1 ? "s" : ""} restante{visibleSteps.length > 1 ? "s" : ""}
             </p>
             {visibleSteps.map((step, i) => {
@@ -318,18 +324,21 @@ export function MessageBubble({
                   completed={false}
                   onSend={onSend}
                   onComplete={() => {
-                    let text = `Traitons l'étape : **${step.title}**`;
-                    if (step.description) text += `\n\nContexte : ${step.description}`;
+                    // Texte court affiché dans la bulle utilisateur
+                    const display = `Étape : "${step.title}"`;
+                    // Contexte complet envoyé au LLM (invisible pour l'user)
+                    let fullCtx = `Traitons l'étape : **${step.title}**`;
+                    if (step.description) fullCtx += `\n\nContexte : ${step.description}`;
                     if (step.subSteps?.length) {
-                      text += `\n\nSous-plans à couvrir :\n${step.subSteps.map((s) => `- ${s.title}`).join("\n")}`;
+                      fullCtx += `\n\nSous-plans à couvrir :\n${step.subSteps.map((s) => `- ${s.title}`).join("\n")}`;
                     }
-                    onStepComplete?.(key, text);
+                    onStepComplete?.(key, fullCtx, display);
                   }}
                 />
               );
             })}
             {visibleSteps.length < steps.length && (
-              <p className="text-[10px] text-emerald-600 px-1">
+              <p className="text-[11px] text-emerald-600 px-1">
                 ✓ {steps.length - visibleSteps.length} étape{steps.length - visibleSteps.length > 1 ? "s" : ""} traitée{steps.length - visibleSteps.length > 1 ? "s" : ""}
               </p>
             )}
@@ -356,7 +365,7 @@ export function MessageBubble({
 
         {/* Footer (heure + copier) */}
         <div className="flex items-center gap-1 px-1">
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-[11px] text-muted-foreground">
             {message.created_at ? formatRelativeTime(message.created_at) : ""}
           </span>
           {showActions && <CopyButton content={message.content} />}

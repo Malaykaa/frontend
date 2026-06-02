@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { usePageTitle } from "@/hooks/use-page-title";
 import {
   Plus, FileText, Building2, TrendingUp, PieChart,
   FolderKanban, BarChart3, GraduationCap, ClipboardCheck, Mic,
@@ -246,6 +247,7 @@ function Skeleton() {
 export default function ActionsTab() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  usePageTitle(t("actions.title"));
   const { mutateAsync: createThread, isPending } = useCreateThread();
   const { threads, hasThreads, isLoading } = useActionThreads();
 
