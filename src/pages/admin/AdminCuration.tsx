@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, ExternalLink, Globe, Loader2, Plus, Trash2, X } from "lucide-react";
+import { CheckCircle2, ExternalLink, Globe, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,6 @@ const EMPTY_FORM: Partial<AdminOfferCreate> = {
 
 // ── Panel de saisie d'offre individuelle ──────────────────────────────────────
 function OfferForm({
-  sourcePageId,
   onAdded,
 }: {
   sourcePageId: string;
@@ -193,7 +192,7 @@ function PageContent({ pageId, onDelete }: { pageId: string; onDelete: () => voi
 // ── Page principale ───────────────────────────────────────────────────────────
 export default function AdminCuration() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
 
   const { data, isLoading, refetch } = useAdminOffers({
     source_prefix: "web_",
