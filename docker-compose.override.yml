@@ -1,0 +1,9 @@
+# Overrides locaux — appliqués automatiquement en dev (docker compose up)
+services:
+  frontend:
+    build: .
+    image: malaykaa-frontend:dev
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
