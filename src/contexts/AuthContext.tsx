@@ -51,6 +51,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: false,
   });
 
+  // Écoute la session expirée depuis client.ts (évite window.location qui casse la PWA)
+  useEffect(() => {
+    const handler = () => {
+      clearToken();
+      setState({ user: null, profile: null, isLoading: false, isAuthenticated: false });
+    };
+    window.addEventListener("auth:session-expired", handler);
+    return () => window.removeEventListener("auth:session-expired", handler);
+  }, []);
+
   // Restauration de session au démarrage (via cookie httpOnly)
   // Timeout 10s pour ne jamais bloquer sur l'écran de chargement
   useEffect(() => {

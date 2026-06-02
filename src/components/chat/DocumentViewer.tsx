@@ -132,7 +132,7 @@ function Toolbar({
 
   return (
     <div className="flex items-center gap-2 border-b bg-background px-3 py-2.5">
-      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={onClose}>
+      <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={onClose}>
         <ChevronLeft className="h-5 w-5" />
       </Button>
 
@@ -142,26 +142,26 @@ function Toolbar({
         <div className="flex rounded-lg border bg-muted/50 p-0.5">
           <button
             className={cn(
-              "flex h-6 items-center gap-1 rounded-md px-2 text-xs font-medium transition-all",
+              "flex h-8 items-center gap-1 rounded-md px-3 text-xs font-medium transition-all",
               activeTab === "edit"
                 ? "bg-background shadow-sm text-foreground"
                 : "text-muted-foreground"
             )}
             onClick={() => onTabChange("edit")}
           >
-            <Edit3 className="h-3 w-3" />
+            <Edit3 className="h-3.5 w-3.5" />
             {t("document.edit_tab")}
           </button>
           <button
             className={cn(
-              "flex h-6 items-center gap-1 rounded-md px-2 text-xs font-medium transition-all",
+              "flex h-8 items-center gap-1 rounded-md px-3 text-xs font-medium transition-all",
               activeTab === "preview"
                 ? "bg-background shadow-sm text-foreground"
                 : "text-muted-foreground"
             )}
             onClick={() => onTabChange("preview")}
           >
-            <Eye className="h-3 w-3" />
+            <Eye className="h-3.5 w-3.5" />
             {t("document.preview_tab")}
           </button>
         </div>
@@ -183,7 +183,7 @@ function Toolbar({
         <button
           onClick={onShareToggle}
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+            "flex h-10 w-10 items-center justify-center rounded-lg border transition-colors",
             shareOpen
               ? "border-primary bg-primary/10 text-primary"
               : "border-input hover:bg-muted text-muted-foreground"
@@ -195,7 +195,7 @@ function Toolbar({
 
         <button
           onClick={handlePrint}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-input hover:bg-muted text-muted-foreground transition-colors"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-input hover:bg-muted text-muted-foreground transition-colors"
           title={t("document.export_pdf")}
         >
           <FileDown className="h-4 w-4" />
@@ -203,7 +203,7 @@ function Toolbar({
 
         <button
           onClick={() => { downloadAsWord(title, content); toast.success(t("document.word_downloading")); }}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-input hover:bg-muted text-muted-foreground transition-colors"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-input hover:bg-muted text-muted-foreground transition-colors"
           title={t("document.word_title")}
         >
           <WordIcon className="h-4 w-4" />

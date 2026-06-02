@@ -1,17 +1,18 @@
 import { NavLink } from "react-router-dom";
-import { BarChart3, Brain, Briefcase, FileText, LogOut, MessageSquare, RefreshCw, Settings, Target, Users } from "lucide-react";
+import { BarChart3, Brain, Briefcase, ClipboardEdit, FileText, LogOut, MessageSquare, RefreshCw, Settings, Target, Users } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV = [
-  { to: "/admin",           label: "Dashboard",    Icon: BarChart3,     exact: true  },
-  { to: "/admin/users",     label: "Utilisateurs", Icon: Users,         exact: false },
-  { to: "/admin/offers",    label: "Offres",       Icon: Briefcase,     exact: false },
-  { to: "/admin/goals",     label: "Objectifs",    Icon: Target,        exact: false },
-  { to: "/admin/threads",   label: "Threads",      Icon: MessageSquare, exact: false },
-  { to: "/admin/documents", label: "Documents",    Icon: FileText,      exact: false },
-  { to: "/admin/intents",   label: "Intentions",   Icon: Brain,         exact: false },
-  { to: "/admin/scraping",  label: "Scraping",     Icon: RefreshCw,     exact: false },
+  { to: "/admin",            label: "Dashboard",    Icon: BarChart3,     exact: true  },
+  { to: "/admin/users",      label: "Utilisateurs", Icon: Users,         exact: false },
+  { to: "/admin/offers",     label: "Offres",       Icon: Briefcase,     exact: false },
+  { to: "/admin/curation",   label: "Curation",     Icon: ClipboardEdit, exact: false },
+  { to: "/admin/goals",      label: "Objectifs",    Icon: Target,        exact: false },
+  { to: "/admin/threads",    label: "Threads",      Icon: MessageSquare, exact: false },
+  { to: "/admin/documents",  label: "Documents",    Icon: FileText,      exact: false },
+  { to: "/admin/intents",    label: "Intentions",   Icon: Brain,         exact: false },
+  { to: "/admin/scraping",   label: "Scraping",     Icon: RefreshCw,     exact: false },
 ] as const;
 
 export function AdminSidebar() {

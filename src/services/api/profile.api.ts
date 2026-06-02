@@ -76,3 +76,6 @@ export function getPushPermission(): NotificationPermission {
   if (!("Notification" in window)) return "denied";
   return Notification.permission;
 }
+
+export const deleteAccount = () =>
+  apiRequest<void>("/auth/me", { method: "DELETE", skipRefresh: true });

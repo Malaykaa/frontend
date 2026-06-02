@@ -125,10 +125,10 @@ export function VueGlobaleSection({ data }: Props) {
                   {isRelevant && orientation.count > 0 && (
                     <div className="mt-1.5 ml-[6.5rem]">
                       <Link
-                        to={`/app/pour-moi?type=${encodeURIComponent(orientation.type)}`}
+                        to={`/app/pour-moi?offer_types=${encodeURIComponent(orientation.type)}&max_age=30`}
                         className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
                       >
-                        {orientation.count} offres disponibles
+                        Voir les offres
                         <ArrowRight className="h-2.5 w-2.5" />
                       </Link>
                     </div>

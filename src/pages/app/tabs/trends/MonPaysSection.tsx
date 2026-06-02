@@ -5,6 +5,16 @@ import type { MonPays } from "@/services/api/trends.api";
 import { interpretMonPays } from "./interpretations";
 import { cn } from "@/shared/lib/utils";
 
+/** URL browse stricte par type de dimension + pays. */
+function dimensionBrowseUrl(country: string, offerTypes: string, maxAge: number): string {
+  const params = new URLSearchParams();
+  params.set("country", country);
+  params.set("offer_types", offerTypes);
+  params.set("max_age", String(maxAge));
+  return `/app/pour-moi?${params.toString()}`;
+}
+
+/** URL browse globale pour un pays (tous types de l'utilisateur). */
 function countryBrowseUrl(country: string, data: MonPays): string {
   const params = new URLSearchParams();
   params.set("country", country);
@@ -20,6 +30,7 @@ const DIMENSIONS = [
     labelKey: "trends.emplois",
     color: "text-blue-600",
     bg: "bg-blue-100",
+    offerTypes: "job",
   },
   {
     key: "financements" as const,
@@ -27,6 +38,7 @@ const DIMENSIONS = [
     labelKey: "trends.financements",
     color: "text-emerald-600",
     bg: "bg-emerald-100",
+    offerTypes: "grant",
   },
   {
     key: "missions" as const,
@@ -34,6 +46,7 @@ const DIMENSIONS = [
     labelKey: "trends.missions",
     color: "text-pink-600",
     bg: "bg-pink-100",
+    offerTypes: "opportunity",
   },
   {
     key: "appels_offre" as const,
@@ -41,6 +54,7 @@ const DIMENSIONS = [
     labelKey: "trends.appels_offre",
     color: "text-orange-600",
     bg: "bg-orange-100",
+    offerTypes: "call_for_applications",
   },
   {
     key: "bourses" as const,
@@ -48,6 +62,7 @@ const DIMENSIONS = [
     labelKey: "trends.bourses",
     color: "text-violet-600",
     bg: "bg-violet-100",
+    offerTypes: "scholarship,formation",
   },
 ] as const;
 
@@ -124,9 +139,10 @@ export function MonPaysSection({ data }: Props) {
 
       {/* Dimension cards */}
       <div className="space-y-2.5">
-        {DIMENSIONS.map(({ key, icon: Icon, labelKey, color, bg }) => {
+        {DIMENSIONS.map(({ key, icon: Icon, labelKey, color, bg, offerTypes }) => {
           const count = data[key];
           const text = interp[key];
+          const maxAge = data.match_local_max_age ?? 30;
 
           return (
             <div key={key} className="rounded-xl border bg-card p-4">
@@ -149,46 +165,21 @@ export function MonPaysSection({ data }: Props) {
                     </span>
                   </div>
                   <p className="text-sm leading-relaxed">{text}</p>
+                  {count > 0 && (
+                    <Link
+                      to={dimensionBrowseUrl(data.pays, offerTypes, maxAge)}
+                      className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                    >
+                      Voir les offres
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* Section pays alternatifs — si marché local faible */}
-      {isWeak && hasAlternatives && (
-        <div className="rounded-xl border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-primary" />
-            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              Marchés alternatifs
-            </p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Ces pays ont plus d'offres adaptées à ton profil en ce moment.
-          </p>
-          <div className="flex flex-col gap-2">
-            {data.top_alternative_countries!.map((alt) => (
-              <Link
-                key={alt.pays}
-                to={countryBrowseUrl(alt.pays, data)}
-                className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2 hover:bg-muted/60 transition-colors group"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{alt.pays}</span>
-                  <span className="rounded-full bg-primary/10 px-1.5 py-0 text-[10px] font-semibold text-primary">
-                    {alt.count} offres
-                  </span>
-                </div>
-                <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors flex items-center gap-1">
-                  Voir <ArrowRight className="h-3 w-3" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Section pays alternatifs — si marché local faible */}
       {isWeak && hasAlternatives && (
@@ -283,7 +274,7 @@ export function MonPaysSection({ data }: Props) {
         to={countryBrowseUrl(data.pays, data)}
         className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
       >
-        Voir les offres au {data.pays}
+        Voir toutes les offres — {data.pays}
         <ArrowRight className="h-4 w-4" />
       </Link>
     </div>

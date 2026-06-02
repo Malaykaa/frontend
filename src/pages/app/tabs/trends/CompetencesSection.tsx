@@ -170,7 +170,7 @@ function CompetenceCard({ c }: { c: Competence }) {
                     to={`/app/pour-moi?skill=${encodeURIComponent(c.skill_keyword ?? c.competence)}&max_age=${c.unlock_max_age ?? 30}`}
                     className="flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-3 py-2 text-xs font-semibold hover:bg-primary/90 transition-colors"
                   >
-                    Voir les {c.offres_debloquees} offres disponibles
+                    Voir les offres liées à {c.competence}
                     <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
                 )
@@ -197,7 +197,7 @@ function CompetenceCard({ c }: { c: Competence }) {
                       to={`/app/pour-moi?skill=${encodeURIComponent(c.skill_keyword ?? c.competence)}&max_age=${c.unlock_max_age ?? 30}`}
                       className="flex items-center justify-center gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
                     >
-                      Voir ce que ça débloque ({c.offres_debloquees} offres)
+                      Voir les offres qui nécessitent {c.competence}
                       <ChevronRight className="h-3.5 w-3.5" />
                     </Link>
                   )}

@@ -146,7 +146,7 @@ export function ChatInput({
           disabled={uploading || disabled}
           onClick={() => fileInputRef.current?.click()}
           className={cn(
-            "mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors",
             uploading ? "cursor-wait opacity-50" : "hover:bg-muted text-muted-foreground hover:text-foreground"
           )}
           title={t("chat.attach")}
@@ -179,9 +179,9 @@ export function ChatInput({
           onClick={handleSend}
           disabled={!canSend}
           className={cn(
-            "mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all",
             canSend
-              ? "bg-primary text-white hover:bg-primary/90 scale-100"
+              ? "bg-primary text-white hover:bg-primary/90 scale-100 active:scale-95"
               : "bg-muted text-muted-foreground scale-90 cursor-not-allowed"
           )}
           title={t("chat.send_tooltip")}

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   X, ChevronDown, ChevronUp, Loader2, Check,
-  User, Lock, Globe, Sliders, Bell, LogOut,
+  User, Lock, Globe, Sliders, Bell, LogOut, Trash2, AlertTriangle,
   Moon, Sun, Eye, EyeOff,
   GraduationCap, Briefcase, Search,
 } from "lucide-react";
@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { CountrySelect } from "@/components/auth/CountrySelect";
 import {
   updateProfile, applyTheme, getTheme, requestPushPermission,
-  getPushPermission, type ProfileUpdatePayload, type Theme,
+  getPushPermission, deleteAccount, type ProfileUpdatePayload, type Theme,
 } from "@/services/api/profile.api";
 import { setLanguage } from "@/i18n";
 import { cn } from "@/shared/lib/utils";
@@ -492,6 +492,49 @@ function NotificationsSection() {
   );
 }
 
+// ── Dialog de confirmation de suppression de compte ─────────────────────
+
+function DeleteAccountConfirm({
+  onConfirm,
+  onCancel,
+  loading,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="w-full max-w-sm rounded-2xl border bg-background p-5 space-y-4 shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+          </div>
+          <p className="font-bold text-destructive">{t("settings.delete_account_title")}</p>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {t("settings.delete_account_warning")}
+        </p>
+        <div className="flex gap-3">
+          <Button variant="outline" className="flex-1" onClick={onCancel} disabled={loading}>
+            {t("common.cancel")}
+          </Button>
+          <Button
+            variant="destructive"
+            className="flex-1 gap-2"
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            {t("settings.delete_account_confirm")}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Dialog de confirmation de déconnexion ────────────────────────────────
 
 function LogoutConfirm({
@@ -543,8 +586,10 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const { user, profile, logout } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [logoutConfirm, setLogoutConfirm] = useState(false);
-  const [loggingOut, setLoggingOut]       = useState(false);
+  const [logoutConfirm, setLogoutConfirm]         = useState(false);
+  const [loggingOut, setLoggingOut]               = useState(false);
+  const [deleteConfirm, setDeleteConfirm]         = useState(false);
+  const [deletingAccount, setDeletingAccount]     = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -566,6 +611,20 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
     await logout();
     navigate("/", { replace: true });
   }, [logout, navigate]);
+
+  const handleDeleteAccount = useCallback(async () => {
+    setDeletingAccount(true);
+    try {
+      await deleteAccount();
+      toast.success(t("settings.delete_account_success"));
+      await logout();
+      navigate("/", { replace: true });
+    } catch {
+      toast.error(t("common.error"));
+      setDeletingAccount(false);
+      setDeleteConfirm(false);
+    }
+  }, [logout, navigate, t]);
 
   if (!open) return null;
 
@@ -625,7 +684,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </Section>
         </div>
 
-        <div className="border-t px-5 py-4">
+        <div className="border-t px-5 py-4 space-y-2">
           <Button
             variant="destructive"
             className="w-full gap-2"
@@ -634,6 +693,12 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
             <LogOut className="h-4 w-4" />
             {t("settings.logout")}
           </Button>
+          <button
+            className="w-full text-xs text-muted-foreground hover:text-destructive transition-colors py-1"
+            onClick={() => setDeleteConfirm(true)}
+          >
+            {t("settings.delete_account")}
+          </button>
         </div>
       </div>
 
@@ -642,6 +707,14 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           onConfirm={handleLogout}
           onCancel={() => setLogoutConfirm(false)}
           loading={loggingOut}
+        />
+      )}
+
+      {deleteConfirm && (
+        <DeleteAccountConfirm
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setDeleteConfirm(false)}
+          loading={deletingAccount}
         />
       )}
     </>

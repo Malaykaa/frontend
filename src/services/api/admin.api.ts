@@ -1,7 +1,7 @@
 ﻿import { apiRequest } from "@/shared/api/client";
-import type { AdminDocumentItem,AdminGoalItem,AdminIntentItem,AdminOfferItem,AdminOfferUpdate,AdminPaginated,AdminStats,AdminThreadDetail,AdminThreadItem,AdminUserDetail,AdminUserItem,AdminUserUpdate } from "@/shared/types";
+import type { AdminDocumentItem,AdminGoalItem,AdminIntentItem,AdminOfferDetail,AdminOfferItem,AdminOfferUpdate,AdminPaginated,AdminStats,AdminThreadDetail,AdminThreadItem,AdminUserDetail,AdminUserItem,AdminUserUpdate } from "@/shared/types";
 export interface AdminUsersParams{page?:number;size?:number;q?:string;role?:string;active?:boolean}
-export interface AdminOffersParams{page?:number;size?:number;q?:string;offer_type?:string;source?:string;active?:boolean}
+export interface AdminOffersParams{page?:number;size?:number;q?:string;offer_type?:string;source?:string;source_prefix?:string;active?:boolean}
 export interface AdminGoalsParams{page?:number;size?:number;goal_type?:string;status?:string;user_id?:string}
 export interface AdminThreadsParams{page?:number;size?:number;status?:string;user_id?:string;q?:string}
 export interface AdminDocumentsParams{page?:number;size?:number;doc_type?:string;user_id?:string}
@@ -12,7 +12,8 @@ export const fetchAdminUsers=(p:AdminUsersParams={})=>apiRequest<AdminPaginated<
 export const fetchAdminUser=(id:string)=>apiRequest<AdminUserDetail>(`/admin/users/${id}`);
 export const updateAdminUser=(id:string,payload:AdminUserUpdate)=>apiRequest<AdminUserItem>(`/admin/users/${id}`,{method:"PATCH",body:JSON.stringify(payload)});
 export const deleteAdminUser=(id:string)=>apiRequest<void>(`/admin/users/${id}`,{method:"DELETE"});
-export const fetchAdminOffers=(p:AdminOffersParams={})=>apiRequest<AdminPaginated<AdminOfferItem>>(`/admin/offers${qs({page:p.page??1,size:p.size??20,q:p.q,offer_type:p.offer_type,source:p.source,active:p.active})}`);
+export const fetchAdminOffers=(p:AdminOffersParams={})=>apiRequest<AdminPaginated<AdminOfferItem>>(`/admin/offers${qs({page:p.page??1,size:p.size??20,q:p.q,offer_type:p.offer_type,source:p.source,source_prefix:p.source_prefix,active:p.active})}`);
+export const fetchAdminOffer=(id:string)=>apiRequest<AdminOfferDetail>(`/admin/offers/${id}`);
 export const updateAdminOffer=(id:string,payload:AdminOfferUpdate)=>apiRequest<AdminOfferItem>(`/admin/offers/${id}`,{method:"PATCH",body:JSON.stringify(payload)});
 export const deleteAdminOffer=(id:string)=>apiRequest<void>(`/admin/offers/${id}`,{method:"DELETE"});
 export const fetchAdminGoals=(p:AdminGoalsParams={})=>apiRequest<AdminPaginated<AdminGoalItem>>(`/admin/goals${qs({page:p.page??1,size:p.size??20,goal_type:p.goal_type,status:p.status,user_id:p.user_id})}`);

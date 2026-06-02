@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg", "favicon.ico", "splash.png"],
+      includeAssets: ["favicon.ico", "apple-touch-icon.png", "icon.png", "pwa-96.png", "pwa-192.png", "pwa-512.png"],
       manifest: {
         name: "Malayka — Mentor IA",
         short_name: "Malayka",
@@ -21,8 +21,9 @@ export default defineConfig({
         start_url: "/",
         lang: "fr",
         icons: [
-          { src: "/pwa-192.png", sizes: "192x192", type: "image/png" },
-          { src: "/pwa-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+          { src: "/pwa-96.png",  sizes: "96x96",   type: "image/png" },
+          { src: "/pwa-192.png", sizes: "192x192",  type: "image/png" },
+          { src: "/pwa-512.png", sizes: "512x512",  type: "image/png", purpose: "any maskable" },
         ],
         categories: ["education", "productivity"],
         shortcuts: [
