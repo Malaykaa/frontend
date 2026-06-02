@@ -64,7 +64,8 @@ jobs:
             cd ${{ secrets.DEPLOY_PATH }}
             docker pull ${{ env.IMAGE }}:${{ github.sha }}
             FRONTEND_IMAGE=${{ env.IMAGE }} IMAGE_TAG=${{ github.sha }} \
-              docker compose up -d --no-build frontend
+              docker compose -f docker-compose.yml -f docker-compose.staging.yml \
+              up -d --no-build frontend-staging
             docker image prune -f
 
   deploy-production:
