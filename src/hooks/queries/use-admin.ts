@@ -1,6 +1,6 @@
 ﻿import{useMutation,useQuery,useQueryClient}from"@tanstack/react-query";
 import{toast}from"sonner";
-import{deleteAdminOffer,deleteAdminThread,deleteAdminUser,fetchAdminDocuments,fetchAdminGoals,fetchAdminIntents,fetchAdminOffers,fetchAdminStats,fetchAdminThread,fetchAdminThreads,fetchAdminUser,fetchAdminUsers,fetchScrapingStats,runApifyScraping,runPerplexityScraping,updateAdminOffer,updateAdminUser}from"@/services/api/admin.api";
+import{deleteAdminOffer,deleteAdminThread,deleteAdminUser,fetchAdminDocuments,fetchAdminGoals,fetchAdminIntents,fetchAdminOffer,fetchAdminOffers,fetchAdminStats,fetchAdminThread,fetchAdminThreads,fetchAdminUser,fetchAdminUsers,fetchScrapingStats,runApifyScraping,runPerplexityScraping,updateAdminOffer,updateAdminUser}from"@/services/api/admin.api";
 import type{AdminDocumentsParams,AdminGoalsParams,AdminIntentsParams,AdminOffersParams,AdminThreadsParams,AdminUsersParams}from"@/services/api/admin.api";
 import type{AdminOfferUpdate,AdminUserUpdate}from"@/shared/types";
 export const adminKeys={stats:["admin","stats"]as const,users:(p:AdminUsersParams)=>["admin","users",p]as const,user:(id:string)=>["admin","users",id]as const,offers:(p:AdminOffersParams)=>["admin","offers",p]as const,goals:(p:AdminGoalsParams)=>["admin","goals",p]as const,threads:(p:AdminThreadsParams)=>["admin","threads",p]as const,thread:(id:string)=>["admin","threads",id]as const,docs:(p:AdminDocumentsParams)=>["admin","documents",p]as const,intents:(p:AdminIntentsParams)=>["admin","intents",p]as const,scrapingStats:["admin","scraping","stats"]as const};
@@ -8,6 +8,7 @@ export const useAdminStats=()=>useQuery({queryKey:adminKeys.stats,queryFn:fetchA
 export const useAdminUsers=(p:AdminUsersParams={})=>useQuery({queryKey:adminKeys.users(p),queryFn:()=>fetchAdminUsers(p),staleTime:60000});
 export const useAdminUser=(id:string)=>useQuery({queryKey:adminKeys.user(id),queryFn:()=>fetchAdminUser(id),enabled:!!id});
 export const useAdminOffers=(p:AdminOffersParams={})=>useQuery({queryKey:adminKeys.offers(p),queryFn:()=>fetchAdminOffers(p),staleTime:60000});
+export const useAdminOffer=(id:string)=>useQuery({queryKey:["admin","offers",id],queryFn:()=>fetchAdminOffer(id),enabled:!!id,staleTime:0});
 export const useAdminGoals=(p:AdminGoalsParams={})=>useQuery({queryKey:adminKeys.goals(p),queryFn:()=>fetchAdminGoals(p),staleTime:60000});
 export const useAdminThreads=(p:AdminThreadsParams={})=>useQuery({queryKey:adminKeys.threads(p),queryFn:()=>fetchAdminThreads(p),staleTime:60000});
 export const useAdminThread=(id:string)=>useQuery({queryKey:adminKeys.thread(id),queryFn:()=>fetchAdminThread(id),enabled:!!id});

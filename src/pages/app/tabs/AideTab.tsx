@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MessageCircle, Phone, Mail, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -26,6 +27,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export default function AideTab() {
   const { t } = useTranslation();
+  usePageTitle(t("help.title"));
 
   const FAQ_KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 

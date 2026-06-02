@@ -188,17 +188,13 @@ export function SemaineAfriqueSection({ data }: Props) {
         </div>
       )}
 
-      {/* CTA principal */}
-      {hasPersonalized && (data.offres_pour_toi ?? 0) > 0 && (
+      {/* CTA principal — uniquement si types connus (pour que le filtre soit exact) */}
+      {hasPersonalized && (data.offres_pour_toi ?? 0) > 0 && data.pour_toi_types?.length && (
         <Link
-          to={
-            data.pour_toi_types?.length
-              ? `/app/pour-moi?offer_types=${encodeURIComponent(data.pour_toi_types.join(","))}&max_age=${data.pour_toi_max_age ?? 7}`
-              : "/app/pour-moi"
-          }
+          to={`/app/pour-moi?offer_types=${encodeURIComponent(data.pour_toi_types.join(","))}&max_age=${data.pour_toi_max_age ?? 7}`}
           className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
         >
-          Voir toutes les {data.offres_pour_toi} offres pour toi
+          Voir les offres pour toi cette semaine
           <ArrowRight className="h-4 w-4" />
         </Link>
       )}

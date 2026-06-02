@@ -28,6 +28,7 @@ const AdminThreadDetail  = lazy(() => import("@/pages/admin/AdminThreadDetail"))
 const AdminDocuments     = lazy(() => import("@/pages/admin/AdminDocuments"));
 const AdminIntents       = lazy(() => import("@/pages/admin/AdminIntents"));
 const AdminScraping      = lazy(() => import("@/pages/admin/AdminScraping"));
+const AdminCuration      = lazy(() => import("@/pages/admin/AdminCuration"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -104,6 +105,7 @@ export default function App() {
                   <Route path="users"             element={<AdminUsers />} />
                   <Route path="users/:userId"     element={<AdminUserDetail />} />
                   <Route path="offers"            element={<AdminOffers />} />
+                  <Route path="curation"          element={<AdminCuration />} />
                   <Route path="goals"             element={<AdminGoals />} />
                   <Route path="threads"           element={<AdminThreads />} />
                   <Route path="threads/:threadId" element={<AdminThreadDetail />} />

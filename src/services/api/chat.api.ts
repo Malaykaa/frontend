@@ -215,9 +215,11 @@ export async function* streamMessage(
   attachmentIds: string[] = [],
   onDone?: (meta: { isDeliverable: boolean }) => void,
   onSection?: (label: string, status: "running" | "complete") => void,
+  displayContent?: string,
 ): AsyncGenerator<string> {
   const body: Record<string, unknown> = { content };
   if (attachmentIds.length > 0) body.attachment_ids = attachmentIds;
+  if (displayContent) body.display_content = displayContent;
   let _currentSectionLabel = "";
 
   for await (const raw of apiStream(

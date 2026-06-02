@@ -27,6 +27,7 @@ import { ApiError } from "@/shared/api/client";
 import { isActionThread } from "@/hooks/queries/use-chat-threads";
 import type { ChatThread, ChatMessage } from "@/shared/types";
 import { cn } from "@/shared/lib/utils";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 // ── États de streaming chat ────────────────────────────────────────────────
 type StreamPhase = "idle" | "thinking" | "streaming" | "error";
@@ -168,8 +169,8 @@ export default function ChatView() {
   const location = useLocation();
   const { t } = useTranslation();
   const navTitle = (location.state as { title?: string } | null)?.title;
-
   const [thread, setThread]   = useState<ChatThread | null>(null);
+  usePageTitle(thread?.title ?? navTitle ?? undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [stream, setStream]   = useState<StreamState>(STREAM_IDLE);
@@ -178,7 +179,14 @@ export default function ChatView() {
   const [viewerOpen, setViewerOpen] = useState(false);
   // Viewer pour les livrables générés dans les threads objectif (via chat)
   const [viewingDoc, setViewingDoc] = useState<{ content: string; title: string } | null>(null);
-  const [completedStepKeys, setCompletedStepKeys] = useState<Set<string>>(new Set());
+  // Étapes complétées — persistées en localStorage par thread pour survivre aux rafraîchissements
+  const [completedStepKeys, setCompletedStepKeys] = useState<Set<string>>(() => {
+    if (!threadId) return new Set<string>();
+    try {
+      const raw = localStorage.getItem(`mlk_steps_${threadId}`);
+      return raw ? new Set<string>(JSON.parse(raw) as string[]) : new Set<string>();
+    } catch { return new Set<string>(); }
+  });
 
   const bottomRef      = useRef<HTMLDivElement>(null);
   const isActiveRef    = useRef(false);
@@ -214,14 +222,16 @@ export default function ChatView() {
 
   // ── Envoi message classique ─────────────────────────────────────────────
   const handleSend = useCallback(
-    async (content: string, attachmentIds: string[]) => {
+    async (content: string, attachmentIds: string[], displayContent?: string) => {
       if (!threadId || isActiveRef.current) return;
 
+      // Bulle user : affiche displayContent si fourni (ex: "Étape : X"), sinon content complet
+      const bubbleContent = displayContent ?? content;
       const userMsg: ChatMessage = {
         id: `local-${Date.now()}`,
         thread_id: threadId,
         role: "user",
-        content,
+        content: bubbleContent,
         created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, userMsg]);
@@ -249,6 +259,7 @@ export default function ChatView() {
               return { ...g, phase: "generating", steps: [...g.steps, step] };
             });
           },
+          displayContent, // transmis au backend pour stocker dans la bulle DB
         )) {
           if (!isActiveRef.current) break;
           if (firstToken) { firstToken = false; setStream((s) => ({ ...s, phase: "streaming" })); }
@@ -330,11 +341,20 @@ export default function ChatView() {
 
   // ── Complétion d'étape plan d'action ────────────────────────────────────
   const handleStepComplete = useCallback(
-    (compositeKey: string, text: string) => {
-      setCompletedStepKeys((prev) => new Set([...prev, compositeKey]));
-      void handleSend(text, []);
+    (compositeKey: string, fullContext: string, displayContent: string) => {
+      setCompletedStepKeys((prev) => {
+        const next = new Set([...prev, compositeKey]);
+        if (threadId) {
+          try {
+            localStorage.setItem(`mlk_steps_${threadId}`, JSON.stringify([...next]));
+          } catch { /* quota exceeded — on ignore */ }
+        }
+        return next;
+      });
+      // fullContext → LLM, displayContent → bulle utilisateur visible
+      void handleSend(fullContext, [], displayContent);
     },
-    [handleSend]
+    [handleSend, threadId]
   );
 
   // ── Cleanup ─────────────────────────────────────────────────────────────
