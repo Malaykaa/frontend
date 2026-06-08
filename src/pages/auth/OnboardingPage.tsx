@@ -641,19 +641,6 @@ export default function OnboardingPage() {
     setLoading(true);
     setError("");
     try {
-      // Vérifier si le numéro est déjà enregistré avant d'envoyer l'OTP.
-      // Évite d'engager l'utilisateur dans 3 étapes pour apprendre au bout
-      // que son numéro existe déjà.
-      const { exists } = await apiRequest<{ exists: boolean }>("/auth/check-phone", {
-        method: "POST",
-        body: JSON.stringify({ phone: data.phone }),
-        skipAuth: true,
-      });
-      if (exists) {
-        setError(t("onboarding.error_phone_exists"));
-        return;
-      }
-
       await sendOtp(data.phone);
       setStep(1);
     } catch (err) {
@@ -662,6 +649,7 @@ export default function OnboardingPage() {
       } else if (err instanceof ApiError && err.status === 400) {
         setError(t("onboarding.error_invalid_phone"));
       } else {
+        console.error(err);
         setError(t("onboarding.error_send_otp"));
       }
     } finally {

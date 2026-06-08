@@ -2,80 +2,20 @@ const BASE_URL = import.meta.env.VITE_API_URL as string;
 
 // ── Token en mémoire uniquement (jamais persisté en sessionStorage/localStorage) ──
 // XSS ne peut pas exfiltrer le token : il n'est accessible que depuis ce module.
-// La session survit aux navigations SPA (même onglet). Un rechargement de page
-// déclenche un appel /auth/refresh via le cookie httpOnly pour restituer le token.
+// La session survit aux navigations SPA (même onglet) ; un rechargement de page
+// déclenche /auth/me → le cookie httpOnly renouvelle le token en mémoire.
 let _accessToken: string | null = null;
-
-// ── Timer de refresh proactif ──────────────────────────────────────────────
-// Planifie un refresh avant l'expiration du token pour éviter toute interruption
-// pendant une conversation ou un stream SSE actif.
-let _proactiveRefreshTimer: ReturnType<typeof setTimeout> | null = null;
-
-function _parseTokenExp(token: string): number | null {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return typeof payload.exp === "number" ? payload.exp * 1000 : null;
-  } catch {
-    return null;
-  }
-}
-
-function _scheduleProactiveRefresh(token: string): void {
-  if (_proactiveRefreshTimer !== null) {
-    clearTimeout(_proactiveRefreshTimer);
-    _proactiveRefreshTimer = null;
-  }
-  const expiresAt = _parseTokenExp(token);
-  if (!expiresAt) return;
-
-  const remaining = expiresAt - Date.now();
-  if (remaining <= 0) return;
-
-  // Refresh à 80 % de la durée de vie restante (au minimum 30 s avant expiration)
-  const delay = Math.max(remaining * 0.8, remaining - 30_000);
-  _proactiveRefreshTimer = setTimeout(() => {
-    doRefresh().catch(() => null); // silencieux — l'erreur sera gérée au prochain appel 401
-  }, delay);
-}
 
 export function setToken(token: string): void {
   _accessToken = token;
-  _scheduleProactiveRefresh(token);
 }
 
 export function clearToken(): void {
   _accessToken = null;
-  if (_proactiveRefreshTimer !== null) {
-    clearTimeout(_proactiveRefreshTimer);
-    _proactiveRefreshTimer = null;
-  }
 }
 
 export function getToken(): string | null {
   return _accessToken;
-}
-
-// Appelé par AuthContext au logout pour nettoyer le timer
-export function clearRefreshSchedule(): void {
-  if (_proactiveRefreshTimer !== null) {
-    clearTimeout(_proactiveRefreshTimer);
-    _proactiveRefreshTimer = null;
-  }
-}
-
-// ── Refresh explicite — garantit un token frais avant de démarrer un stream SSE ──
-// Si le token expire dans moins de 2 min, on rafraîchit maintenant.
-export async function ensureFreshToken(): Promise<void> {
-  const token = _accessToken;
-  if (!token) {
-    await doRefresh();
-    return;
-  }
-  const expiresAt = _parseTokenExp(token);
-  if (!expiresAt) return;
-  if (expiresAt - Date.now() < 2 * 60 * 1000) {
-    await doRefresh();
-  }
 }
 
 // ── Mutex sur le refresh : une seule requête en vol à la fois ──────────────
@@ -208,12 +148,6 @@ export async function* apiStream(
   options: RequestOptions = {},
   timeoutMs = 60_000
 ): AsyncGenerator<string> {
-  // Garantir un token frais avant d'ouvrir le stream : le backend valide le
-  // token à la connexion initiale, pas pendant la diffusion. Un token qui
-  // expirerait quelques secondes après le début du stream provoquerait une
-  // coupure silencieuse. Ce check est rapide (no-op si le token est encore frais).
-  await ensureFreshToken().catch(() => null);
-
   const { skipAuth = false, ...fetchOptions } = options;
 
   const controller = new AbortController();
