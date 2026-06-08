@@ -41,8 +41,7 @@
     "strength_too_weak": "Trop faible",
     "strength_weak": "Faible",
     "strength_medium": "Moyen",
-    "strength_strong": "Fort",
-    "forgot_password": "Mot de passe oublié ?"
+    "strength_strong": "Fort"
   },
   "onboarding": {
     "title": "Créer mon compte",
@@ -667,24 +666,6 @@
     "created_at": "Créé le {{date}} · Partagé via Malayka",
     "generated_by": "Généré par",
     "create_account": "Créer mon compte gratuit →"
-  },
-  "forgot_password": {
-    "step_phone_title": "Mot de passe oublié ?",
-    "step_phone_hint": "Saisis ton numéro WhatsApp. On t'envoie un code de vérification.",
-    "send_code": "Envoyer le code",
-    "remembered_password": "Tu te souviens de ton mot de passe ?",
-    "step_otp_title": "Code de vérification",
-    "step_otp_hint": "Nous avons envoyé un code à 6 chiffres au {{phone}}",
-    "resend_in": "Renvoyer dans {{seconds}}s",
-    "step_password_title": "Nouveau mot de passe",
-    "step_password_hint": "Choisis un mot de passe solide d'au moins 8 caractères.",
-    "new_password": "Nouveau mot de passe",
-    "confirm_reset": "Réinitialiser le mot de passe",
-    "error_invalid_code": "Code invalide ou expiré. Recommence depuis le début.",
-    "success_title": "Mot de passe réinitialisé !",
-    "success_hint": "Tu peux maintenant te connecter avec ton nouveau mot de passe.",
-    "go_to_login": "Se connecter",
-    "auto_redirect": "Redirection automatique dans {{seconds}}s…"
   },
   "errors": {
     "network": "Problème de connexion. Vérifie ta connexion internet.",

@@ -154,13 +154,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Mot de passe oublié */}
-          <p className="text-center text-sm">
-            <Link to="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">
-              {t("auth.forgot_password")}
-            </Link>
-          </p>
-
           {/* Link to onboarding */}
           <p className="text-center text-sm text-muted-foreground">
             {t("auth.no_account")}{" "}

@@ -29,6 +29,7 @@ const EMPTY_FORM: Partial<AdminOfferCreate> = {
 function OfferForm({
   onAdded,
 }: {
+  sourcePageId: string;
   onAdded: () => void;
 }) {
   const [form, setForm] = useState<Partial<AdminOfferCreate>>(EMPTY_FORM);
@@ -171,7 +172,7 @@ function PageContent({ pageId, onDelete }: { pageId: string; onDelete: () => voi
       {/* Formulaire de saisie */}
       <div className="rounded-xl border p-4 space-y-3">
         <p className="text-sm font-semibold">Extraire une offre de cette page</p>
-        <OfferForm onAdded={() => setAddedCount(c => c + 1)} />
+        <OfferForm sourcePageId={pageId} onAdded={() => setAddedCount(c => c + 1)} />
       </div>
 
       {/* Bouton supprimer la page */}
@@ -191,7 +192,7 @@ function PageContent({ pageId, onDelete }: { pageId: string; onDelete: () => voi
 // ── Page principale ───────────────────────────────────────────────────────────
 export default function AdminCuration() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const page = 1;
+  const [page] = useState(1);
 
   const { data, isLoading, refetch } = useAdminOffers({
     source_prefix: "web_",
