@@ -77,6 +77,7 @@ function normalizeMessage(raw: RawMessage, threadId: string): ChatMessage {
     content: raw.content,
     created_at: raw.createdAt,
     is_deliverable: Boolean(raw.metadata?.isDeliverable),
+    completed_step_key: (raw.metadata?.completedStepKey as string) ?? null,
   };
 }
 
@@ -216,10 +217,12 @@ export async function* streamMessage(
   onDone?: (meta: { isDeliverable: boolean }) => void,
   onSection?: (label: string, status: "running" | "complete") => void,
   displayContent?: string,
+  stepKey?: string,
 ): AsyncGenerator<string> {
   const body: Record<string, unknown> = { content };
   if (attachmentIds.length > 0) body.attachment_ids = attachmentIds;
   if (displayContent) body.display_content = displayContent;
+  if (stepKey) body.metadata = { completed_step_key: stepKey };
   let _currentSectionLabel = "";
 
   for await (const raw of apiStream(
