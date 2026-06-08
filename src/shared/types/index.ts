@@ -58,7 +58,11 @@ export interface ChatMessage {
   created_at: string;
   agent_id?: string | null;
   processing_ms?: number | null;
-  is_deliverable?: boolean; // true quand l'assistant a gÃ©nÃ©rÃ© un livrable
+  is_deliverable?: boolean;
+  /** Clé composite "${msgId}::${stepId}" — présente sur les messages user
+   *  générés en cliquant une étape du plan d'action. Persistée en DB pour
+   *  synchroniser la progression sur tous les appareils. */
+  completed_step_key?: string | null;
 }
 
 // â”€â”€ Objectifs & Plans â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

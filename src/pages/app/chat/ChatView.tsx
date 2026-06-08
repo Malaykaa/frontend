@@ -179,14 +179,10 @@ export default function ChatView() {
   const [viewerOpen, setViewerOpen] = useState(false);
   // Viewer pour les livrables générés dans les threads objectif (via chat)
   const [viewingDoc, setViewingDoc] = useState<{ content: string; title: string } | null>(null);
-  // Étapes complétées — persistées en localStorage par thread pour survivre aux rafraîchissements
-  const [completedStepKeys, setCompletedStepKeys] = useState<Set<string>>(() => {
-    if (!threadId) return new Set<string>();
-    try {
-      const raw = localStorage.getItem(`mlk_steps_${threadId}`);
-      return raw ? new Set<string>(JSON.parse(raw) as string[]) : new Set<string>();
-    } catch { return new Set<string>(); }
-  });
+  // Étapes complétées — dérivées des messages chargés depuis le serveur.
+  // Source de vérité : DB (payload.completed_step_key sur les messages user).
+  // Synchronisées sur tous les appareils sans localStorage.
+  const [completedStepKeys, setCompletedStepKeys] = useState<Set<string>>(new Set());
 
   const bottomRef      = useRef<HTMLDivElement>(null);
   const isActiveRef    = useRef(false);
@@ -200,7 +196,18 @@ export default function ChatView() {
       setLoading(true);
       try {
         const { thread: t, messages: msgs } = await fetchThreadWithMessages(threadId);
-        if (!cancelled) { setThread(t); setMessages(msgs); }
+        if (!cancelled) {
+          setThread(t);
+          setMessages(msgs);
+          // Reconstruire les étapes complétées depuis les messages DB
+          // (synchronisé sur tous les appareils, survit aux rechargements)
+          const keys = new Set<string>(
+            msgs
+              .filter((m) => m.role === "user" && m.completed_step_key)
+              .map((m) => m.completed_step_key as string)
+          );
+          setCompletedStepKeys(keys);
+        }
       } catch {
         if (!cancelled) toast.error(t("chat.load_error"));
       } finally {
@@ -222,7 +229,7 @@ export default function ChatView() {
 
   // ── Envoi message classique ─────────────────────────────────────────────
   const handleSend = useCallback(
-    async (content: string, attachmentIds: string[], displayContent?: string) => {
+    async (content: string, attachmentIds: string[], displayContent?: string, stepKey?: string) => {
       if (!threadId || isActiveRef.current) return;
 
       // Bulle user : affiche displayContent si fourni (ex: "Étape : X"), sinon content complet
@@ -246,7 +253,6 @@ export default function ChatView() {
         for await (const token of streamMessage(
           threadId, content, attachmentIds,
           ({ isDeliverable: flag }) => { isDeliverable = flag; },
-          // Callback sections : affiché quand l'orchestrateur génère un document via chat
           (label, status) => {
             setGen((g) => {
               const existing = g.steps.findIndex((s) => s.agent === label);
@@ -259,7 +265,8 @@ export default function ChatView() {
               return { ...g, phase: "generating", steps: [...g.steps, step] };
             });
           },
-          displayContent, // transmis au backend pour stocker dans la bulle DB
+          displayContent,
+          stepKey, // clé d'étape → stockée en DB dans le payload du message user
         )) {
           if (!isActiveRef.current) break;
           if (firstToken) { firstToken = false; setStream((s) => ({ ...s, phase: "streaming" })); }
@@ -342,19 +349,12 @@ export default function ChatView() {
   // ── Complétion d'étape plan d'action ────────────────────────────────────
   const handleStepComplete = useCallback(
     (compositeKey: string, fullContext: string, displayContent: string) => {
-      setCompletedStepKeys((prev) => {
-        const next = new Set([...prev, compositeKey]);
-        if (threadId) {
-          try {
-            localStorage.setItem(`mlk_steps_${threadId}`, JSON.stringify([...next]));
-          } catch { /* quota exceeded — on ignore */ }
-        }
-        return next;
-      });
-      // fullContext → LLM, displayContent → bulle utilisateur visible
-      void handleSend(fullContext, [], displayContent);
+      // Mise à jour optimiste immédiate (UX réactive sans attendre la réponse serveur)
+      setCompletedStepKeys((prev) => new Set([...prev, compositeKey]));
+      // Le compositeKey est envoyé dans le metadata → stocké en DB → relu au prochain chargement
+      void handleSend(fullContext, [], displayContent, compositeKey);
     },
-    [handleSend, threadId]
+    [handleSend]
   );
 
   // ── Cleanup ─────────────────────────────────────────────────────────────
