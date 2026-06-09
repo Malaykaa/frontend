@@ -7,8 +7,9 @@ import { InstallBanner } from "@/components/app/InstallBanner";
 import { Suspense, lazy } from "react";
 
 const LandingPage        = lazy(() => import("@/pages/landing"));
-const LoginPage          = lazy(() => import("@/pages/auth/LoginPage"));
-const OnboardingPage     = lazy(() => import("@/pages/auth/OnboardingPage"));
+const LoginPage           = lazy(() => import("@/pages/auth/LoginPage"));
+const OnboardingPage      = lazy(() => import("@/pages/auth/OnboardingPage"));
+const ForgotPasswordPage  = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
 const NotFoundPage       = lazy(() => import("@/pages/NotFoundPage"));
 const SharedDocumentPage = lazy(() => import("@/pages/shared/SharedDocumentPage"));
 const AppPage            = lazy(() => import("@/pages/app/AppPage"));
@@ -89,6 +90,7 @@ export default function App() {
                 <Route path="/" element={<PublicOnlyRoute><LandingPage /></PublicOnlyRoute>} />
                 <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
 
                 <Route path="/app" element={<PrivateRoute><AppPage /></PrivateRoute>}>
                   <Route index element={<Navigate to="pour-moi" replace />} />
