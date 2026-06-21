@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   Briefcase, GraduationCap, Banknote, Trophy, FileText,
-  Laptop, BookOpen, Compass, Plus, Loader2, Check, Bell, Clock,
+  Laptop, BookOpen, Compass, NotebookPen, Plus, Loader2, Check, Bell, Clock,
 } from "lucide-react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const TOPICS_CONFIG = [
   { preset: "missions_freelance",     labelKey: "goals.topic_freelance",    phKey: "goals.ph_freelance",    Icon: Laptop,        color: "bg-pink-100 text-pink-600"     },
   { preset: "appels_projet",          labelKey: "goals.topic_appels_projet",phKey: "goals.ph_appels_projet",Icon: BookOpen,      color: "bg-sky-100 text-sky-600"       },
   { preset: "orientation_carriere",   labelKey: "goals.topic_orientation",  phKey: "goals.ph_orientation",  Icon: Compass,       color: "bg-rose-100 text-rose-600"     },
+  { preset: "soutien_scolaire",       labelKey: "goals.topic_soutien_scolaire", phKey: "goals.ph_soutien_scolaire", Icon: NotebookPen, color: "bg-teal-100 text-teal-600" },
 ] as const;
 
 type PresetKey = (typeof TOPICS_CONFIG)[number]["preset"];
