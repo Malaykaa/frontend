@@ -35,6 +35,7 @@ const PRESET_KEY_LABELS: Record<string, string> = {
   missions_freelance:     "Missions Freelances",
   appels_projet:          "Appels à Projet / Candidature",
   orientation_carriere:   "Orientation de Carrière",
+  soutien_scolaire:       "Suivi Scolaire / Cours",
   // Objectifs legacy (threads existants en DB)
   career:       "Trouver un emploi",
   scholarship:  "Bourse d'études",
@@ -43,6 +44,8 @@ const PRESET_KEY_LABELS: Record<string, string> = {
   tender:       "Appel d'offres",
   freelance:    "Mission freelance",
   study_grant:  "Bourse de recherche",
+  orientation:  "Orientation",
+  coursework:   "Suivi Scolaire",
   professional: "Progression de carrière",
   // Livrables
   business_plan:       "Business Plan",
