@@ -25,6 +25,7 @@ export default function AppPage() {
       {/* ── MOBILE (< 1024px) ────────────────────────────── */}
       <div className="flex min-h-screen flex-col lg:hidden">
         <AppHeader
+          compact
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenNotifications={() => setNotifOpen(true)}
         />

@@ -5,6 +5,8 @@ import { useNotificationCount } from "@/components/app/NotificationPanel";
 
 interface AppHeaderProps {
   hideLogo?: boolean;
+  /** Vue mobile compacte : avatar seul (profil + paramètres), sans salutation ni icône paramètres séparée. */
+  compact?: boolean;
   onOpenSettings?: () => void;
   onOpenNotifications?: () => void;
 }
@@ -24,7 +26,7 @@ function Avatar({ name }: { name: string }) {
   );
 }
 
-export function AppHeader({ hideLogo = false, onOpenSettings, onOpenNotifications }: AppHeaderProps) {
+export function AppHeader({ hideLogo = false, compact = false, onOpenSettings, onOpenNotifications }: AppHeaderProps) {
   const { profile, user } = useAuth();
   const { t } = useTranslation();
   const notifCount = useNotificationCount();
@@ -50,29 +52,46 @@ export function AppHeader({ hideLogo = false, onOpenSettings, onOpenNotification
           <img src="/logo.png" alt="Malayka" className="h-7 w-auto shrink-0 dark:invert" />
         )}
 
-        {/* Avatar + salutation (cliquable → paramètres) */}
-        <button
-          className="flex flex-1 items-center gap-2.5 min-w-0 rounded-xl p-1 -m-1 hover:bg-muted/40 transition-colors text-left"
-          onClick={onOpenSettings}
-          title={t("settings.open_settings")}
-        >
-          <Avatar name={fullName} />
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">{greeting}</p>
-            <p className="truncate text-sm font-semibold leading-tight">
-              {firstName ?? fullName}
-            </p>
-          </div>
-        </button>
+        {compact ? (
+          <>
+            {/* Mobile compact : pousse l'avatar + la cloche à droite */}
+            <div className="flex-1" />
+            {/* Avatar seul — sert à la fois de profil et d'accès aux paramètres */}
+            <button
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-muted/60 transition-colors"
+              onClick={onOpenSettings}
+              aria-label={t("settings.open_settings")}
+            >
+              <Avatar name={fullName} />
+            </button>
+          </>
+        ) : (
+          <>
+            {/* Avatar + salutation (cliquable → paramètres) */}
+            <button
+              className="flex flex-1 items-center gap-2.5 min-w-0 rounded-xl p-1 -m-1 hover:bg-muted/40 transition-colors text-left"
+              onClick={onOpenSettings}
+              title={t("settings.open_settings")}
+            >
+              <Avatar name={fullName} />
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">{greeting}</p>
+                <p className="truncate text-sm font-semibold leading-tight">
+                  {firstName ?? fullName}
+                </p>
+              </div>
+            </button>
 
-        {/* Paramètres (icône explicite sur desktop) */}
-        <button
-          className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted/60 transition-colors"
-          aria-label={t("settings.title")}
-          onClick={onOpenSettings}
-        >
-          <Settings className="h-4.5 w-4.5 text-muted-foreground" size={18} />
-        </button>
+            {/* Paramètres (icône explicite sur desktop) */}
+            <button
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted/60 transition-colors"
+              aria-label={t("settings.title")}
+              onClick={onOpenSettings}
+            >
+              <Settings className="h-4.5 w-4.5 text-muted-foreground" size={18} />
+            </button>
+          </>
+        )}
 
         {/* Cloche avec badge */}
         <button
