@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Loader2, Lock, GraduationCap, Briefcase, Search, Eye, EyeOff, Upload, X, Check } from "lucide-react";
+import { Loader2, Lock, GraduationCap, Briefcase, Search, Eye, EyeOff, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -428,19 +428,6 @@ function StepDomain({
   loading: boolean;
 }) {
   const { t } = useTranslation();
-  const [dragOver, setDragOver] = useState(false);
-
-  const handleFile = (file: File) => {
-    if (file.type !== "application/pdf") {
-      toast.error(t("onboarding.error_pdf_only"));
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(t("onboarding.error_file_size"));
-      return;
-    }
-    onChange({ cvFile: file });
-  };
 
   const canProceed =
     data.role === "student"
@@ -536,55 +523,6 @@ function StepDomain({
             value={data.currentStatus}
             onChange={(e) => onChange({ currentStatus: e.target.value })}
           />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label>{t("onboarding.cv_label")}</Label>
-
-          {data.cvFile ? (
-            <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5">
-              <Upload className="h-4 w-4 text-primary" />
-              <span className="flex-1 truncate text-sm font-medium">{data.cvFile.name}</span>
-              <button
-                type="button"
-                onClick={() => onChange({ cvFile: null })}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <label
-              className={cn(
-                "flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-5 text-center transition-colors",
-                dragOver ? "border-primary bg-primary/5" : "border-input hover:border-primary/50"
-              )}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragOver(false);
-                const file = e.dataTransfer.files[0];
-                if (file) handleFile(file);
-              }}
-            >
-              <Upload className="h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground"
-                dangerouslySetInnerHTML={{
-                  __html: t("onboarding.cv_drag"),
-                }}
-              />
-              <input
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleFile(file);
-                }}
-              />
-            </label>
-          )}
         </div>
       </div>
 
