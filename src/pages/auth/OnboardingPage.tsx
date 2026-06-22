@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StepProgress } from "@/components/auth/StepProgress";
 import { PhoneInput } from "@/components/auth/PhoneInput";
-import { OtpInput } from "@/components/auth/OtpInput";
 import { PasswordStrength, isPasswordValid } from "@/components/auth/PasswordStrength";
 import { STUDY_LEVELS, DOMAIN_SUGGESTIONS, DEFAULT_COUNTRY, type Country } from "@/shared/data/countries";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,7 +21,6 @@ type Role = "student" | "professional" | "jobseeker";
 interface OnboardingData {
   phone: string;
   country: Country;
-  otp: string;
   password: string;
   firstName: string;
   lastName: string;
@@ -38,7 +36,7 @@ interface OnboardingData {
   cvFile: File | null;
 }
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 // ── Composants d'étapes ────────────────────────────────────────────────────
 
@@ -83,60 +81,8 @@ function StepPhone({
         onClick={onNext}
         disabled={loading || data.phone.replace(/\D/g, "").length < 8}
       >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.send_otp")}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.continue")}
       </Button>
-    </div>
-  );
-}
-
-function StepOtp({
-  data,
-  onChange,
-  onNext,
-  onResend,
-  loading,
-  error,
-}: {
-  data: OnboardingData;
-  onChange: (patch: Partial<OnboardingData>) => void;
-  onNext: () => void;
-  onResend: () => void;
-  loading: boolean;
-  error: string;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold">{t("onboarding.step_otp")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t("onboarding.otp_sent_to", { phone: data.phone })}
-        </p>
-      </div>
-
-      <OtpInput
-        value={data.otp}
-        onChange={(val) => onChange({ otp: val })}
-        error={error}
-      />
-
-      <Button
-        className="w-full"
-        size="lg"
-        onClick={onNext}
-        disabled={loading || data.otp.length !== 6}
-      >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.verify_otp")}
-      </Button>
-
-      <button
-        type="button"
-        className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-        onClick={onResend}
-        disabled={loading}
-      >
-        {t("onboarding.resend_code")}
-      </button>
     </div>
   );
 }
@@ -600,7 +546,7 @@ function StepDomain({
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { sendOtp, verifyOtpRegister, refreshProfile } = useAuth();
+  const { registerPhone, refreshProfile } = useAuth();
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -609,7 +555,6 @@ export default function OnboardingPage() {
   const [data, setData] = useState<OnboardingData>({
     phone: "",
     country: DEFAULT_COUNTRY,
-    otp: "",
     password: "",
     firstName: "",
     lastName: "",
@@ -637,13 +582,13 @@ export default function OnboardingPage() {
 
   // ── Handlers par étape ──────────────────────────────────────────────────
 
-  const handleSendOtp = async () => {
+  const handlePhoneNext = async () => {
     setLoading(true);
     setError("");
     try {
-      // Vérifier si le numéro est déjà enregistré avant d'envoyer l'OTP.
-      // Évite d'engager l'utilisateur dans 3 étapes pour apprendre au bout
-      // que son numéro existe déjà.
+      // Vérifier si le numéro est déjà enregistré avant de continuer.
+      // Évite d'engager l'utilisateur dans toute l'inscription pour apprendre
+      // au bout que son numéro existe déjà.
       const { exists } = await apiRequest<{ exists: boolean }>("/auth/check-phone", {
         method: "POST",
         body: JSON.stringify({ phone: data.phone }),
@@ -654,7 +599,6 @@ export default function OnboardingPage() {
         return;
       }
 
-      await sendOtp(data.phone);
       setStep(1);
     } catch (err) {
       if (err instanceof ApiError && err.status === 429) {
@@ -669,35 +613,25 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleVerifyOtp = () => {
-    setStep(2);
-  };
-
   const handleNameStep = () => {
-    setStep(3);
+    setStep(2);
   };
 
   const handlePassword = async () => {
     setLoading(true);
     setError("");
     try {
-      await verifyOtpRegister(data.phone, data.otp, data.password);
+      await registerPhone(data.phone, data.password, {
+        first_name: data.firstName.trim() || undefined,
+        last_name: data.lastName.trim() || undefined,
+      });
 
-      setStep(4);
-
-      void apiRequest("/profile", {
-        method: "PATCH",
-        body: JSON.stringify({
-          first_name: data.firstName.trim() || null,
-          last_name:  data.lastName.trim()  || null,
-        }),
-      }).then(() => refreshProfile()).catch(() => null);
+      setStep(3);
+      void refreshProfile().catch(() => null);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 400) {
-        setError(t("onboarding.error_otp_invalid"));
-        setStep(0);
-      } else if (err instanceof ApiError && err.status === 409) {
+      if (err instanceof ApiError && err.status === 409) {
         setError(t("onboarding.error_phone_exists"));
+        setStep(0);
       } else if (err instanceof ApiError && err.status === 408) {
         setError(t("onboarding.error_slow_connection"));
       } else {
@@ -708,9 +642,9 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleRole = () => setStep(5);
+  const handleRole = () => setStep(4);
 
-  const handleGoal = () => setStep(6);
+  const handleGoal = () => setStep(5);
 
   const handleDomain = async () => {
     setLoading(true);
@@ -747,13 +681,12 @@ export default function OnboardingPage() {
   // ── Rendu ────────────────────────────────────────────────────────────────
 
   const stepContent = [
-    <StepPhone key={0} data={data} onChange={patch} onNext={handleSendOtp} loading={loading} error={error} />,
-    <StepOtp key={1} data={data} onChange={patch} onNext={handleVerifyOtp} onResend={handleSendOtp} loading={loading} error={error} />,
-    <StepPersonalInfo key={2} data={data} onChange={patch} onNext={handleNameStep} />,
-    <StepPassword key={3} data={data} onChange={patch} onNext={handlePassword} loading={loading} error={error} />,
-    <StepRole key={4} data={data} onChange={patch} onNext={handleRole} />,
-    <StepGoal key={5} data={data} onNext={handleGoal} />,
-    <StepDomain key={6} data={data} onChange={patch} onNext={handleDomain} loading={loading} />,
+    <StepPhone key={0} data={data} onChange={patch} onNext={handlePhoneNext} loading={loading} error={error} />,
+    <StepPersonalInfo key={1} data={data} onChange={patch} onNext={handleNameStep} />,
+    <StepPassword key={2} data={data} onChange={patch} onNext={handlePassword} loading={loading} error={error} />,
+    <StepRole key={3} data={data} onChange={patch} onNext={handleRole} />,
+    <StepGoal key={4} data={data} onNext={handleGoal} />,
+    <StepDomain key={5} data={data} onChange={patch} onNext={handleDomain} loading={loading} />,
   ];
 
   return (
