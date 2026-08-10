@@ -7,6 +7,8 @@ import { InstallBanner } from "@/components/app/InstallBanner";
 import { Suspense, lazy } from "react";
 
 const LandingPage        = lazy(() => import("@/pages/landing"));
+const PrivacyPolicy      = lazy(() => import("@/pages/legal/PrivacyPolicy"));
+const TermsOfService     = lazy(() => import("@/pages/legal/TermsOfService"));
 const LoginPage           = lazy(() => import("@/pages/auth/LoginPage"));
 const OnboardingPage      = lazy(() => import("@/pages/auth/OnboardingPage"));
 const ForgotPasswordPage  = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
@@ -91,6 +93,8 @@ export default function App() {
                 <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
+                <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+                <Route path="/legal/terms" element={<TermsOfService />} />
 
                 <Route path="/app" element={<PrivateRoute><AppPage /></PrivateRoute>}>
                   <Route index element={<Navigate to="pour-moi" replace />} />
