@@ -91,16 +91,32 @@ export function MarkdownContent({ content, className, variant = "chat" }: Markdo
               {children}
             </blockquote>
           ),
-          a: ({ href, children }) => (
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline underline-offset-2 hover:text-primary/80"
-            >
-              {children}
-            </a>
-          ),
+          a: ({ href, children }) => {
+            let resolvedHref = href ?? "#";
+            let isInternal = false;
+            if (href) {
+              try {
+                const url = new URL(href);
+                if (url.hostname === "localhost" || url.hostname === window.location.hostname) {
+                  // Normalise le port en dev — évite les liens cassés si Vite change de port
+                  resolvedHref = url.pathname + url.search + url.hash;
+                  isInternal = true;
+                }
+              } catch {
+                isInternal = !href.startsWith("http");
+              }
+            }
+            return (
+              <a
+                href={resolvedHref}
+                target={isInternal ? "_self" : "_blank"}
+                rel={isInternal ? undefined : "noopener noreferrer"}
+                className="text-primary underline underline-offset-2 hover:text-primary/80"
+              >
+                {children}
+              </a>
+            );
+          },
           strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
           em: ({ children }) => <em className="italic">{children}</em>,
           hr: () => <hr className={cn("border-border", isDoc ? "my-6" : "my-3")} />,

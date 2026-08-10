@@ -92,6 +92,7 @@ function normalizeThread(raw: RawThread): ChatThread {
     title: resolveTitle(raw.title, raw.presetKey),
     status: raw.status as ThreadStatus,
     message_count: raw.messages?.length ?? 0,
+    unread_count: (raw as unknown as Record<string, unknown>).unreadCount as number ?? 0,
     created_at: raw.createdAt,
     updated_at: raw.updatedAt,
     preset_key: raw.presetKey ?? null,

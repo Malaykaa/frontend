@@ -109,9 +109,9 @@ function ObjectiveItem({
           </p>
         )}
       </div>
-      {thread.message_count > 0 && (
+      {thread.unread_count > 0 && (
         <span className="shrink-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-white">
-          {thread.message_count > 99 ? "99+" : thread.message_count}
+          {thread.unread_count > 99 ? "99+" : thread.unread_count}
         </span>
       )}
       <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />
@@ -144,8 +144,8 @@ function TopicCard({
         className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left hover:bg-muted/20 transition-colors"
         onClick={() => setOpen((o) => !o)}
       >
-        <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", bg)}>
-          <Icon className={cn("h-4 w-4", text)} />
+        <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded", bg)}>
+          <Icon className={cn("h-3.5 w-3.5", text)} />
         </div>
 
         <div className="flex-1 min-w-0">

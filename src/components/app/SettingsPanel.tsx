@@ -2,10 +2,10 @@ import { useState, useCallback, useEffect, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  X, ChevronDown, ChevronUp, Loader2, Check,
+  X, ChevronDown, ChevronUp, ChevronRight, Loader2, Check,
   User, Lock, Globe, Sliders, Bell, LogOut, Trash2, AlertTriangle,
   Moon, Sun, Eye, EyeOff,
-  GraduationCap, Briefcase, Search,
+  GraduationCap, Briefcase, Search, Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,9 +17,11 @@ import {
   updateProfile, applyTheme, getTheme, requestPushPermission,
   getPushPermission, deleteAccount, type ProfileUpdatePayload, type Theme,
 } from "@/services/api/profile.api";
+import { CreateStructureDialog } from "@/components/structures/CreateStructureDialog";
+import { StructureSwitcher } from "@/components/structures/StructureSwitcher";
 import { setLanguage } from "@/i18n";
 import { cn } from "@/shared/lib/utils";
-import { apiRequest } from "@/shared/api/client";
+import { apiRequest, ApiError } from "@/shared/api/client";
 
 // ── Accordion section ──────────────────────────────────────────────────────
 
@@ -60,7 +62,7 @@ function Section({ icon, title, children, defaultOpen = false }: SectionProps) {
 function AvatarDisplay({ name }: { name: string }) {
   const initials = name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   return (
-    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
       {initials || "?"}
     </div>
   );
@@ -133,21 +135,20 @@ function ProfileSection() {
 
       <div className="space-y-1.5">
         <Label className="text-xs">{t("settings.your_profile")}</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {ROLES.map(({ value, label, Icon }) => (
+        <div className="flex gap-1.5">
+          {ROLES.map(({ value, label }) => (
             <button
               key={value}
               type="button"
               className={cn(
-                "flex flex-col items-center gap-1 rounded-lg border py-2.5 px-2 text-xs font-medium transition-all",
+                "flex-1 rounded-full border py-1.5 text-xs font-medium transition-all",
                 form.primary_role === value
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-input hover:bg-muted/50 text-muted-foreground"
               )}
               onClick={() => setForm((f) => ({ ...f, primary_role: value }))}
             >
-              <Icon className="h-4 w-4" />
-              <span className="leading-tight text-center">{label}</span>
+              {label}
             </button>
           ))}
         </div>
@@ -237,8 +238,12 @@ function AccountSection() {
       });
       toast.success(t("settings.password_changed"));
       setForm({ old: "", new: "", confirm: "" });
-    } catch {
-      toast.error(t("settings.password_change_error"));
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        toast.error(t("settings.password_change_error"));
+      } else {
+        toast.error(t("errors.generic"));
+      }
     } finally {
       setSaving(false);
     }
@@ -590,6 +595,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const [loggingOut, setLoggingOut]               = useState(false);
   const [deleteConfirm, setDeleteConfirm]         = useState(false);
   const [deletingAccount, setDeletingAccount]     = useState(false);
+  const [createStructureOpen, setCreateStructureOpen] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -619,8 +625,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
       toast.success(t("settings.delete_account_success"));
       await logout();
       navigate("/", { replace: true });
-    } catch {
-      toast.error(t("common.error"));
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : t("errors.generic"));
       setDeletingAccount(false);
       setDeleteConfirm(false);
     }
@@ -655,12 +661,15 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           <span className="font-bold">{t("settings.title")}</span>
         </div>
 
-        <div className="flex items-center gap-4 border-b px-5 py-5">
+        <div className="flex items-center gap-3 border-b px-5 py-4">
           <AvatarDisplay name={fullName} />
-          <div className="min-w-0">
-            <p className="truncate font-bold">{fullName}</p>
-            {role && <p className="text-sm text-muted-foreground">{role}</p>}
-            <p className="truncate text-xs text-muted-foreground">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1">
+              <p className="truncate font-bold text-sm">{fullName}</p>
+              <StructureSwitcher />
+            </div>
+            {role && <p className="text-xs text-muted-foreground">{role}</p>}
+            <p className="truncate text-xs text-muted-foreground/70">
               {user?.phone ?? user?.email}
             </p>
           </div>
@@ -682,6 +691,17 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           <Section icon={<Bell className="h-4 w-4" />} title={t("settings.notifications")}>
             <NotificationsSection />
           </Section>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 border-b px-5 py-4 text-left hover:bg-muted/30 transition-colors last:border-b-0"
+            onClick={() => setCreateStructureOpen(true)}
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <Building2 className="h-4 w-4" />
+            </div>
+            <span className="flex-1 text-left text-sm font-semibold">{t("settings.structure_create_menu")}</span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
         </div>
 
         <div className="border-t px-5 py-4 space-y-2">
@@ -717,6 +737,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           loading={deletingAccount}
         />
       )}
+
+      <CreateStructureDialog open={createStructureOpen} onClose={() => setCreateStructureOpen(false)} />
     </>
   );
 }

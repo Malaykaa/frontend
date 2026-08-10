@@ -1,6 +1,7 @@
 ﻿import { apiRequest } from "@/shared/api/client";
-import type { AdminDocumentItem,AdminGoalItem,AdminIntentItem,AdminOfferDetail,AdminOfferItem,AdminOfferUpdate,AdminPaginated,AdminStats,AdminThreadDetail,AdminThreadItem,AdminUserDetail,AdminUserItem,AdminUserUpdate } from "@/shared/types";
+import type { AdminDocumentItem,AdminGoalItem,AdminIntentItem,AdminOfferDetail,AdminOfferItem,AdminOfferUpdate,AdminPaginated,AdminStats,AdminStructureDetail,AdminStructureItem,AdminThreadDetail,AdminThreadItem,AdminUserDetail,AdminUserItem,AdminUserUpdate } from "@/shared/types";
 export interface AdminUsersParams{page?:number;size?:number;q?:string;role?:string;active?:boolean}
+export interface AdminStructuresParams{page?:number;size?:number;status?:string}
 export interface AdminOffersParams{page?:number;size?:number;q?:string;offer_type?:string;source?:string;source_prefix?:string;active?:boolean}
 export interface AdminGoalsParams{page?:number;size?:number;goal_type?:string;status?:string;user_id?:string}
 export interface AdminThreadsParams{page?:number;size?:number;status?:string;user_id?:string;q?:string}
@@ -23,6 +24,12 @@ export const deleteAdminThread=(id:string)=>apiRequest<void>(`/admin/threads/${i
 export const fetchAdminDocuments=(p:AdminDocumentsParams={})=>apiRequest<AdminPaginated<AdminDocumentItem>>(`/admin/documents${qs({page:p.page??1,size:p.size??20,doc_type:p.doc_type,user_id:p.user_id})}`);
 export const fetchAdminIntents=(p:AdminIntentsParams={})=>apiRequest<AdminPaginated<AdminIntentItem>>(`/admin/intents${qs({page:p.page??1,size:p.size??20,intent_type:p.intent_type,user_id:p.user_id})}`);
 export const fetchScrapingStats=()=>apiRequest<Record<string,unknown>>("/admin/scraping/stats");
+export const fetchAdminStructures=(p:AdminStructuresParams={})=>apiRequest<AdminPaginated<AdminStructureItem>>(`/admin/structures${qs({page:p.page??1,size:p.size??20,status:p.status})}`);
+export const fetchAdminStructure=(id:string)=>apiRequest<AdminStructureDetail>(`/admin/structures/${id}`);
+export const updateAdminStructure=(id:string,payload:{status?:string})=>apiRequest<AdminStructureItem>(`/admin/structures/${id}`,{method:"PATCH",body:JSON.stringify(payload)});
+export const deleteAdminStructure=(id:string)=>apiRequest<void>(`/admin/structures/${id}`,{method:"DELETE"});
+export const approveAdminStructure=(id:string)=>apiRequest<AdminStructureItem>(`/admin/structures/${id}/approve`,{method:"POST"});
+export const rejectAdminStructure=(id:string)=>apiRequest<AdminStructureItem>(`/admin/structures/${id}/reject`,{method:"POST"});
 export const runPerplexityScraping=()=>apiRequest<Record<string,unknown>>("/admin/scraping/run-perplexity",{method:"POST"});
 export const runApifyScraping=()=>apiRequest<Record<string,unknown>>("/admin/scraping/run-apify-light",{method:"POST"});
 

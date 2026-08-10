@@ -202,6 +202,38 @@ export async function apiRequest<T = unknown>(
   return response.json() as Promise<T>;
 }
 
+// ── Téléchargement de fichier binaire (PDF/CSV générés côté backend) ───────
+export async function apiBlobRequest(path: string, options: RequestOptions = {}): Promise<Blob> {
+  const { skipAuth = false, timeoutMs = 30_000, ...fetchOptions } = options;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  const headers = new Headers(fetchOptions.headers as HeadersInit | undefined);
+  if (!skipAuth) {
+    const token = getToken();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      ...fetchOptions,
+      headers,
+      credentials: "include",
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, errData as Record<string, unknown>);
+  }
+  return response.blob();
+}
+
 // ── SSE streaming helper ───────────────────────────────────────────────────
 export async function* apiStream(
   path: string,

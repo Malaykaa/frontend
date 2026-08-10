@@ -7,6 +7,8 @@ import { InstallBanner } from "@/components/app/InstallBanner";
 import { Suspense, lazy } from "react";
 
 const LandingPage        = lazy(() => import("@/pages/landing"));
+const PrivacyPolicy      = lazy(() => import("@/pages/legal/PrivacyPolicy"));
+const TermsOfService     = lazy(() => import("@/pages/legal/TermsOfService"));
 const LoginPage           = lazy(() => import("@/pages/auth/LoginPage"));
 const OnboardingPage      = lazy(() => import("@/pages/auth/OnboardingPage"));
 const ForgotPasswordPage  = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
@@ -30,6 +32,14 @@ const AdminDocuments     = lazy(() => import("@/pages/admin/AdminDocuments"));
 const AdminIntents       = lazy(() => import("@/pages/admin/AdminIntents"));
 const AdminScraping      = lazy(() => import("@/pages/admin/AdminScraping"));
 const AdminCuration      = lazy(() => import("@/pages/admin/AdminCuration"));
+const AdminStructures    = lazy(() => import("@/pages/admin/AdminStructures"));
+const StructureDashboardPage = lazy(() => import("@/pages/structures/StructureDashboardPage"));
+const ClassroomDetailPage = lazy(() => import("@/pages/structures/ClassroomDetailPage"));
+const InviteAcceptPage   = lazy(() => import("@/pages/structures/InviteAcceptPage"));
+const ClassroomJoinPage  = lazy(() => import("@/pages/structures/ClassroomJoinPage"));
+const CourseProgressPage = lazy(() => import("@/pages/structures/CourseProgressPage"));
+const CourseEditorPage   = lazy(() => import("@/pages/structures/CourseEditorPage"));
+const MyCoursePage       = lazy(() => import("@/pages/structures/MyCoursePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +101,8 @@ export default function App() {
                 <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
+                <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+                <Route path="/legal/terms" element={<TermsOfService />} />
 
                 <Route path="/app" element={<PrivateRoute><AppPage /></PrivateRoute>}>
                   <Route index element={<Navigate to="pour-moi" replace />} />
@@ -101,6 +113,14 @@ export default function App() {
                 </Route>
 
                 <Route path="/app/chat/:threadId" element={<PrivateRoute><ChatView /></PrivateRoute>} />
+
+                <Route path="/structures/invite/:token" element={<InviteAcceptPage />} />
+                <Route path="/classrooms/join/:inviteCode" element={<ClassroomJoinPage />} />
+                <Route path="/structures/:structureId" element={<PrivateRoute><StructureDashboardPage /></PrivateRoute>} />
+                <Route path="/structures/:structureId/classrooms/:classroomId" element={<PrivateRoute><ClassroomDetailPage /></PrivateRoute>} />
+                <Route path="/structures/:structureId/classrooms/:classroomId/courses/new" element={<PrivateRoute><CourseEditorPage /></PrivateRoute>} />
+                <Route path="/structures/:structureId/classrooms/:classroomId/courses/:courseId" element={<PrivateRoute><CourseProgressPage /></PrivateRoute>} />
+                <Route path="/classrooms/courses/:courseId" element={<PrivateRoute><MyCoursePage /></PrivateRoute>} />
 
                 <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
                   <Route index element={<AdminDashboard />} />
@@ -114,6 +134,7 @@ export default function App() {
                   <Route path="documents"         element={<AdminDocuments />} />
                   <Route path="intents"           element={<AdminIntents />} />
                   <Route path="scraping"          element={<AdminScraping />} />
+                  <Route path="structures"        element={<AdminStructures />} />
                 </Route>
 
                 <Route path="/share/:token" element={<SharedDocumentPage />} />
