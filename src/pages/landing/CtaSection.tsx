@@ -1,39 +1,44 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users } from "lucide-react";
+import { ArrowRight, Users, Sparkles } from "lucide-react";
 
 export function CtaSection() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
-    <section className="py-10 md:py-14 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-primary" />
-        <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-white/5 blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-white/5 blur-3xl" />
-      </div>
+    <section className="py-14 md:py-20 relative overflow-hidden bg-primary">
+      {/* Background mesh */}
+      <div
+        className="absolute inset-0 opacity-[0.06] pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, white 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+      <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-white/8 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-white/8 blur-3xl pointer-events-none" />
 
       <div className="mx-auto max-w-3xl px-5 text-center space-y-7">
 
-        {/* Logo icon */}
+        {/* Icon */}
         <div className="flex justify-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm ring-2 ring-white/20">
-            <img src="/icon.png" alt="" className="h-9 w-9 object-contain brightness-0 invert" />
+            <Sparkles className="h-8 w-8 text-white" />
           </div>
         </div>
 
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm">
-          <Users className="h-3.5 w-3.5" />
-          {t("landing.cta_final_members")}
+        {/* Member badge */}
+        <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 backdrop-blur-sm">
+          <Users className="h-3.5 w-3.5 text-white/80" />
+          <span className="text-xs font-semibold text-white/90">{t("landing.cta_final_members")}</span>
         </div>
 
         {/* Headline */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/50">
             {t("landing.cta_final_label")}
           </p>
           <h2 className="text-3xl font-extrabold text-white leading-tight md:text-5xl">
@@ -41,11 +46,11 @@ export function CtaSection() {
           </h2>
         </div>
 
-        <p className="text-base text-white/75 max-w-xl mx-auto leading-relaxed">
+        <p className="text-base text-white/70 max-w-xl mx-auto leading-relaxed">
           {t("landing.cta_final_desc")}
         </p>
 
-        {/* CTA */}
+        {/* CTAs */}
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button
             size="lg"
@@ -65,7 +70,7 @@ export function CtaSection() {
           </Button>
         </div>
 
-        <p className="text-xs text-white/50">{t("landing.signup_hint")}</p>
+        <p className="text-xs text-white/40">{t("landing.signup_hint")}</p>
       </div>
     </section>
   );
