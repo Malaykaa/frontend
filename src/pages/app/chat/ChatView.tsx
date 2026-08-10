@@ -5,6 +5,8 @@ import {
   useCallback,
 } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { THREADS_KEY } from "@/hooks/queries/use-chat-threads";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -184,6 +186,7 @@ export default function ChatView() {
   // Synchronisées sur tous les appareils sans localStorage.
   const [completedStepKeys, setCompletedStepKeys] = useState<Set<string>>(new Set());
 
+  const qc             = useQueryClient();
   const bottomRef      = useRef<HTMLDivElement>(null);
   const isActiveRef    = useRef(false);
 
@@ -216,8 +219,13 @@ export default function ChatView() {
     };
 
     void load();
-    return () => { cancelled = true; };
-  }, [threadId]);
+    return () => {
+      cancelled = true;
+      // Invalider le cache threads au démontage pour que le badge non-lus
+      // soit recalculé dès le retour à la liste des objectifs.
+      qc.invalidateQueries({ queryKey: THREADS_KEY });
+    };
+  }, [threadId, qc]);
 
   // ── Auto-scroll ─────────────────────────────────────────────────────────
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {

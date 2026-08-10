@@ -55,19 +55,19 @@ function StepTopics({
             key={preset}
             type="button"
             className={cn(
-              "flex items-center gap-2.5 rounded-xl border p-3 text-left transition-all duration-150",
+              "flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-all duration-150",
               selected === preset
                 ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                 : "border-input hover:bg-muted/40"
             )}
             onClick={() => onSelect(preset as PresetKey)}
           >
-            <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", color)}>
-              <Icon className="h-4 w-4" />
+            <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded", color)}>
+              <Icon className="h-3.5 w-3.5" />
             </div>
-            <span className="text-xs font-medium leading-tight">{label}</span>
+            <span className="text-xs font-medium leading-tight flex-1">{label}</span>
             {selected === preset && (
-              <Check className="ml-auto h-4 w-4 shrink-0 text-primary" />
+              <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
             )}
           </button>
           );
@@ -114,9 +114,9 @@ function StepDetails({
 
   return (
     <div className="space-y-5">
-      <div className={cn("flex items-center gap-2.5 rounded-xl p-3", topic.color.split(" ")[0] + "/10")}>
-        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", topic.color)}>
-          <topic.Icon className="h-4 w-4" />
+      <div className={cn("flex items-center gap-2.5 rounded-lg p-2.5", topic.color.split(" ")[0] + "/10")}>
+        <div className={cn("flex h-6 w-6 items-center justify-center rounded", topic.color)}>
+          <topic.Icon className="h-3.5 w-3.5" />
         </div>
         <span className="text-sm font-semibold">{t(topic.labelKey)}</span>
         <button

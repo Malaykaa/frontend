@@ -19,10 +19,15 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
+interface RegisterPhoneProfile {
+  first_name?: string;
+  last_name?: string;
+  country?: string;
+}
+
 interface AuthContextValue extends AuthState {
-  login: (identifier: string, password: string) => Promise<User>;
-  sendOtp: (phone: string) => Promise<void>;
-  verifyOtpRegister: (phone: string, code: string, password: string) => Promise<void>;
+  login: (phone: string, password: string) => Promise<User>;
+  registerPhone: (phone: string, password: string, profile?: RegisterPhoneProfile) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -120,16 +125,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timeout);
   }, []);
 
-  const login = useCallback(async (identifier: string, password: string): Promise<User> => {
-    const isPhone = /^\+?[\d\s\-()]{7,}$/.test(identifier.trim());
-    const endpoint = isPhone ? "/auth/login-phone" : "/auth/login";
-    const body = isPhone
-      ? { phone: identifier.trim(), password }
-      : { email: identifier.trim(), password };
-
-    const data = await apiRequest<LoginResponse>(endpoint, {
+  const login = useCallback(async (phone: string, password: string): Promise<User> => {
+    const data = await apiRequest<LoginResponse>("/auth/login-phone", {
       method: "POST",
-      body: JSON.stringify(body),
+      body: JSON.stringify({ phone: phone.trim(), password }),
       skipAuth: true,
     });
 
@@ -144,19 +143,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.user;
   }, [queryClient]);
 
-  const sendOtp = useCallback(async (phone: string) => {
-    await apiRequest("/auth/send-otp", {
-      method: "POST",
-      body: JSON.stringify({ phone }),
-      skipAuth: true,
-    });
-  }, []);
-
-  const verifyOtpRegister = useCallback(
-    async (phone: string, code: string, password: string) => {
-      const data = await apiRequest<LoginResponse>("/auth/verify-otp-register", {
+  const registerPhone = useCallback(
+    async (phone: string, password: string, profile?: RegisterPhoneProfile) => {
+      const data = await apiRequest<LoginResponse>("/auth/register-phone", {
         method: "POST",
-        body: JSON.stringify({ phone, code, password }),
+        body: JSON.stringify({ phone, password, consent_given: true, ...profile }),
         skipAuth: true,
       });
       setToken(data.accessToken);
@@ -191,7 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, login, sendOtp, verifyOtpRegister, logout, refreshProfile }}
+      value={{ ...state, login, registerPhone, logout, refreshProfile }}
     >
       {children}
     </AuthContext.Provider>

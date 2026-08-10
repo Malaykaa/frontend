@@ -1,28 +1,29 @@
 import { useTranslation } from "react-i18next";
-import { Users, Globe2, FileText, Search, Target } from "lucide-react";
+import { Clock, Zap, Sparkles, Globe2, Radio, Target } from "lucide-react";
+
+const STATS = [
+  { value: "12 jours", labelKey: "landing.stat_time_to_result",  Icon: Clock,     color: "text-sky-500",     bg: "bg-sky-500/10"     },
+  { value: "8 sec",    labelKey: "landing.stat_doc_speed",       Icon: Zap,       color: "text-amber-500",   bg: "bg-amber-500/10"   },
+  { value: "91%",      labelKey: "landing.stat_match_accuracy",  Icon: Sparkles,  color: "text-violet-500",  bg: "bg-violet-500/10"  },
+  { value: "+47 000",  labelKey: "landing.stat_opps_per_day",    Icon: Globe2,    color: "text-emerald-500", bg: "bg-emerald-500/10" },
+  { value: "+120",     labelKey: "landing.stat_sources",         Icon: Radio,     color: "text-rose-500",    bg: "bg-rose-500/10"    },
+  { value: "+600",     labelKey: "landing.stat_goals_per_day",   Icon: Target,    color: "text-primary",     bg: "bg-primary/10"     },
+] as const;
 
 export function StatsSection() {
   const { t } = useTranslation();
 
-  const stats = [
-    { value: "10 000+", label: t("landing.stat_users"),       Icon: Users,     color: "text-primary bg-primary/10"         },
-    { value: "15+",     label: t("landing.stat_countries"),   Icon: Globe2,    color: "text-emerald-600 bg-emerald-100"    },
-    { value: "50 000+", label: t("landing.stat_docs"),        Icon: FileText,  color: "text-amber-600 bg-amber-100"        },
-    { value: "2 000+",  label: t("landing.stat_opps"),        Icon: Search,    color: "text-violet-600 bg-violet-100"      },
-    { value: "500+",    label: t("landing.stat_goals_daily"), Icon: Target,    color: "text-rose-600 bg-rose-100"          },
-  ];
-
   return (
-    <section className="border-y bg-muted/30 py-6">
-      <div className="mx-auto max-w-5xl px-5">
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5 md:gap-6">
-          {stats.map(({ value, label, Icon, color }) => (
-            <div key={label} className="flex flex-col items-center gap-2 text-center">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${color}`}>
-                <Icon className="h-5 w-5" />
+    <section className="bg-zinc-950 py-0">
+      <div className="mx-auto max-w-6xl px-4 sm:px-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-zinc-800 divide-y lg:divide-y-0 lg:divide-x sm:divide-x-0">
+          {STATS.map(({ value, labelKey, Icon, color, bg }) => (
+            <div key={labelKey} className="flex flex-col items-center gap-2 py-6 px-3 text-center">
+              <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${bg}`}>
+                <Icon className={`h-4 w-4 ${color}`} />
               </div>
-              <p className="text-2xl font-extrabold text-foreground md:text-3xl">{value}</p>
-              <p className="text-xs text-muted-foreground font-medium leading-snug">{label}</p>
+              <p className={`font-mono text-2xl font-extrabold tabular-nums leading-none ${color}`}>{value}</p>
+              <p className="text-[10px] font-medium leading-snug text-zinc-400 max-w-[90px]">{t(labelKey)}</p>
             </div>
           ))}
         </div>

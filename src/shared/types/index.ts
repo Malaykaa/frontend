@@ -43,6 +43,7 @@ export interface ChatThread {
   title: string;
   status: ThreadStatus;
   message_count: number;
+  unread_count: number;
   created_at: string;
   updated_at?: string;
   preset_key?: string | null;
@@ -211,6 +212,61 @@ export interface AdminUserItem {
   threads_count: number;
   goals_count: number;
   documents_count: number;
+}
+
+export interface AdminStructureMember {
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  role: string;
+  joined_at: string;
+}
+
+export interface AdminStructureItem {
+  id: string;
+  name: string;
+  country: string | null;
+  status: "pending" | "active" | "rejected";
+  structure_type: string | null;
+  address: string | null;
+  email: string | null;
+  requested_by_email: string | null;
+  created_at: string;
+  members_count: number;
+}
+
+export interface AdminStructureClassroom {
+  id: string;
+  name: string;
+  invite_code: string;
+  teachers_count: number;
+  students_count: number;
+  pending_members_count: number;
+  courses_count: number;
+  created_at: string;
+}
+
+export interface AdminStructureInvitation {
+  id: string;
+  first_name: string;
+  last_name: string;
+  contact: string | null;
+  status: string;
+  created_at: string;
+  expires_at: string;
+}
+
+export interface AdminStructureDetail extends AdminStructureItem {
+  structure_type_other: string | null;
+  members: AdminStructureMember[];
+  classrooms: AdminStructureClassroom[];
+  invitations: AdminStructureInvitation[];
+  classrooms_count: number;
+  students_total: number;
+  courses_total: number;
+  pending_invitations_count: number;
 }
 
 export interface AdminUserDetail extends AdminUserItem {

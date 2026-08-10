@@ -101,29 +101,27 @@ function ActionSheet({ open, onClose, onSelect, loading, creatingPreset }: Actio
         </div>
 
         {/* Liste des types */}
-        <div className="space-y-2">
+        <div className="divide-y rounded-xl border overflow-hidden">
           {ACTIONS.map(({ Icon, label, color, desc, preset }) => (
             <button
               key={preset}
               disabled={loading}
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all",
-                creatingPreset === preset
-                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                  : "border-input hover:bg-muted/40",
+                "flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors",
+                creatingPreset === preset ? "bg-primary/5" : "hover:bg-muted/30",
                 loading && creatingPreset !== preset && "opacity-50 cursor-not-allowed"
               )}
               onClick={() => onSelect(preset, label)}
             >
-              <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", color)}>
+              <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded", color)}>
                 {loading && creatingPreset === preset ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3.5 w-3.5" />
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold">{label}</p>
+                <p className="text-sm font-medium">{label}</p>
                 <p className="text-xs text-muted-foreground">{desc}</p>
               </div>
             </button>
@@ -161,24 +159,24 @@ function EmptyTopicGrid({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-1.5">
         {ACTIONS.map(({ Icon, label, color, preset }) => (
           <button
             key={preset}
             disabled={loading}
             className={cn(
-              "flex items-center gap-2.5 rounded-xl border bg-card p-3 text-left transition-all active:scale-[0.98]",
+              "flex items-center gap-2 rounded-lg border bg-card px-2.5 py-2 text-left transition-all active:scale-[0.98]",
               loading && creatingPreset !== preset && "opacity-50 cursor-not-allowed",
               loading && creatingPreset === preset && "border-amber-400 bg-amber-50",
               !loading && "hover:bg-muted/30"
             )}
             onClick={() => onSelect(preset, label)}
           >
-            <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", color)}>
+            <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded", color)}>
               {loading && creatingPreset === preset ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5" />
               )}
             </div>
             <span className="text-xs font-medium leading-tight">{label}</span>
@@ -206,15 +204,15 @@ function LiverableItem({
 
   return (
     <button
-      className="flex w-full items-center gap-3 rounded-xl border bg-card p-3.5 text-left transition-all hover:bg-muted/30 active:scale-[0.99]"
+      className="flex w-full items-center gap-3 py-3 px-1 text-left transition-colors hover:bg-muted/30 active:scale-[0.99]"
       onClick={onClick}
     >
-      <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", color)}>
-        <IconComp className="h-5 w-5" />
+      <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded", color)}>
+        <IconComp className="h-3.5 w-3.5" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="truncate text-sm font-semibold leading-tight">{thread.title}</p>
+        <p className="truncate text-sm font-medium leading-tight">{thread.title}</p>
         <p className="mt-0.5 text-xs text-muted-foreground truncate">{label}</p>
       </div>
 
@@ -224,7 +222,7 @@ function LiverableItem({
             {formatRelativeTime(thread.updated_at)}
           </span>
         )}
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
       </div>
     </button>
   );
@@ -233,8 +231,8 @@ function LiverableItem({
 // ── Squelette ──────────────────────────────────────────────────────────────
 function Skeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-xl border bg-card p-3.5 animate-pulse">
-      <div className="h-10 w-10 shrink-0 rounded-xl bg-muted" />
+    <div className="flex items-center gap-3 py-3 px-1 animate-pulse">
+      <div className="h-6 w-6 shrink-0 rounded bg-muted" />
       <div className="flex-1 space-y-2">
         <div className="h-3.5 w-3/4 rounded bg-muted" />
         <div className="h-3 w-1/2 rounded bg-muted" />
@@ -318,7 +316,7 @@ export default function ActionsTab() {
 
       {/* Des livrables existent → liste des conversations */}
       {!isLoading && hasThreads && (
-        <div className="space-y-2">
+        <div className="divide-y rounded-xl border overflow-hidden">
           {threads.map((thread) => (
             <LiverableItem
               key={thread.id}
