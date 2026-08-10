@@ -26,7 +26,7 @@ interface RegisterPhoneProfile {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (phone: string, password: string) => Promise<User>;
+  login: (identifier: string, password: string) => Promise<User>;
   registerPhone: (phone: string, password: string, profile?: RegisterPhoneProfile) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -125,10 +125,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timeout);
   }, []);
 
-  const login = useCallback(async (phone: string, password: string): Promise<User> => {
-    const data = await apiRequest<LoginResponse>("/auth/login-phone", {
+  const login = useCallback(async (identifier: string, password: string): Promise<User> => {
+    const isPhone = /^\+?[\d\s\-()]{7,}$/.test(identifier.trim());
+    const endpoint = isPhone ? "/auth/login-phone" : "/auth/login";
+    const body = isPhone
+      ? { phone: identifier.trim(), password }
+      : { email: identifier.trim(), password };
+
+    const data = await apiRequest<LoginResponse>(endpoint, {
       method: "POST",
-      body: JSON.stringify({ phone: phone.trim(), password }),
+      body: JSON.stringify(body),
       skipAuth: true,
     });
 
