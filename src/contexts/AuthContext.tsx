@@ -153,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (phone: string, password: string, profile?: RegisterPhoneProfile) => {
       const data = await apiRequest<LoginResponse>("/auth/register-phone", {
         method: "POST",
-        body: JSON.stringify({ phone, password, ...profile }),
+        body: JSON.stringify({ phone, password, consent_given: true, ...profile }),
         skipAuth: true,
       });
       setToken(data.accessToken);

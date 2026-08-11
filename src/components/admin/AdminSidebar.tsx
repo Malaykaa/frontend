@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { BarChart3, Brain, Briefcase, ClipboardEdit, FileText, LogOut, MessageSquare, RefreshCw, Settings, Target, Users } from "lucide-react";
+import { BarChart3, Brain, Briefcase, Building2, ClipboardEdit, FileText, LogOut, MessageSquare, RefreshCw, Settings, Target, Users } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin/documents",  label: "Documents",    Icon: FileText,      exact: false },
   { to: "/admin/intents",    label: "Intentions",   Icon: Brain,         exact: false },
   { to: "/admin/scraping",   label: "Scraping",     Icon: RefreshCw,     exact: false },
+  { to: "/admin/structures", label: "Structures",   Icon: Building2,     exact: false },
 ] as const;
 
 export function AdminSidebar() {

@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/auth/PhoneInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError } from "@/shared/api/client";
-import { isPhone } from "@/shared/lib/utils";
+import { DEFAULT_COUNTRY } from "@/shared/data/countries";
+import { getPendingInviteRedirect, clearPendingInviteRedirect } from "@/shared/lib/pending-invite";
 import { setLanguage } from "@/i18n";
 
 export default function LoginPage() {
@@ -16,34 +17,41 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [identifier, setIdentifier] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const detectedType = identifier.trim()
-    ? isPhone(identifier)
-      ? "phone"
-      : "email"
-    : null;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier.trim() || !password) return;
+    if (!phone.trim() || !password) return;
 
     setError("");
     setLoading(true);
     try {
-      const loggedUser = await login(identifier.trim(), password);
+      const loggedUser = await login(phone.trim(), password);
+      const pendingRedirect = getPendingInviteRedirect();
+      if (pendingRedirect) {
+        clearPendingInviteRedirect();
+        navigate(pendingRedirect, { replace: true });
+        return;
+      }
       const dest = loggedUser.role === "admin" ? "/admin" : "/app";
       navigate(dest, { replace: true });
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
-        setError(t("auth.invalid_credentials"));
+      if (err instanceof ApiError) {
+        if (err.status === 429) {
+          setError(t("onboarding.error_too_many"));
+        } else if (err.status === 401) {
+          // Le backend renvoie des messages distincts : on les affiche directement
+          setError(err.message);
+        } else {
+          setError(t("errors.generic"));
+        }
       } else {
         setError(t("errors.generic"));
-        toast.error(t("errors.generic"));
       }
     } finally {
       setLoading(false);
@@ -80,29 +88,16 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Identifier */}
             <div className="space-y-1.5">
-              <Label htmlFor="identifier">
-                {t("auth.email")} {t("common.or")} {t("auth.phone")}
-              </Label>
-              <div className="relative">
-                <Input
-                  id="identifier"
-                  type="text"
-                  inputMode="email"
-                  autoComplete="username"
-                  placeholder={t("auth.identifier_placeholder")}
-                  value={identifier}
-                  onChange={(e) => {
-                    setIdentifier(e.target.value);
-                    setError("");
-                  }}
-                  className="pr-16"
-                />
-                {detectedType && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                    {detectedType === "phone" ? "📱" : "✉️"}
-                  </span>
-                )}
-              </div>
+              <Label htmlFor="phone">{t("auth.phone")}</Label>
+              <PhoneInput
+                value={phone}
+                defaultCountry={country}
+                onChange={(fullNumber, c) => {
+                  setPhone(fullNumber);
+                  setCountry(c);
+                  setError("");
+                }}
+              />
             </div>
 
             {/* Password */}
@@ -144,7 +139,7 @@ export default function LoginPage() {
               type="submit"
               className="w-full"
               size="lg"
-              disabled={loading || !identifier.trim() || !password}
+              disabled={loading || !phone.trim() || !password}
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

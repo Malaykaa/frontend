@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { CheckCircle2, ExternalLink, Globe, Loader2, Plus, Trash2 } from "lucide-react";
+import { Check, ExternalLink, Globe, Loader2, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { useAdminOffers, useAdminOffer, useDeleteAdminOffer, useCreateAdminOffer } from "@/hooks/queries/use-admin";
 import { formatRelativeTime } from "@/shared/lib/utils";
 import { toast } from "sonner";
-import type { AdminOfferItem } from "@/shared/types";
-import type { AdminOfferCreate } from "@/services/api/admin.api";
+import type { AdminOfferDetail, AdminOfferItem } from "@/shared/types";
 
 const TYPE_OPTIONS = [
   { value: "job",                   label: "Emploi" },
@@ -20,98 +19,71 @@ const TYPE_OPTIONS = [
   { value: "resource",              label: "Ressource" },
 ];
 
-const EMPTY_FORM: Partial<AdminOfferCreate> = {
-  title: "", company: "", location: "", url: "",
-  offer_type: "job", description: "",
-};
+interface OfferDraft {
+  title: string;
+  company: string;
+  location: string;
+  url: string;
+  offer_type: string;
+}
 
-// ── Panel de saisie d'offre individuelle ──────────────────────────────────────
-function OfferForm({
-  onAdded,
-}: {
-  onAdded: () => void;
-}) {
-  const [form, setForm] = useState<Partial<AdminOfferCreate>>(EMPTY_FORM);
-  const create = useCreateAdminOffer();
-  const set = (k: keyof AdminOfferCreate, v: string) => setForm(f => ({ ...f, [k]: v }));
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.title?.trim()) { toast.error("Le titre est requis."); return; }
-    create.mutate(
-      {
-        title: form.title!.trim(),
-        company: form.company?.trim() || undefined,
-        location: form.location?.trim() || undefined,
-        url: form.url?.trim() || undefined,
-        offer_type: form.offer_type || "job",
-        description: form.description?.trim() || undefined,
-        source: "admin",
-      },
-      {
-        onSuccess: () => {
-          toast.success("Offre ajoutée ✓");
-          setForm(EMPTY_FORM);
-          onAdded();
-        },
-      }
-    );
+function draftFromPage(page: AdminOfferDetail): OfferDraft {
+  return {
+    title:      page.title ?? "",
+    company:    page.company ?? "",
+    location:   page.location ?? "",
+    url:        page.url ?? page.external_id ?? "",
+    offer_type: page.offer_type ?? "opportunity",
   };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="space-y-1.5">
-        <Label className="text-xs">Titre de l'offre *</Label>
-        <Input value={form.title ?? ""} onChange={e => set("title", e.target.value)} placeholder="Ex : Ingénieur Logiciel Senior" />
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="space-y-1.5">
-          <Label className="text-xs">Entreprise</Label>
-          <Input value={form.company ?? ""} onChange={e => set("company", e.target.value)} placeholder="Ex : MTN Côte d'Ivoire" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">Localisation</Label>
-          <Input value={form.location ?? ""} onChange={e => set("location", e.target.value)} placeholder="Ex : Abidjan, CI" />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="space-y-1.5">
-          <Label className="text-xs">Type</Label>
-          <select className="w-full h-9 rounded-md border bg-background px-3 text-sm" value={form.offer_type ?? "job"} onChange={e => set("offer_type", e.target.value)}>
-            {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">URL de l'offre</Label>
-          <Input value={form.url ?? ""} onChange={e => set("url", e.target.value)} placeholder="https://..." />
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs">Description (optionnel)</Label>
-        <textarea
-          className="w-full h-20 rounded-md border bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          value={form.description ?? ""}
-          onChange={e => set("description", e.target.value)}
-          placeholder="Copiez le texte de l'annonce…"
-        />
-      </div>
-      <Button type="submit" className="w-full gap-2" disabled={create.isPending}>
-        {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-        {create.isPending ? "Ajout en cours…" : "Ajouter cette offre"}
-      </Button>
-    </form>
-  );
 }
 
 // ── Panneau de contenu de la page sélectionnée ───────────────────────────────
-function PageContent({ pageId, onDelete }: { pageId: string; onDelete: () => void }) {
+function PageContent({ pageId, onDone }: { pageId: string; onDone: () => void }) {
   const { data: page, isLoading } = useAdminOffer(pageId);
-  const deletePage = useDeleteAdminOffer();
-  const [addedCount, setAddedCount] = useState(0);
+  const deletePage  = useDeleteAdminOffer();
+  const createOffer = useCreateAdminOffer();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft]     = useState<OfferDraft | null>(null);
 
-  const handleDelete = () => {
-    if (!confirm("Supprimer cette page ? Les offres déjà extraites sont conservées.")) return;
-    deletePage.mutate(pageId, { onSuccess: onDelete });
+  const busy = deletePage.isPending || createOffer.isPending;
+
+  const openEdit = () => {
+    if (!page) return;
+    setDraft(draftFromPage(page));
+    setEditing(true);
+  };
+
+  const set = (k: keyof OfferDraft, v: string) =>
+    setDraft((d) => d ? { ...d, [k]: v } : d);
+
+  const handleValidate = async (overrides?: Partial<OfferDraft>) => {
+    if (!page) return;
+    const base = draftFromPage(page);
+    const data = { ...base, ...overrides };
+    try {
+      await createOffer.mutateAsync({
+        title:      data.title.trim() || page.title,
+        company:    data.company.trim()  || undefined,
+        location:   data.location.trim() || undefined,
+        url:        data.url.trim()      || undefined,
+        offer_type: data.offer_type      || "opportunity",
+        description: page.description   ?? undefined,
+        source: "curated",
+      });
+      deletePage.mutate(pageId, {
+        onSuccess: onDone,
+        onError: (err: unknown) =>
+          toast.error(err instanceof Error ? err.message : "Erreur lors de la suppression."),
+      });
+    } catch {
+      // onError toast géré par le hook createOffer
+    }
+  };
+
+  const handleReject = () => {
+    if (!confirm("Rejeter et supprimer cette page ?")) return;
+    deletePage.mutate(pageId, { onSuccess: onDone });
+    toast.success("Page rejetée.");
   };
 
   if (isLoading) return (
@@ -121,46 +93,80 @@ function PageContent({ pageId, onDelete }: { pageId: string; onDelete: () => voi
   );
   if (!page) return null;
 
+  const pageUrl = page.url || page.external_id;
+
   return (
     <div className="space-y-4">
-      {/* En-tête page */}
-      <div className="rounded-xl border bg-amber-50 dark:bg-amber-900/10 p-4 space-y-2.5">
-        <div className="space-y-1">
-          <p className="font-semibold text-sm leading-tight">{page.title}</p>
-          <p className="text-xs text-muted-foreground">{page.source} · {formatRelativeTime(page.scraped_at)}</p>
-        </div>
-
-        {/* Lien de la page scrapée — toujours visible */}
-        {(page.url || page.external_id) && (
-          <a
-            href={page.url || page.external_id}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-lg bg-white dark:bg-background border px-3 py-2 hover:bg-primary/5 transition-colors group"
-          >
-            <ExternalLink className="h-4 w-4 shrink-0 text-primary" />
-            <span className="text-xs text-primary truncate group-hover:underline">
-              {page.url || page.external_id}
-            </span>
-          </a>
-        )}
-
-        {addedCount > 0 && (
-          <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            {addedCount} offre{addedCount > 1 ? "s" : ""} ajoutée{addedCount > 1 ? "s" : ""} depuis cette page
-          </div>
-        )}
+      {/* En-tête */}
+      <div className="space-y-1">
+        <p className="font-semibold text-base leading-tight">{page.title}</p>
+        <p className="text-xs text-muted-foreground">
+          {page.source} · {formatRelativeTime(page.scraped_at)}
+          {page.offer_type && <> · <span className="capitalize">{page.offer_type}</span></>}
+        </p>
       </div>
 
-      {/* Contenu brut de la page */}
+      {/* Lien */}
+      {pageUrl && (
+        <a
+          href={pageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-muted/40 transition-colors group"
+        >
+          <ExternalLink className="h-3.5 w-3.5 shrink-0 text-primary" />
+          <span className="text-xs text-primary truncate group-hover:underline">{pageUrl}</span>
+        </a>
+      )}
+
+      {/* Formulaire d'édition (inline, affiché si editing) */}
+      {editing && draft && (
+        <div className="rounded-xl border bg-muted/10 p-4 space-y-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Modifier avant validation</p>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs">Titre *</Label>
+            <Input value={draft.title} onChange={(e) => set("title", e.target.value)} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Entreprise</Label>
+              <Input value={draft.company} onChange={(e) => set("company", e.target.value)} placeholder="—" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Localisation</Label>
+              <Input value={draft.location} onChange={(e) => set("location", e.target.value)} placeholder="—" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Type</Label>
+              <select
+                className="w-full h-9 rounded-md border bg-background px-3 text-sm"
+                value={draft.offer_type}
+                onChange={(e) => set("offer_type", e.target.value)}
+              >
+                {TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">URL</Label>
+              <Input value={draft.url} onChange={(e) => set("url", e.target.value)} placeholder="https://…" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contenu brut */}
       {page.description && (
         <div className="rounded-xl border bg-muted/20">
           <div className="flex items-center justify-between px-3 py-2 border-b">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Contenu de la page</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Contenu</p>
             <p className="text-xs text-muted-foreground">{page.description.length.toLocaleString()} chars</p>
           </div>
-          <div className="px-3 py-3 max-h-64 overflow-y-auto">
+          <div className="px-3 py-3 max-h-72 overflow-y-auto">
             <pre className="text-xs text-foreground/80 whitespace-pre-wrap font-mono leading-relaxed">
               {page.description}
             </pre>
@@ -168,22 +174,42 @@ function PageContent({ pageId, onDelete }: { pageId: string; onDelete: () => voi
         </div>
       )}
 
-      {/* Formulaire de saisie */}
-      <div className="rounded-xl border p-4 space-y-3">
-        <p className="text-sm font-semibold">Extraire une offre de cette page</p>
-        <OfferForm onAdded={() => setAddedCount(c => c + 1)} />
-      </div>
+      {/* Actions */}
+      <div className="flex gap-2 pt-1">
+        <Button
+          variant="outline"
+          className="flex-1 gap-2 text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
+          onClick={handleReject}
+          disabled={busy}
+        >
+          {deletePage.isPending && !createOffer.isPending
+            ? <Loader2 className="h-4 w-4 animate-spin" />
+            : <X className="h-4 w-4" />}
+          Rejeter
+        </Button>
 
-      {/* Bouton supprimer la page */}
-      <Button
-        variant="destructive"
-        className="w-full gap-2"
-        onClick={handleDelete}
-        disabled={deletePage.isPending}
-      >
-        {deletePage.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-        Page traitée — Supprimer
-      </Button>
+        {editing ? (
+          <Button variant="outline" className="flex-1 gap-2" onClick={() => setEditing(false)} disabled={busy}>
+            Annuler
+          </Button>
+        ) : (
+          <Button variant="outline" className="flex-1 gap-2" onClick={openEdit} disabled={busy}>
+            <Pencil className="h-4 w-4" />
+            Modifier
+          </Button>
+        )}
+
+        <Button
+          className="flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700"
+          onClick={() => handleValidate(editing && draft ? draft : undefined)}
+          disabled={busy || (editing && !draft?.title.trim())}
+        >
+          {createOffer.isPending
+            ? <Loader2 className="h-4 w-4 animate-spin" />
+            : <Check className="h-4 w-4" />}
+          Valider
+        </Button>
+      </div>
     </div>
   );
 }
@@ -191,11 +217,10 @@ function PageContent({ pageId, onDelete }: { pageId: string; onDelete: () => voi
 // ── Page principale ───────────────────────────────────────────────────────────
 export default function AdminCuration() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const page = 1;
 
   const { data, isLoading, refetch } = useAdminOffers({
     source_prefix: "web_",
-    page,
+    page: 1,
     size: 50,
     active: true,
   });
@@ -203,70 +228,73 @@ export default function AdminCuration() {
   const pages = data?.items ?? [];
   const total = data?.total ?? 0;
 
+  const handleDone = () => {
+    setSelectedId(null);
+    refetch();
+  };
+
   return (
     <div className="flex h-full gap-0">
       {/* ── Panel gauche : liste des pages à traiter ─────────── */}
-      <div className="w-80 shrink-0 border-r flex flex-col">
-        <div className="px-4 py-4 border-b">
+      <div className="w-72 shrink-0 border-r flex flex-col">
+        <div className="px-4 py-3 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-base font-bold">Curation manuelle</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {total} page{total > 1 ? "s" : ""} à traiter
-              </p>
+              <h1 className="text-sm font-bold">Curation</h1>
+              <p className="text-xs text-muted-foreground">{total} page{total !== 1 ? "s" : ""} à traiter</p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5 text-xs">
+            <Button variant="ghost" size="sm" onClick={() => refetch()} className="text-xs h-7 px-2">
               Actualiser
             </Button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-2">
+        <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center h-20 text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin mr-2" /> Chargement…
             </div>
           ) : pages.length === 0 ? (
-            <div className="px-4 py-8 text-center space-y-2">
-              <Globe className="h-8 w-8 mx-auto text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">Aucune page à traiter.</p>
-              <p className="text-xs text-muted-foreground">Lance un run Apify heavy depuis la page Scraping pour alimenter cette liste.</p>
+            <div className="px-4 py-10 text-center space-y-2">
+              <Globe className="h-7 w-7 mx-auto text-muted-foreground/30" />
+              <p className="text-xs text-muted-foreground">Aucune page à traiter.</p>
             </div>
           ) : (
-            pages.map((p: AdminOfferItem) => (
-              <button
-                key={p.id}
-                onClick={() => setSelectedId(p.id)}
-                className={`w-full text-left px-4 py-3 border-b hover:bg-muted/30 transition-colors ${selectedId === p.id ? "bg-primary/5 border-l-2 border-l-primary" : ""}`}
-              >
-                <p className="text-sm font-medium leading-tight line-clamp-2">{p.title}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">{p.source}</Badge>
-                  <span className="text-[10px] text-muted-foreground">{formatRelativeTime(p.scraped_at)}</span>
-                </div>
-              </button>
-            ))
+            <div className="divide-y">
+              {pages.map((p: AdminOfferItem) => (
+                <button
+                  key={p.id}
+                  onClick={() => setSelectedId(p.id)}
+                  className={`w-full text-left px-4 py-3 hover:bg-muted/30 transition-colors ${
+                    selectedId === p.id ? "bg-primary/5 border-l-2 border-l-primary" : ""
+                  }`}
+                >
+                  <p className="text-xs font-medium leading-tight line-clamp-2">{p.title}</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">{p.source}</Badge>
+                    <span className="text-[10px] text-muted-foreground">{formatRelativeTime(p.scraped_at)}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </div>
 
-      {/* ── Panel droit : contenu + formulaire ─────────────────── */}
+      {/* ── Panel droit : contenu + actions ────────────────────── */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
         {selectedId ? (
           <PageContent
             key={selectedId}
             pageId={selectedId}
-            onDelete={() => {
-              setSelectedId(null);
-              refetch();
-            }}
+            onDone={handleDone}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center space-y-3 text-muted-foreground">
-            <Globe className="h-12 w-12 opacity-20" />
-            <p className="text-sm font-medium">Sélectionne une page à traiter</p>
-            <p className="text-xs max-w-xs">
-              Lis le contenu, saisis les offres une par une, puis supprime la page quand c'est terminé.
+          <div className="flex flex-col items-center justify-center h-full text-center space-y-2 text-muted-foreground">
+            <Globe className="h-10 w-10 opacity-15" />
+            <p className="text-sm font-medium">Sélectionne une page</p>
+            <p className="text-xs max-w-xs opacity-70">
+              Lis le contenu, ouvre le lien pour vérifier, puis valide ou rejette.
             </p>
           </div>
         )}

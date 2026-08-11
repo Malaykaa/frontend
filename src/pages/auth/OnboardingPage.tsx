@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Loader2, Lock, GraduationCap, Briefcase, Search, Eye, EyeOff, Check } from "lucide-react";
+import { Loader2, Lock, GraduationCap, Briefcase, Search, Eye, EyeOff, Check, Square, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest } from "@/shared/api/client";
 import { ApiError } from "@/shared/api/client";
 import { cn } from "@/shared/lib/utils";
+import { getPendingInviteRedirect, clearPendingInviteRedirect } from "@/shared/lib/pending-invite";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Role = "student" | "professional" | "jobseeker";
@@ -40,6 +41,29 @@ const TOTAL_STEPS = 6;
 
 // ── Composants d'étapes ────────────────────────────────────────────────────
 
+function ConsentCheckbox({
+  checked,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className="flex items-start gap-3 text-left w-full group"
+    >
+      <span className={`mt-0.5 shrink-0 transition-colors ${checked ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>
+        {checked ? <CheckSquare className="h-4.5 w-4.5" style={{ height: "1.125rem", width: "1.125rem" }} /> : <Square className="h-4.5 w-4.5" style={{ height: "1.125rem", width: "1.125rem" }} />}
+      </span>
+      <span className="text-xs text-muted-foreground leading-relaxed">{children}</span>
+    </button>
+  );
+}
+
 function StepPhone({
   data,
   onChange,
@@ -54,6 +78,13 @@ function StepPhone({
   error: string;
 }) {
   const { t } = useTranslation();
+  const [consentPrivacy, setConsentPrivacy] = useState(false);
+  const [consentTerms, setConsentTerms] = useState(false);
+  const [consentAI, setConsentAI] = useState(false);
+
+  const allConsented = consentPrivacy && consentTerms && consentAI;
+  const canProceed = data.phone.replace(/\D/g, "").length >= 8 && allConsented;
+
   return (
     <div className="space-y-6">
       <div>
@@ -75,11 +106,44 @@ function StepPhone({
         />
       </div>
 
+      {/* Consentements — obligatoires (Loi 2013-450 CI, art. 6) */}
+      <div className="rounded-xl border bg-muted/20 p-4 space-y-3.5">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Consentements requis
+        </p>
+
+        <ConsentCheckbox checked={consentPrivacy} onChange={setConsentPrivacy}>
+          J'ai lu et j'accepte la{" "}
+          <Link to="/legal/privacy" target="_blank" className="font-semibold text-primary hover:underline">
+            Politique de Confidentialité
+          </Link>{" "}
+          de Malayka, incluant la collecte et le traitement de mes données personnelles.
+        </ConsentCheckbox>
+
+        <ConsentCheckbox checked={consentTerms} onChange={setConsentTerms}>
+          J'ai lu et j'accepte les{" "}
+          <Link to="/legal/terms" target="_blank" className="font-semibold text-primary hover:underline">
+            Conditions Générales d'Utilisation
+          </Link>{" "}
+          et je confirme avoir au moins 16 ans.
+        </ConsentCheckbox>
+
+        <ConsentCheckbox checked={consentAI} onChange={setConsentAI}>
+          J'accepte que mes données soient traitées par intelligence artificielle à des fins de matching d'opportunités, de génération de documents et d'accompagnement personnalisé.
+        </ConsentCheckbox>
+      </div>
+
+      {!allConsented && data.phone.replace(/\D/g, "").length >= 8 && (
+        <p className="text-xs text-amber-600 text-center">
+          Veuillez cocher les trois cases pour continuer.
+        </p>
+      )}
+
       <Button
         className="w-full"
         size="lg"
         onClick={onNext}
-        disabled={loading || data.phone.replace(/\D/g, "").length < 8}
+        disabled={loading || !canProceed}
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("onboarding.continue")}
       </Button>
@@ -607,13 +671,23 @@ export default function OnboardingPage() {
 
       await refreshProfile();
       toast.success(t("onboarding.success_account_created"));
-      navigate("/app", { replace: true });
+      navigateAfterOnboarding();
     } catch {
       toast.error(t("onboarding.profile_partial"));
-      navigate("/app", { replace: true });
+      navigateAfterOnboarding();
     } finally {
       setLoading(false);
     }
+  };
+
+  const navigateAfterOnboarding = () => {
+    const pendingRedirect = getPendingInviteRedirect();
+    if (pendingRedirect) {
+      clearPendingInviteRedirect();
+      navigate(pendingRedirect, { replace: true });
+      return;
+    }
+    navigate("/app", { replace: true });
   };
 
   // ── Rendu ────────────────────────────────────────────────────────────────

@@ -32,6 +32,14 @@ const AdminDocuments     = lazy(() => import("@/pages/admin/AdminDocuments"));
 const AdminIntents       = lazy(() => import("@/pages/admin/AdminIntents"));
 const AdminScraping      = lazy(() => import("@/pages/admin/AdminScraping"));
 const AdminCuration      = lazy(() => import("@/pages/admin/AdminCuration"));
+const AdminStructures    = lazy(() => import("@/pages/admin/AdminStructures"));
+const StructureDashboardPage = lazy(() => import("@/pages/structures/StructureDashboardPage"));
+const ClassroomDetailPage = lazy(() => import("@/pages/structures/ClassroomDetailPage"));
+const InviteAcceptPage   = lazy(() => import("@/pages/structures/InviteAcceptPage"));
+const ClassroomJoinPage  = lazy(() => import("@/pages/structures/ClassroomJoinPage"));
+const CourseProgressPage = lazy(() => import("@/pages/structures/CourseProgressPage"));
+const CourseEditorPage   = lazy(() => import("@/pages/structures/CourseEditorPage"));
+const MyCoursePage       = lazy(() => import("@/pages/structures/MyCoursePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +114,14 @@ export default function App() {
 
                 <Route path="/app/chat/:threadId" element={<PrivateRoute><ChatView /></PrivateRoute>} />
 
+                <Route path="/structures/invite/:token" element={<InviteAcceptPage />} />
+                <Route path="/classrooms/join/:inviteCode" element={<ClassroomJoinPage />} />
+                <Route path="/structures/:structureId" element={<PrivateRoute><StructureDashboardPage /></PrivateRoute>} />
+                <Route path="/structures/:structureId/classrooms/:classroomId" element={<PrivateRoute><ClassroomDetailPage /></PrivateRoute>} />
+                <Route path="/structures/:structureId/classrooms/:classroomId/courses/new" element={<PrivateRoute><CourseEditorPage /></PrivateRoute>} />
+                <Route path="/structures/:structureId/classrooms/:classroomId/courses/:courseId" element={<PrivateRoute><CourseProgressPage /></PrivateRoute>} />
+                <Route path="/classrooms/courses/:courseId" element={<PrivateRoute><MyCoursePage /></PrivateRoute>} />
+
                 <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="users"             element={<AdminUsers />} />
@@ -118,6 +134,7 @@ export default function App() {
                   <Route path="documents"         element={<AdminDocuments />} />
                   <Route path="intents"           element={<AdminIntents />} />
                   <Route path="scraping"          element={<AdminScraping />} />
+                  <Route path="structures"        element={<AdminStructures />} />
                 </Route>
 
                 <Route path="/share/:token" element={<SharedDocumentPage />} />

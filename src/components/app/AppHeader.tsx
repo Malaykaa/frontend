@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import { Bell, Settings } from "lucide-react";
 import { useNotificationCount } from "@/components/app/NotificationPanel";
+import { StructureSwitcher } from "@/components/structures/StructureSwitcher";
 
 interface AppHeaderProps {
   hideLogo?: boolean;
@@ -76,9 +77,12 @@ export function AppHeader({ hideLogo = false, compact = false, onOpenSettings, o
               <Avatar name={fullName} />
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">{greeting}</p>
-                <p className="truncate text-sm font-semibold leading-tight">
-                  {firstName ?? fullName}
-                </p>
+                <div className="flex items-center gap-1">
+                  <p className="truncate text-sm font-semibold leading-tight">
+                    {firstName ?? fullName}
+                  </p>
+                  <StructureSwitcher />
+                </div>
               </div>
             </button>
 

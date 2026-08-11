@@ -416,6 +416,8 @@ export default function ForgotPasswordPage() {
         setStep("otp");
         setState((s) => ({ ...s, otp: "" }));
         setError(t("forgot_password.error_invalid_code"));
+      } else if (err instanceof ApiError && err.status === 401) {
+        setError(err.message);
       } else if (err instanceof ApiError && err.status === 429) {
         setError(t("onboarding.error_too_many"));
       } else {
