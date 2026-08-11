@@ -41,7 +41,8 @@
     "strength_weak": "Weak",
     "strength_medium": "Medium",
     "strength_strong": "Strong",
-    "forgot_password": "Forgot your password?"
+    "forgot_password": "Forgot your password?",
+    "identifier_placeholder": "contact@example.com or +225 07..."
   },
   "onboarding": {
     "title": "Create my account",
