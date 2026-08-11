@@ -41,7 +41,8 @@
     "strength_weak": "Faible",
     "strength_medium": "Moyen",
     "strength_strong": "Fort",
-    "forgot_password": "Mot de passe oublié ?"
+    "forgot_password": "Mot de passe oublié ?",
+    "identifier_placeholder": "contact@exemple.com ou +225 07..."
   },
   "onboarding": {
     "title": "Créer mon compte",
