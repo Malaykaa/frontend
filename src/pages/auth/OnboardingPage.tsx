@@ -636,6 +636,11 @@ export default function OnboardingPage() {
         setStep(0);
       } else if (err instanceof ApiError && err.status === 408) {
         setError(t("onboarding.error_slow_connection"));
+      } else if (err instanceof ApiError && err.status === 429) {
+        // Le message générique masquait un vrai 429 : l'utilisateur voyait
+        // "Erreur lors de la création du compte" sans savoir qu'il fallait
+        // patienter, ni combien de temps.
+        setError(t("onboarding.error_register_rate_limited"));
       } else {
         setError(t("onboarding.error_create_account"));
       }

@@ -120,6 +120,7 @@
     "error_slow_connection": "La connexion est lente. Réessaie.",
     "error_phone_exists": "Ce numéro est déjà enregistré. Va sur la page de connexion.",
     "error_create_account": "Erreur lors de la création du compte. Réessaie.",
+    "error_register_rate_limited": "Trop de tentatives de création de compte. Réessaie dans 15 minutes.",
     "success_account_created": "Compte créé avec succès ! Bienvenue sur Malayka 🎉",
     "profile_partial": "Profil partiellement sauvegardé. Tu pourras compléter plus tard."
   },

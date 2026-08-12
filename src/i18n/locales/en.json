@@ -120,6 +120,7 @@
     "error_slow_connection": "Connection is slow. Try again.",
     "error_phone_exists": "This number is already registered. Go to the sign in page.",
     "error_create_account": "Error creating account. Please try again.",
+    "error_register_rate_limited": "Too many account creation attempts. Try again in 15 minutes.",
     "success_account_created": "Account created successfully! Welcome to Malayka 🎉",
     "profile_partial": "Profile partially saved. You can complete it later."
   },
