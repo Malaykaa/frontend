@@ -17,6 +17,7 @@ export interface Profile {
   birth_year: number | null;
   country: string | null;
   city: string | null;
+  nationality: string | null;
   primary_role: "student" | "professional" | "jobseeker" | null;
   domain: string | null;
   field_of_study: string | null;

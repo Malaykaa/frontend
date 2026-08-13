@@ -325,9 +325,9 @@
     "greeting": "Hello",
     "new_goal": "New goal",
     "my_goals": "My Goals",
-    "no_goals": "No goals yet",
-    "no_goals_hint": "Create your first goal to get started",
-    "no_goals_long": "Create your first goal and let the AI guide you step by step to success.",
+    "no_goals": "No objectives yet",
+    "no_goals_hint": "Create your first objective to get started",
+    "no_goals_long": "Create your objectives and tell me what you're looking for — I'll guide you step by step toward each one. Malayka (\"angel\") watches over your objectives.",
     "create_first": "Create my first goal",
     "for_you": "For you",
     "load_error": "Unable to load goals",
@@ -457,7 +457,12 @@
     "legacy_professional": "Career progression",
     "legacy_other": "Other goals",
     "objectives_count_one": "{{count}} goal",
-    "objectives_count_other": "{{count}} goals"
+    "objectives_count_other": "{{count}} goals",
+    "complete_profile_title": "Complete your profile",
+    "complete_profile_subtitle": "One more minute before your objective",
+    "complete_profile_hint": "To let us search better on your behalf, fill in a few details. They help us target the right opportunities based on your location, nationality, gender and age.",
+    "complete_profile_continue": "Continue",
+    "complete_profile_error": "Couldn't save your profile. Please try again."
   },
   "recommendations": {
     "title": "For you",
@@ -670,7 +675,9 @@
     "notif_denied_toast": "Notifications denied. Enable them in browser settings.",
     "notif_whatsapp_hint": "WhatsApp alerts are configured from your objectives.",
     "logout_title": "Sign out?",
-    "logout_hint": "You will need to sign in again to access Malayka."
+    "logout_hint": "You will need to sign in again to access Malayka.",
+    "nationality": "Nationality",
+    "nationality_placeholder": "Select your nationality"
   },
   "app_header": {
     "me_fallback": "Me",
