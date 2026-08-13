@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   Briefcase, GraduationCap, Banknote, Trophy, FileText,
   Laptop, BookOpen, Compass, NotebookPen, Plus, Loader2, Check, Bell, Clock,
+  Sparkles,
 } from "lucide-react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CountrySelect } from "@/components/auth/CountrySelect";
 import { cn } from "@/shared/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCreateThread } from "@/hooks/queries/use-chat-threads";
+import { updateProfile } from "@/services/api/profile.api";
+import { isProfileComplete } from "@/shared/lib/profile";
 import type { ChatThread } from "@/shared/types";
 
 // ── Thèmes disponibles — labels et placeholders via i18n ───────────────────
@@ -32,6 +37,119 @@ interface NewObjectiveSheetProps {
   open: boolean;
   onClose: () => void;
   onCreated?: (thread: ChatThread) => void;
+}
+
+// ── Étape 0 — Profil incomplet (bloque la création tant qu'il ne l'est pas) ─
+//
+// Les recherches d'opportunités dépendent de la localisation, de la
+// nationalité (éligibilité de certaines bourses/appels), du genre et de
+// l'âge (bourses avec plafond). Un profil incomplet produit un matching
+// dégradé sans que l'utilisateur sache pourquoi — on lui demande donc de le
+// compléter au moment précis où il en ressent le besoin : la création d'un
+// objectif, qu'il s'agisse du premier ou d'un suivant.
+interface CompleteProfileForm {
+  country: string;
+  city: string;
+  nationality: string;
+  gender: string;
+  birth_year: string;
+}
+
+function StepCompleteProfile({
+  form,
+  onChange,
+  onSubmit,
+  loading,
+}: {
+  form: CompleteProfileForm;
+  onChange: (patch: Partial<CompleteProfileForm>) => void;
+  onSubmit: () => void;
+  loading: boolean;
+}) {
+  const { t } = useTranslation();
+
+  const canSubmit =
+    !!form.country && !!form.city.trim() && !!form.nationality && !!form.gender && !!form.birth_year;
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-start gap-2.5 rounded-lg bg-primary/5 p-3">
+        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          {t("goals.complete_profile_hint")}
+        </p>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">{t("settings.country")}</Label>
+        <CountrySelect
+          value={form.country}
+          onChange={(code) => onChange({ country: code })}
+          placeholder={t("settings.country_placeholder")}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">{t("settings.city")}</Label>
+        <Input
+          value={form.city}
+          onChange={(e) => onChange({ city: e.target.value })}
+          placeholder={t("settings.city_placeholder")}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">{t("settings.nationality")}</Label>
+        <CountrySelect
+          value={form.nationality}
+          onChange={(code) => onChange({ nationality: code })}
+          placeholder={t("settings.nationality_placeholder")}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">{t("settings.gender")}</Label>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { value: "male",   label: t("settings.gender_male")   },
+            { value: "female", label: t("settings.gender_female") },
+            { value: "other",  label: t("settings.gender_other")  },
+          ].map((g) => (
+            <button
+              key={g.value}
+              type="button"
+              className={cn(
+                "rounded-lg border py-2 text-xs font-medium transition-all",
+                form.gender === g.value
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-input hover:bg-muted/50"
+              )}
+              onClick={() => onChange({ gender: g.value })}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">{t("settings.birth_year")}</Label>
+        <Input
+          type="number"
+          value={form.birth_year}
+          onChange={(e) => onChange({ birth_year: e.target.value })}
+          placeholder="2000"
+          min={1950}
+          max={new Date().getFullYear() - 14}
+        />
+      </div>
+
+      <Button className="w-full gap-2" onClick={onSubmit} disabled={loading || !canSubmit}>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+        {t("goals.complete_profile_continue")}
+      </Button>
+    </div>
+  );
 }
 
 // ── Étape 1 — Choix du thème ───────────────────────────────────────────────
@@ -212,22 +330,70 @@ function StepDetails({
 
 // ── Composant principal ────────────────────────────────────────────────────
 export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveSheetProps) {
-  const [step, setStep]           = useState<1 | 2>(1);
+  const [step, setStep]           = useState<0 | 1 | 2>(1);
   const [preset, setPreset]       = useState<PresetKey | null>(null);
   const [title, setTitle]         = useState("");
   const [notifMode, setNotifMode] = useState<"realtime" | "scheduled">("realtime");
   const [notifTime, setNotifTime] = useState("18:00");
+  const [profileForm, setProfileForm] = useState<CompleteProfileForm>({
+    country: "", city: "", nationality: "", gender: "", birth_year: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
   const { t } = useTranslation();
+  const { profile, refreshProfile } = useAuth();
 
   const { mutateAsync, isPending } = useCreateThread();
 
+  // À chaque ouverture, réévaluer si le profil est complet — un profil
+  // complété entre deux ouvertures (depuis Réglages) ne doit plus jamais
+  // redemander cette étape. Le sheet reste monté en permanence (Radix Dialog
+  // ne démonte pas ses enfants), d'où la réinitialisation explicite ici
+  // plutôt qu'un simple état initial.
+  useEffect(() => {
+    if (!open) return;
+    if (isProfileComplete(profile)) {
+      setStep(1);
+    } else {
+      setProfileForm({
+        country:     profile?.country     ?? "",
+        city:        profile?.city        ?? "",
+        nationality: profile?.nationality ?? "",
+        gender:      profile?.gender      ?? "",
+        birth_year:  profile?.birth_year?.toString() ?? "",
+      });
+      setStep(0);
+    }
+  }, [open, profile]);
+
   const resetAndClose = () => {
-    setStep(1);
     setPreset(null);
     setTitle("");
     setNotifMode("realtime");
     setNotifTime("18:00");
     onClose();
+  };
+
+  const handleProfileFormChange = (patch: Partial<CompleteProfileForm>) => {
+    setProfileForm((f) => ({ ...f, ...patch }));
+  };
+
+  const handleProfileSubmit = async () => {
+    setSavingProfile(true);
+    try {
+      await updateProfile({
+        country:     profileForm.country,
+        city:        profileForm.city.trim(),
+        nationality: profileForm.nationality,
+        gender:      profileForm.gender,
+        birth_year:  parseInt(profileForm.birth_year, 10),
+      });
+      await refreshProfile();
+      setStep(1);
+    } catch {
+      toast.error(t("goals.complete_profile_error"));
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const handleTopicSelected = (p: PresetKey) => {
@@ -256,20 +422,34 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
     }
   };
 
+  const titles = {
+    0: t("goals.complete_profile_title"),
+    1: t("goals.new_goal_title"),
+    2: t("goals.sheet_details_title"),
+  } as const;
+  const descriptions = {
+    0: t("goals.complete_profile_subtitle"),
+    1: t("goals.sheet_choose_hint"),
+    2: t("goals.sheet_details_hint"),
+  } as const;
+
   return (
     <BottomSheet
       open={open}
       onClose={resetAndClose}
-      title={step === 1 ? t("goals.new_goal_title") : t("goals.sheet_details_title")}
-      description={
-        step === 1
-          ? t("goals.sheet_choose_hint")
-          : t("goals.sheet_details_hint")
-      }
+      title={titles[step]}
+      description={descriptions[step]}
       maxHeight="max-h-[85vh]"
-      locked={isPending}
+      locked={isPending || savingProfile}
     >
-      {step === 1 ? (
+      {step === 0 ? (
+        <StepCompleteProfile
+          form={profileForm}
+          onChange={handleProfileFormChange}
+          onSubmit={handleProfileSubmit}
+          loading={savingProfile}
+        />
+      ) : step === 1 ? (
         <StepTopics
           selected={preset}
           onSelect={handleTopicSelected}

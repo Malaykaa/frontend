@@ -81,6 +81,7 @@ function ProfileSection() {
     birth_year:   profile?.birth_year?.toString() ?? "",
     country:      profile?.country    ?? "",
     city:         profile?.city       ?? "",
+    nationality:  profile?.nationality ?? "",
     primary_role: profile?.primary_role ?? "",
   });
 
@@ -100,6 +101,7 @@ function ProfileSection() {
         birth_year:   form.birth_year ? parseInt(form.birth_year) : null,
         country:      form.country      || null,
         city:         form.city         || null,
+        nationality:  form.nationality  || null,
         primary_role: (form.primary_role as ProfileUpdatePayload["primary_role"]) || null,
       };
       await updateProfile(payload);
@@ -206,6 +208,15 @@ function ProfileSection() {
           value={form.city}
           onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
           placeholder={t("settings.city_placeholder")}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">{t("settings.nationality")}</Label>
+        <CountrySelect
+          value={form.nationality}
+          onChange={(code) => setForm((f) => ({ ...f, nationality: code }))}
+          placeholder={t("settings.nationality_placeholder")}
         />
       </div>
 
