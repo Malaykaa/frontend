@@ -10,6 +10,7 @@ export interface ProfileUpdatePayload {
   birth_year?: number | null;
   country?: string | null;
   city?: string | null;
+  nationality?: string | null;
   language?: string | null;
   primary_role?: "student" | "professional" | "jobseeker" | null;
   domain?: string | null;

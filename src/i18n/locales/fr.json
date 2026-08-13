@@ -325,9 +325,9 @@
     "greeting": "Bonjour",
     "new_goal": "Nouvel objectif",
     "my_goals": "Mes Objectifs",
-    "no_goals": "Aucun objectif pour l'instant",
+    "no_goals": "Aucun objectif pour le moment",
     "no_goals_hint": "Crée ton premier objectif pour commencer",
-    "no_goals_long": "Crée ton premier objectif et laisse l'IA t'accompagner pas à pas vers ta réussite.",
+    "no_goals_long": "Crée tes objectifs et dis-moi ce que tu cherches — je t'accompagne pas à pas vers chacun d'eux. Malayka (« ange ») veille sur tes objectifs.",
     "create_first": "Créer mon premier objectif",
     "for_you": "Pour toi",
     "load_error": "Impossible de charger les objectifs",
@@ -457,7 +457,12 @@
     "legacy_professional": "Progression de carrière",
     "legacy_other": "Autres objectifs",
     "objectives_count_one": "{{count}} objectif",
-    "objectives_count_other": "{{count}} objectifs"
+    "objectives_count_other": "{{count}} objectifs",
+    "complete_profile_title": "Complète ton profil",
+    "complete_profile_subtitle": "Encore une minute avant ton objectif",
+    "complete_profile_hint": "Pour te permettre de mieux faire les recherches pour toi, remplis ces quelques informations. Elles nous aident à cibler les bonnes opportunités selon ta localisation, ta nationalité, ton genre et ton âge.",
+    "complete_profile_continue": "Continuer",
+    "complete_profile_error": "Impossible d'enregistrer ton profil. Réessaie."
   },
   "recommendations": {
     "title": "Pour toi",
@@ -670,7 +675,9 @@
     "notif_denied_toast": "Notifications refusées. Active-les dans les paramètres du navigateur.",
     "notif_whatsapp_hint": "Les alertes WhatsApp sont configurées depuis tes objectifs.",
     "logout_title": "Se déconnecter ?",
-    "logout_hint": "Tu devras te reconnecter pour accéder à Malayka."
+    "logout_hint": "Tu devras te reconnecter pour accéder à Malayka.",
+    "nationality": "Nationalité",
+    "nationality_placeholder": "Sélectionner ta nationalité"
   },
   "app_header": {
     "me_fallback": "Moi",
