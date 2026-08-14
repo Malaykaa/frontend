@@ -11,8 +11,8 @@ import {
   useInbox, useMyProvider, useProviderDecide, usePublishProvider,
   useUnpublishProvider, useUpsertProvider,
 } from "@/hooks/queries/use-services";
-import type { DeliveryMode, InboxItem } from "@/services/api/services.api";
-import { DeliveryModeSelect, QueryError, deliveryModeLabel } from "@/pages/app/services/shared";
+import type { InboxItem } from "@/services/api/services.api";
+import { QueryError, deliveryModeLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 type Tab = "inbox" | "profile";
@@ -272,7 +272,7 @@ function ProfileSection() {
 
   const [form, setForm] = useState({
     title: "", description: "", keywordsRaw: "",
-    delivery_mode: "onsite" as DeliveryMode, city: "", country: "",
+    city: "", country: "", portfolio: "",
     rate_text: "", availability_text: "", years_experience: "", contact_phone: "",
   });
 
@@ -282,9 +282,9 @@ function ProfileSection() {
       title: provider.title,
       description: provider.description,
       keywordsRaw: (provider.keywords ?? []).join(", "),
-      delivery_mode: provider.delivery_mode,
       city: provider.city ?? "",
       country: provider.country ?? "",
+      portfolio: provider.portfolio ?? "",
       rate_text: provider.rate_text ?? "",
       availability_text: provider.availability_text ?? "",
       years_experience: provider.years_experience?.toString() ?? "",
@@ -292,16 +292,21 @@ function ProfileSection() {
     });
   }, [provider]);
 
-  const canSave = form.title.trim().length >= 3 && form.description.trim().length >= 20;
+  // La ville et le pays sont toujours obligatoires côté prestataire : c'est le
+  // client qui décide, dans sa demande, si la localisation compte pour lui —
+  // pas au prestataire de s'auto-exclure en la laissant vide.
+  const canSave =
+    form.title.trim().length >= 3 && form.description.trim().length >= 20
+    && form.city.trim().length > 0 && form.country.trim().length > 0;
 
   const save = () =>
     upsert.mutate({
       title: form.title.trim(),
       description: form.description.trim(),
       keywords: form.keywordsRaw.split(",").map((k) => k.trim()).filter(Boolean).slice(0, 15),
-      delivery_mode: form.delivery_mode,
-      city: form.delivery_mode === "remote" ? null : form.city || null,
-      country: form.delivery_mode === "remote" ? null : form.country || null,
+      city: form.city.trim(),
+      country: form.country.trim(),
+      portfolio: form.portfolio.trim() || null,
       rate_text: form.rate_text || null,
       availability_text: form.availability_text || null,
       years_experience: form.years_experience ? parseInt(form.years_experience, 10) : null,
@@ -343,7 +348,7 @@ function ProfileSection() {
         </div>
       )}
 
-      <Field label="Que proposez-vous ?" hint="Une ligne claire, comme un titre d'annonce">
+      <Field label="Que proposez-vous comme services ?" hint="Une ligne claire, comme un titre d'annonce">
         <Input
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
@@ -352,7 +357,10 @@ function ProfileSection() {
         />
       </Field>
 
-      <Field label="Décrivez votre savoir-faire" hint="20 caractères minimum">
+      <Field
+        label="Décrivez de manière détaillée tout ce que vous savez bien faire"
+        hint="20 caractères minimum"
+      >
         <textarea
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
@@ -371,29 +379,38 @@ function ProfileSection() {
         />
       </Field>
 
-      <DeliveryModeSelect
-        value={form.delivery_mode}
-        onChange={(delivery_mode) => setForm((f) => ({ ...f, delivery_mode }))}
-      />
+      <Field
+        label="Réalisations"
+        hint="Description et lien si possible"
+      >
+        <textarea
+          value={form.portfolio}
+          onChange={(e) => setForm((f) => ({ ...f, portfolio: e.target.value }))}
+          placeholder="Listez tout ce que vous avez déjà réalisé avec les liens en appui."
+          rows={4}
+          maxLength={5000}
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      </Field>
 
-      {form.delivery_mode !== "remote" && (
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Ville">
-            <Input
-              value={form.city}
-              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-              placeholder="Abidjan"
-            />
-          </Field>
-          <Field label="Pays">
-            <CountrySelect
-              value={form.country}
-              onChange={(code) => setForm((f) => ({ ...f, country: code }))}
-              placeholder="Sélectionner"
-            />
-          </Field>
-        </div>
-      )}
+      {/* Toujours requis — c'est le client, dans sa demande, qui décide si la
+          localisation compte pour lui, pas le prestataire en amont. */}
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Ville">
+          <Input
+            value={form.city}
+            onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+            placeholder="Abidjan"
+          />
+        </Field>
+        <Field label="Pays">
+          <CountrySelect
+            value={form.country}
+            onChange={(code) => setForm((f) => ({ ...f, country: code }))}
+            placeholder="Sélectionner"
+          />
+        </Field>
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Tarif" hint="Libre">

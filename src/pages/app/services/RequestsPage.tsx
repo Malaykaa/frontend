@@ -8,6 +8,7 @@ import { CountrySelect } from "@/components/auth/CountrySelect";
 import { useCreateRequest, useMyRequests } from "@/hooks/queries/use-services";
 import type { DeliveryMode, RequestType } from "@/services/api/services.api";
 import { DeliveryModeSelect, QueryError, statusLabel } from "@/pages/app/services/shared";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/shared/lib/utils";
 
 const TYPES: { value: RequestType; label: string; hint: string }[] = [
@@ -100,14 +101,21 @@ export default function RequestsPage() {
 }
 
 function NewRequestForm({ onDone }: { onDone: (id: string) => void }) {
+  const { user } = useAuth();
   const create = useCreateRequest();
   const [form, setForm] = useState({
     request_type: "prestation" as RequestType,
     title: "", description: "", keywordsRaw: "",
     delivery_mode: "onsite" as DeliveryMode, city: "", country: "", budget_hint: "",
+    // Préremplie depuis le compte pour éviter la friction, mais toujours
+    // modifiable : le client choisit explicitement le numéro à communiquer
+    // pour CETTE demande, pas nécessairement celui de son compte.
+    contact_phone: user?.phone ?? "",
   });
 
-  const canSubmit = form.title.trim().length >= 3 && form.description.trim().length >= 10;
+  const canSubmit =
+    form.title.trim().length >= 3 && form.description.trim().length >= 10
+    && form.contact_phone.trim().length >= 6;
 
   const submit = () =>
     create.mutate(
@@ -120,6 +128,7 @@ function NewRequestForm({ onDone }: { onDone: (id: string) => void }) {
         city: form.delivery_mode === "remote" ? null : form.city || null,
         country: form.delivery_mode === "remote" ? null : form.country || null,
         budget_hint: form.budget_hint || null,
+        contact_phone: form.contact_phone.trim(),
       },
       { onSuccess: (detail) => onDone(detail.id) }
     );
@@ -160,7 +169,7 @@ function NewRequestForm({ onDone }: { onDone: (id: string) => void }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs">Détaillez</Label>
+        <Label className="text-xs">Détaillez votre demande</Label>
         <textarea
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
@@ -216,6 +225,19 @@ function NewRequestForm({ onDone }: { onDone: (id: string) => void }) {
           onChange={(e) => setForm((f) => ({ ...f, budget_hint: e.target.value }))}
           placeholder="Entre 20 000 et 50 000 FCFA"
         />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">Numéro à contacter</Label>
+        <Input
+          type="tel"
+          value={form.contact_phone}
+          onChange={(e) => setForm((f) => ({ ...f, contact_phone: e.target.value }))}
+          placeholder="+225 07 00 00 00 00"
+        />
+        <p className="text-[11px] text-muted-foreground">
+          Communiqué au prestataire uniquement après que vous l'ayez retenu.
+        </p>
       </div>
 
       <Button className="w-full gap-2" disabled={!canSubmit || create.isPending} onClick={submit}>

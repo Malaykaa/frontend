@@ -7,7 +7,7 @@ import {
   useClientDecide, useCloseRequest, useGoPublic, useRequest,
 } from "@/hooks/queries/use-services";
 import type { MatchCard } from "@/services/api/services.api";
-import { QueryError, deliveryModeLabel, statusLabel } from "@/pages/app/services/shared";
+import { Linkified, QueryError, deliveryModeLabel, statusLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -229,12 +229,24 @@ function ProviderCard({
         </div>
       )}
 
+      {/* Réalisations passées — mêmes informations que le prestataire a
+          renseignées dans sa vitrine, avec ses liens rendus cliquables. */}
+      {card.portfolio && (
+        <div className="mt-2.5 rounded-lg bg-muted/40 p-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Réalisations
+          </p>
+          <div className="mt-1 text-xs text-muted-foreground">
+            <Linkified text={card.portfolio} />
+          </div>
+        </div>
+      )}
+
+      {/* Le prestataire a toujours une ville et un pays. */}
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
         <span className="flex items-center gap-1">
           <MapPin className="h-3 w-3" />
-          {card.delivery_mode === "remote"
-            ? "À distance"
-            : [card.city, card.country].filter(Boolean).join(", ") || deliveryModeLabel(card.delivery_mode)}
+          {[card.city, card.country].filter(Boolean).join(", ")}
         </span>
         {card.rate_text && <span>{card.rate_text}</span>}
         {card.availability_text && <span>{card.availability_text}</span>}

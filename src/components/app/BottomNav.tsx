@@ -1,12 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Compass, FolderOpen, Wrench, TrendingUp, HelpCircle } from "lucide-react";
+import { Compass, FolderOpen, Cog, TrendingUp, HelpCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/shared/lib/utils";
 
 const TAB_ROUTES = [
   { to: "/app/pour-moi",  key: "app.tab_pour_moi", Icon: Compass     },
   { to: "/app/actions",   key: "app.tab_livrables", Icon: FolderOpen  },
-  { to: "/app/services",  key: "app.tab_services",  Icon: Wrench      },
+  { to: "/app/services",  key: "app.tab_services",  Icon: Cog        },
   { to: "/app/tendances", key: "app.tab_trends",    Icon: TrendingUp  },
   { to: "/app/aide",      key: "app.tab_aide",      Icon: HelpCircle  },
 ] as const;

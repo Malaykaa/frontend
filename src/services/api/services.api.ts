@@ -16,9 +16,9 @@ export interface ProviderProfile {
   title: string;
   description: string;
   keywords: string[];
-  delivery_mode: DeliveryMode;
   city: string | null;
   country: string | null;
+  portfolio: string | null;
   rate_text: string | null;
   availability_text: string | null;
   years_experience: number | null;
@@ -32,9 +32,9 @@ export interface ProviderUpsertPayload {
   title: string;
   description: string;
   keywords: string[];
-  delivery_mode: DeliveryMode;
-  city?: string | null;
-  country?: string | null;
+  city: string;
+  country: string;
+  portfolio?: string | null;
   rate_text?: string | null;
   availability_text?: string | null;
   years_experience?: number | null;
@@ -48,9 +48,9 @@ export interface ProviderPublicCard {
   title: string;
   description: string;
   keywords: string[];
-  delivery_mode: DeliveryMode;
   city: string | null;
   country: string | null;
+  portfolio: string | null;
   rate_text: string | null;
   availability_text: string | null;
   years_experience: number | null;
@@ -78,6 +78,7 @@ export interface ServiceRequest {
   city: string | null;
   country: string | null;
   budget_hint: string | null;
+  contact_phone: string | null;
   status: RequestStatus;
   published_public_at: string | null;
   created_at: string;
@@ -100,6 +101,7 @@ export interface RequestCreatePayload {
   city?: string | null;
   country?: string | null;
   budget_hint?: string | null;
+  contact_phone: string;
 }
 
 export interface InboxItem {
