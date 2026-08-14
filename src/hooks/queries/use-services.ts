@@ -7,6 +7,18 @@ import {
   type ProviderUpsertPayload, type RequestCreatePayload,
 } from "@/services/api/services.api";
 
+// Une seule re-tentative sur les lectures. Par défaut React Query en fait
+// trois : combinées au délai d'expiration du client, un backend lent laissait
+// l'écran vide plusieurs minutes avant d'afficher quoi que ce soit. Mieux vaut
+// montrer l'erreur vite et laisser l'utilisateur réessayer.
+const RETRY = 1;
+
+/** Message renvoyé par le serveur, sinon repli générique. */
+const reason = (e: unknown, fallback: string) => {
+  const m = e instanceof Error ? e.message.trim() : "";
+  return m && m.length < 200 ? m : fallback;
+};
+
 export const serviceKeys = {
   provider: ["services", "provider"] as const,
   requests: ["services", "requests"] as const,
@@ -17,7 +29,10 @@ export const serviceKeys = {
 // ── Prestataire ────────────────────────────────────────────────────────────
 
 export const useMyProvider = () =>
-  useQuery({ queryKey: serviceKeys.provider, queryFn: fetchMyProvider, staleTime: 60_000 });
+  useQuery({
+    queryKey: serviceKeys.provider, queryFn: fetchMyProvider,
+    staleTime: 60_000, retry: RETRY,
+  });
 
 export function useUpsertProvider() {
   const qc = useQueryClient();
@@ -27,7 +42,7 @@ export function useUpsertProvider() {
       qc.invalidateQueries({ queryKey: serviceKeys.provider });
       toast.success("Vitrine enregistrée.");
     },
-    onError: () => toast.error("Impossible d'enregistrer la vitrine."),
+    onError: (e) => toast.error(reason(e, "Impossible d'enregistrer la vitrine.")),
   });
 }
 
@@ -39,7 +54,7 @@ export function usePublishProvider() {
       qc.invalidateQueries({ queryKey: serviceKeys.provider });
       toast.success("Votre vitrine est visible.");
     },
-    onError: () => toast.error("Publication impossible."),
+    onError: (e) => toast.error(reason(e, "Publication impossible.")),
   });
 }
 
@@ -59,7 +74,7 @@ export const useInbox = (onlyPending = false) =>
   useQuery({
     queryKey: [...serviceKeys.inbox, onlyPending],
     queryFn: () => fetchInbox(onlyPending),
-    staleTime: 30_000,
+    staleTime: 30_000, retry: RETRY,
   });
 
 export function useProviderDecide() {
@@ -82,14 +97,17 @@ export function useProviderDecide() {
 // ── Client ─────────────────────────────────────────────────────────────────
 
 export const useMyRequests = () =>
-  useQuery({ queryKey: serviceKeys.requests, queryFn: fetchMyRequests, staleTime: 30_000 });
+  useQuery({
+    queryKey: serviceKeys.requests, queryFn: fetchMyRequests,
+    staleTime: 30_000, retry: RETRY,
+  });
 
 export const useRequest = (id: string) =>
   useQuery({
     queryKey: serviceKeys.request(id),
     queryFn: () => fetchRequest(id),
     enabled: !!id,
-    staleTime: 15_000,
+    staleTime: 15_000, retry: RETRY,
   });
 
 export function useCreateRequest() {

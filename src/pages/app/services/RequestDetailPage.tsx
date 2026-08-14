@@ -7,7 +7,7 @@ import {
   useClientDecide, useCloseRequest, useGoPublic, useRequest,
 } from "@/hooks/queries/use-services";
 import type { MatchCard } from "@/services/api/services.api";
-import { statusLabel } from "@/pages/app/tabs/ServicesTab";
+import { QueryError, statusLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -24,7 +24,7 @@ import { cn } from "@/shared/lib/utils";
 export default function RequestDetailPage() {
   const { requestId = "" } = useParams();
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useRequest(requestId);
+  const { data, isLoading, isError, refetch } = useRequest(requestId);
   const goPublicMut = useGoPublic();
   const closeMut = useCloseRequest();
 
@@ -48,9 +48,10 @@ export default function RequestDetailPage() {
       )}
 
       {isError && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-          Impossible de charger cette demande.
-        </div>
+        <QueryError
+          message="Impossible de charger cette demande."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {data && (

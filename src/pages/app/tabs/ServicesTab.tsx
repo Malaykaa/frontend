@@ -3,6 +3,7 @@ import {
   ArrowRight, Briefcase, CheckCircle2, Clock, Handshake, Inbox, Search, Store,
 } from "lucide-react";
 import { useInbox, useMyProvider, useMyRequests } from "@/hooks/queries/use-services";
+import { QueryError, statusLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -14,9 +15,9 @@ import { cn } from "@/shared/lib/utils";
  */
 export default function ServicesTab() {
   const navigate = useNavigate();
-  const { data: provider } = useMyProvider();
+  const { data: provider, isError: providerError, refetch: refetchProvider } = useMyProvider();
   const { data: inbox } = useInbox();
-  const { data: requests } = useMyRequests();
+  const { data: requests, isError: requestsError } = useMyRequests();
 
   const pendingCount = (inbox ?? []).filter((i) => i.decision === "pending").length;
   const wonCount = (inbox ?? []).filter((i) => i.decision === "client_accepted").length;
@@ -33,9 +34,13 @@ export default function ServicesTab() {
         </p>
       </div>
 
+      {(providerError || requestsError) && (
+        <QueryError onRetry={() => void refetchProvider()} />
+      )}
+
       {/* Les deux portes d'entrée */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <EntryCard
+      <div className="flex flex-col gap-2">
+        <EntryButton
           Icon={Store}
           title="Proposer mes services"
           subtitle={
@@ -49,7 +54,7 @@ export default function ServicesTab() {
           badge={pendingCount > 0 ? `${pendingCount} nouvelle${pendingCount > 1 ? "s" : ""}` : undefined}
           onClick={() => navigate("/app/services/prestataire")}
         />
-        <EntryCard
+        <EntryButton
           Icon={Search}
           title="Chercher un prestataire"
           subtitle={
@@ -131,7 +136,15 @@ const TONES = {
   sky: "bg-sky-100 text-sky-600",
 } as const;
 
-function EntryCard({
+/**
+ * Porte d'entrée — une ligne, pas une carte.
+ *
+ * Format volontairement dense : hauteur d'une rangée de liste mobile, icône
+ * cadrée sur la hauteur du texte, aucun remplissage autour des mots. Le badge
+ * est dans le flux plutôt qu'en position absolue, qui obligeait à réserver du
+ * vide en haut à droite même quand il n'y avait rien à afficher.
+ */
+function EntryButton({
   Icon, title, subtitle, tone, badge, onClick,
 }: {
   Icon: typeof Store;
@@ -144,20 +157,23 @@ function EntryCard({
   return (
     <button
       onClick={onClick}
-      className="group relative flex items-start gap-3 rounded-2xl border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-sm"
+      className="flex w-full items-center gap-2.5 rounded-xl border bg-card px-3 py-2.5 text-left transition-colors hover:bg-muted/40 active:bg-muted/60"
     >
-      <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", TONES[tone])}>
-        <Icon className="h-5 w-5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold">{title}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
-      </div>
+      <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", TONES[tone])}>
+        <Icon className="h-4 w-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold leading-tight">{title}</span>
+        <span className="block truncate text-[11px] leading-tight text-muted-foreground">
+          {subtitle}
+        </span>
+      </span>
       {badge && (
-        <span className="absolute right-3 top-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+        <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
           {badge}
         </span>
       )}
+      <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
     </button>
   );
 }
@@ -182,17 +198,6 @@ function MiniStat({ value, label, tone }: { value: number; label: string; tone: 
       <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{label}</p>
     </div>
   );
-}
-
-export function statusLabel(status: string): string {
-  switch (status) {
-    case "open":      return "Envoyée aux prestataires";
-    case "public":    return "Élargie au grand public";
-    case "fulfilled": return "Mise en relation faite";
-    case "closed":    return "Clôturée";
-    case "expired":   return "Expirée";
-    default:          return status;
-  }
 }
 
 function RequestStatusDot({ status }: { status: string }) {
