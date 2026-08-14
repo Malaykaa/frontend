@@ -19,6 +19,10 @@ const PourMoiTab         = lazy(() => import("@/pages/app/tabs/PourMoiTab"));
 const ActionsTab         = lazy(() => import("@/pages/app/tabs/ActionsTab"));
 const TendancesTab       = lazy(() => import("@/pages/app/tabs/TendancesTab"));
 const AideTab            = lazy(() => import("@/pages/app/tabs/AideTab"));
+const ServicesTab        = lazy(() => import("@/pages/app/tabs/ServicesTab"));
+const ProviderPage       = lazy(() => import("@/pages/app/services/ProviderPage"));
+const RequestsPage       = lazy(() => import("@/pages/app/services/RequestsPage"));
+const RequestDetailPage  = lazy(() => import("@/pages/app/services/RequestDetailPage"));
 const ChatView           = lazy(() => import("@/pages/app/chat/ChatView"));
 const AdminLayout        = lazy(() => import("@/layouts/AdminLayout"));
 const AdminDashboard     = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -110,6 +114,10 @@ export default function App() {
                   <Route path="actions"   element={<ActionsTab />} />
                   <Route path="tendances" element={<TendancesTab />} />
                   <Route path="aide"      element={<AideTab />} />
+                  <Route path="services"  element={<ServicesTab />} />
+                  <Route path="services/prestataire" element={<ProviderPage />} />
+                  <Route path="services/demandes" element={<RequestsPage />} />
+                  <Route path="services/demandes/:requestId" element={<RequestDetailPage />} />
                 </Route>
 
                 <Route path="/app/chat/:threadId" element={<PrivateRoute><ChatView /></PrivateRoute>} />

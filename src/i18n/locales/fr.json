@@ -355,7 +355,9 @@
     "no_notifications_hint": "Tes conversations et activités récentes apparaîtront ici.",
     "active_threads": "Objectifs avec activité",
     "credits": "Crédits",
-    "see_you_soon": "À bientôt !"
+    "see_you_soon": "À bientôt !",
+    "tab_services": "Services",
+    "desc_services": "Proposer ou trouver un prestataire"
   },
   "chat": {
     "placeholder": "Écris ton message…",

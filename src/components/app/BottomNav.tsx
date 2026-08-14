@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Compass, FolderOpen, TrendingUp, HelpCircle } from "lucide-react";
+import { Compass, FolderOpen, Handshake, TrendingUp, HelpCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/shared/lib/utils";
 
 const TAB_ROUTES = [
   { to: "/app/pour-moi",  key: "app.tab_pour_moi", Icon: Compass     },
   { to: "/app/actions",   key: "app.tab_livrables", Icon: FolderOpen  },
+  { to: "/app/services",  key: "app.tab_services",  Icon: Handshake   },
   { to: "/app/tendances", key: "app.tab_trends",    Icon: TrendingUp  },
   { to: "/app/aide",      key: "app.tab_aide",      Icon: HelpCircle  },
 ] as const;
@@ -42,7 +43,7 @@ export function BottomNav() {
               </div>
               <span
                 className={cn(
-                  "text-[10px] font-medium leading-none transition-colors",
+                  "text-[9px] font-medium leading-none transition-colors",
                   active ? "text-primary" : "text-muted-foreground"
                 )}
               >
