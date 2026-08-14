@@ -55,6 +55,22 @@ jobs:
       name: staging
       url: https://staging.malayka.co
     steps:
+      - uses: actions/checkout@v4
+
+      # nginx.staging.conf est monté en volume, pas intégré à l'image Docker :
+      # un `docker pull` + redémarrage du conteneur ne le met jamais à jour tout
+      # seul. Sans cette étape, un changement de routage nginx pousse bien sur
+      # GitHub mais n'atteint jamais le serveur — c'est resté invisible jusqu'à
+      # ce qu'un module entier (Services) découvre le trou.
+      - uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "nginx.staging.conf"
+          target: ${{ secrets.DEPLOY_PATH }}
+          strip_components: 0
+
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -69,6 +85,12 @@ jobs:
             FRONTEND_IMAGE="${IMAGE}" IMAGE_TAG=develop \
               docker compose -f docker-compose.yml -f docker-compose.staging.yml \
               up -d --no-build frontend-staging
+            # Recharge nginx explicitement : si seul le fichier de config a
+            # changé (aucune modification de l'image), Compose peut décider
+            # que rien ne justifie de recréer le conteneur, et le nouveau
+            # fichier resterait sur disque sans jamais être pris en compte.
+            docker compose -f docker-compose.yml -f docker-compose.staging.yml \
+              exec -T frontend-staging nginx -s reload
             docker image prune -f
 
   deploy-production:
@@ -80,6 +102,20 @@ jobs:
       name: production
       url: https://malayka.co
     steps:
+      - uses: actions/checkout@v4
+
+      # Même raison qu'en staging : nginx.production.conf est un volume, pas
+      # une couche de l'image. C'est ce qui a fait qu'un correctif de routage
+      # fusionné dans main n'atteignait jamais malayka.co.
+      - uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "nginx.production.conf"
+          target: ${{ secrets.DEPLOY_PATH }}
+          strip_components: 0
+
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -93,4 +129,7 @@ jobs:
             docker pull "${IMAGE}:latest"
             FRONTEND_IMAGE="${IMAGE}" IMAGE_TAG=latest \
               docker compose up -d --no-build frontend
+            # Même précaution qu'en staging : forcer la prise en compte du
+            # fichier de config sans dépendre de la recréation du conteneur.
+            docker compose exec -T frontend nginx -s reload
             docker image prune -f
