@@ -12,6 +12,7 @@ import {
   useUnpublishProvider, useUpsertProvider,
 } from "@/hooks/queries/use-services";
 import type { InboxItem } from "@/services/api/services.api";
+import { QueryError } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 type Tab = "inbox" | "profile";
@@ -25,14 +26,14 @@ type Tab = "inbox" | "profile";
  */
 export default function ProviderPage() {
   const navigate = useNavigate();
-  const { data: provider, isLoading } = useMyProvider();
+  const { data: provider, isLoading, isError, refetch } = useMyProvider();
   const [tab, setTab] = useState<Tab>("inbox");
 
   // Bascule automatique sur le formulaire tant qu'aucune vitrine n'existe :
   // la boîte de réception serait vide et n'apprendrait rien.
   useEffect(() => {
-    if (!isLoading && !provider) setTab("profile");
-  }, [isLoading, provider]);
+    if (!isLoading && !isError && !provider) setTab("profile");
+  }, [isLoading, isError, provider]);
 
   return (
     <div className="flex flex-col px-4 py-5">
@@ -58,7 +59,12 @@ export default function ProviderPage() {
         </div>
       )}
 
-      {isLoading ? (
+      {isError ? (
+        <QueryError
+          message="Impossible de charger votre espace prestataire."
+          onRetry={() => void refetch()}
+        />
+      ) : isLoading ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
             <div key={i} className="h-24 animate-pulse rounded-xl border bg-card" />
@@ -92,7 +98,16 @@ function TabButton({
 // ── Boîte de réception ─────────────────────────────────────────────────────
 
 function InboxSection() {
-  const { data: items, isLoading } = useInbox();
+  const { data: items, isLoading, isError, refetch } = useInbox();
+
+  if (isError) {
+    return (
+      <QueryError
+        message="Impossible de charger vos propositions."
+        onRetry={() => void refetch()}
+      />
+    );
+  }
 
   if (isLoading) {
     return (

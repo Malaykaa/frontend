@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { CountrySelect } from "@/components/auth/CountrySelect";
 import { useCreateRequest, useMyRequests } from "@/hooks/queries/use-services";
 import type { RequestType } from "@/services/api/services.api";
-import { statusLabel } from "@/pages/app/tabs/ServicesTab";
+import { QueryError, statusLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 const TYPES: { value: RequestType; label: string; hint: string }[] = [
@@ -26,7 +26,7 @@ const TYPES: { value: RequestType; label: string; hint: string }[] = [
  */
 export default function RequestsPage() {
   const navigate = useNavigate();
-  const { data: requests, isLoading } = useMyRequests();
+  const { data: requests, isLoading, isError, refetch } = useMyRequests();
   const [creating, setCreating] = useState(false);
 
   return (
@@ -53,13 +53,20 @@ export default function RequestsPage() {
             Décrire un nouveau besoin
           </Button>
 
+          {isError && (
+            <QueryError
+              message="Impossible de charger vos demandes."
+              onRetry={() => void refetch()}
+            />
+          )}
+
           {isLoading && (
             <div className="space-y-2">
               {[0, 1].map((i) => <div key={i} className="h-20 animate-pulse rounded-xl border bg-card" />)}
             </div>
           )}
 
-          {!isLoading && !(requests?.length) && (
+          {!isLoading && !isError && !(requests?.length) && (
             <div className="rounded-2xl border border-dashed py-12 text-center">
               <Search className="mx-auto h-7 w-7 text-muted-foreground" />
               <p className="mt-2 text-sm font-medium">Aucune demande</p>

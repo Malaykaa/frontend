@@ -4,46 +4,48 @@ import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { InstallBanner } from "@/components/app/InstallBanner";
-import { Suspense, lazy } from "react";
+import { Suspense, useEffect } from "react";
+import { clearChunkReloadMark, lazyRoute } from "@/shared/lib/lazy-route";
 
-const LandingPage        = lazy(() => import("@/pages/landing"));
-const PrivacyPolicy      = lazy(() => import("@/pages/legal/PrivacyPolicy"));
-const TermsOfService     = lazy(() => import("@/pages/legal/TermsOfService"));
-const LoginPage           = lazy(() => import("@/pages/auth/LoginPage"));
-const OnboardingPage      = lazy(() => import("@/pages/auth/OnboardingPage"));
-const ForgotPasswordPage  = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
-const NotFoundPage       = lazy(() => import("@/pages/NotFoundPage"));
-const SharedDocumentPage = lazy(() => import("@/pages/shared/SharedDocumentPage"));
-const AppPage            = lazy(() => import("@/pages/app/AppPage"));
-const PourMoiTab         = lazy(() => import("@/pages/app/tabs/PourMoiTab"));
-const ActionsTab         = lazy(() => import("@/pages/app/tabs/ActionsTab"));
-const TendancesTab       = lazy(() => import("@/pages/app/tabs/TendancesTab"));
-const AideTab            = lazy(() => import("@/pages/app/tabs/AideTab"));
-const ServicesTab        = lazy(() => import("@/pages/app/tabs/ServicesTab"));
-const ProviderPage       = lazy(() => import("@/pages/app/services/ProviderPage"));
-const RequestsPage       = lazy(() => import("@/pages/app/services/RequestsPage"));
-const RequestDetailPage  = lazy(() => import("@/pages/app/services/RequestDetailPage"));
-const ChatView           = lazy(() => import("@/pages/app/chat/ChatView"));
-const AdminLayout        = lazy(() => import("@/layouts/AdminLayout"));
-const AdminDashboard     = lazy(() => import("@/pages/admin/AdminDashboard"));
-const AdminUsers         = lazy(() => import("@/pages/admin/AdminUsers"));
-const AdminUserDetail    = lazy(() => import("@/pages/admin/AdminUserDetail"));
-const AdminOffers        = lazy(() => import("@/pages/admin/AdminOffers"));
-const AdminGoals         = lazy(() => import("@/pages/admin/AdminGoals"));
-const AdminThreads       = lazy(() => import("@/pages/admin/AdminThreads"));
-const AdminThreadDetail  = lazy(() => import("@/pages/admin/AdminThreadDetail"));
-const AdminDocuments     = lazy(() => import("@/pages/admin/AdminDocuments"));
-const AdminIntents       = lazy(() => import("@/pages/admin/AdminIntents"));
-const AdminScraping      = lazy(() => import("@/pages/admin/AdminScraping"));
-const AdminCuration      = lazy(() => import("@/pages/admin/AdminCuration"));
-const AdminStructures    = lazy(() => import("@/pages/admin/AdminStructures"));
-const StructureDashboardPage = lazy(() => import("@/pages/structures/StructureDashboardPage"));
-const ClassroomDetailPage = lazy(() => import("@/pages/structures/ClassroomDetailPage"));
-const InviteAcceptPage   = lazy(() => import("@/pages/structures/InviteAcceptPage"));
-const ClassroomJoinPage  = lazy(() => import("@/pages/structures/ClassroomJoinPage"));
-const CourseProgressPage = lazy(() => import("@/pages/structures/CourseProgressPage"));
-const CourseEditorPage   = lazy(() => import("@/pages/structures/CourseEditorPage"));
-const MyCoursePage       = lazy(() => import("@/pages/structures/MyCoursePage"));
+const LandingPage        = lazyRoute(() => import("@/pages/landing"));
+const PrivacyPolicy      = lazyRoute(() => import("@/pages/legal/PrivacyPolicy"));
+const TermsOfService     = lazyRoute(() => import("@/pages/legal/TermsOfService"));
+const LoginPage           = lazyRoute(() => import("@/pages/auth/LoginPage"));
+const OnboardingPage      = lazyRoute(() => import("@/pages/auth/OnboardingPage"));
+const ForgotPasswordPage  = lazyRoute(() => import("@/pages/auth/ForgotPasswordPage"));
+const NotFoundPage       = lazyRoute(() => import("@/pages/NotFoundPage"));
+const SharedDocumentPage = lazyRoute(() => import("@/pages/shared/SharedDocumentPage"));
+const AppPage            = lazyRoute(() => import("@/pages/app/AppPage"));
+const PourMoiTab         = lazyRoute(() => import("@/pages/app/tabs/PourMoiTab"));
+const ActionsTab         = lazyRoute(() => import("@/pages/app/tabs/ActionsTab"));
+const TendancesTab       = lazyRoute(() => import("@/pages/app/tabs/TendancesTab"));
+const AideTab            = lazyRoute(() => import("@/pages/app/tabs/AideTab"));
+const ServicesTab        = lazyRoute(() => import("@/pages/app/tabs/ServicesTab"));
+const ProviderPage       = lazyRoute(() => import("@/pages/app/services/ProviderPage"));
+const RequestsPage       = lazyRoute(() => import("@/pages/app/services/RequestsPage"));
+const RequestDetailPage  = lazyRoute(() => import("@/pages/app/services/RequestDetailPage"));
+const ChatView           = lazyRoute(() => import("@/pages/app/chat/ChatView"));
+const AdminLayout        = lazyRoute(() => import("@/layouts/AdminLayout"));
+const AdminDashboard     = lazyRoute(() => import("@/pages/admin/AdminDashboard"));
+const AdminUsers         = lazyRoute(() => import("@/pages/admin/AdminUsers"));
+const AdminUserDetail    = lazyRoute(() => import("@/pages/admin/AdminUserDetail"));
+const AdminOffers        = lazyRoute(() => import("@/pages/admin/AdminOffers"));
+const AdminGoals         = lazyRoute(() => import("@/pages/admin/AdminGoals"));
+const AdminThreads       = lazyRoute(() => import("@/pages/admin/AdminThreads"));
+const AdminThreadDetail  = lazyRoute(() => import("@/pages/admin/AdminThreadDetail"));
+const AdminDocuments     = lazyRoute(() => import("@/pages/admin/AdminDocuments"));
+const AdminIntents       = lazyRoute(() => import("@/pages/admin/AdminIntents"));
+const AdminScraping      = lazyRoute(() => import("@/pages/admin/AdminScraping"));
+const AdminCuration      = lazyRoute(() => import("@/pages/admin/AdminCuration"));
+const AdminStructures    = lazyRoute(() => import("@/pages/admin/AdminStructures"));
+const AdminServices      = lazyRoute(() => import("@/pages/admin/AdminServices"));
+const StructureDashboardPage = lazyRoute(() => import("@/pages/structures/StructureDashboardPage"));
+const ClassroomDetailPage = lazyRoute(() => import("@/pages/structures/ClassroomDetailPage"));
+const InviteAcceptPage   = lazyRoute(() => import("@/pages/structures/InviteAcceptPage"));
+const ClassroomJoinPage  = lazyRoute(() => import("@/pages/structures/ClassroomJoinPage"));
+const CourseProgressPage = lazyRoute(() => import("@/pages/structures/CourseProgressPage"));
+const CourseEditorPage   = lazyRoute(() => import("@/pages/structures/CourseEditorPage"));
+const MyCoursePage       = lazyRoute(() => import("@/pages/structures/MyCoursePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,6 +96,10 @@ export function FullScreenLoader() {
 }
 
 export default function App() {
+  // L'application est montée : un éventuel rechargement dû à un morceau
+  // manquant a abouti, la marque peut être levée pour la suite de la session.
+  useEffect(clearChunkReloadMark, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -143,6 +149,7 @@ export default function App() {
                   <Route path="intents"           element={<AdminIntents />} />
                   <Route path="scraping"          element={<AdminScraping />} />
                   <Route path="structures"        element={<AdminStructures />} />
+                  <Route path="services"          element={<AdminServices />} />
                 </Route>
 
                 <Route path="/share/:token" element={<SharedDocumentPage />} />
