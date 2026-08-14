@@ -7,7 +7,7 @@ import {
   useClientDecide, useCloseRequest, useGoPublic, useRequest,
 } from "@/hooks/queries/use-services";
 import type { MatchCard } from "@/services/api/services.api";
-import { QueryError, statusLabel } from "@/pages/app/services/shared";
+import { QueryError, deliveryModeLabel, statusLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -62,12 +62,12 @@ export default function RequestDetailPage() {
             <p className="text-xs text-muted-foreground">{statusLabel(data.status)}</p>
             <p className="mt-1.5 text-sm">{data.description}</p>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-              {(data.city || data.country) && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {[data.city, data.country].filter(Boolean).join(", ")}
-                </span>
-              )}
+              <span className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {data.delivery_mode === "remote"
+                  ? "À distance"
+                  : [data.city, data.country].filter(Boolean).join(", ") || deliveryModeLabel(data.delivery_mode)}
+              </span>
               {data.budget_hint && <span>Budget : {data.budget_hint}</span>}
             </div>
           </div>
@@ -230,12 +230,12 @@ function ProviderCard({
       )}
 
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-        {(card.city || card.country) && (
-          <span className="flex items-center gap-1">
-            <MapPin className="h-3 w-3" />
-            {[card.city, card.country].filter(Boolean).join(", ")}
-          </span>
-        )}
+        <span className="flex items-center gap-1">
+          <MapPin className="h-3 w-3" />
+          {card.delivery_mode === "remote"
+            ? "À distance"
+            : [card.city, card.country].filter(Boolean).join(", ") || deliveryModeLabel(card.delivery_mode)}
+        </span>
         {card.rate_text && <span>{card.rate_text}</span>}
         {card.availability_text && <span>{card.availability_text}</span>}
         {card.years_experience !== null && <span>{card.years_experience} ans d'exp.</span>}

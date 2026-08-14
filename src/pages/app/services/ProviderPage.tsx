@@ -11,8 +11,8 @@ import {
   useInbox, useMyProvider, useProviderDecide, usePublishProvider,
   useUnpublishProvider, useUpsertProvider,
 } from "@/hooks/queries/use-services";
-import type { InboxItem } from "@/services/api/services.api";
-import { QueryError } from "@/pages/app/services/shared";
+import type { DeliveryMode, InboxItem } from "@/services/api/services.api";
+import { DeliveryModeSelect, QueryError, deliveryModeLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 type Tab = "inbox" | "profile";
@@ -210,12 +210,12 @@ function InboxCard({ item, actionable = false }: { item: InboxItem; actionable?:
       </div>
 
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-        {(item.city || item.country) && (
-          <span className="flex items-center gap-1">
-            <MapPin className="h-3 w-3" />
-            {[item.city, item.country].filter(Boolean).join(", ")}
-          </span>
-        )}
+        <span className="flex items-center gap-1">
+          <MapPin className="h-3 w-3" />
+          {item.delivery_mode === "remote"
+            ? "À distance"
+            : [item.city, item.country].filter(Boolean).join(", ") || deliveryModeLabel(item.delivery_mode)}
+        </span>
         {item.budget_hint && <span>Budget : {item.budget_hint}</span>}
       </div>
 
@@ -271,7 +271,8 @@ function ProfileSection() {
   const unpublish = useUnpublishProvider();
 
   const [form, setForm] = useState({
-    title: "", description: "", keywordsRaw: "", city: "", country: "",
+    title: "", description: "", keywordsRaw: "",
+    delivery_mode: "onsite" as DeliveryMode, city: "", country: "",
     rate_text: "", availability_text: "", years_experience: "", contact_phone: "",
   });
 
@@ -281,6 +282,7 @@ function ProfileSection() {
       title: provider.title,
       description: provider.description,
       keywordsRaw: (provider.keywords ?? []).join(", "),
+      delivery_mode: provider.delivery_mode,
       city: provider.city ?? "",
       country: provider.country ?? "",
       rate_text: provider.rate_text ?? "",
@@ -297,8 +299,9 @@ function ProfileSection() {
       title: form.title.trim(),
       description: form.description.trim(),
       keywords: form.keywordsRaw.split(",").map((k) => k.trim()).filter(Boolean).slice(0, 15),
-      city: form.city || null,
-      country: form.country || null,
+      delivery_mode: form.delivery_mode,
+      city: form.delivery_mode === "remote" ? null : form.city || null,
+      country: form.delivery_mode === "remote" ? null : form.country || null,
       rate_text: form.rate_text || null,
       availability_text: form.availability_text || null,
       years_experience: form.years_experience ? parseInt(form.years_experience, 10) : null,
@@ -344,7 +347,7 @@ function ProfileSection() {
         <Input
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          placeholder="Plombier · dépannage 24h"
+          placeholder="Designer graphique · identité visuelle et supports print"
           maxLength={300}
         />
       </Field>
@@ -364,26 +367,33 @@ function ProfileSection() {
         <Input
           value={form.keywordsRaw}
           onChange={(e) => setForm((f) => ({ ...f, keywordsRaw: e.target.value }))}
-          placeholder="plomberie, fuite, urgence, sanitaire"
+          placeholder="design graphique, logo, identité visuelle, charte graphique"
         />
       </Field>
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Ville">
-          <Input
-            value={form.city}
-            onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-            placeholder="Abidjan"
-          />
-        </Field>
-        <Field label="Pays">
-          <CountrySelect
-            value={form.country}
-            onChange={(code) => setForm((f) => ({ ...f, country: code }))}
-            placeholder="Sélectionner"
-          />
-        </Field>
-      </div>
+      <DeliveryModeSelect
+        value={form.delivery_mode}
+        onChange={(delivery_mode) => setForm((f) => ({ ...f, delivery_mode }))}
+      />
+
+      {form.delivery_mode !== "remote" && (
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Ville">
+            <Input
+              value={form.city}
+              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+              placeholder="Abidjan"
+            />
+          </Field>
+          <Field label="Pays">
+            <CountrySelect
+              value={form.country}
+              onChange={(code) => setForm((f) => ({ ...f, country: code }))}
+              placeholder="Sélectionner"
+            />
+          </Field>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Tarif" hint="Libre">
