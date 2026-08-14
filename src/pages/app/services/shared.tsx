@@ -1,4 +1,4 @@
-import { AlertCircle, Laptop, MapPin, RefreshCw, Shuffle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { ApiError } from "@/shared/api/client";
@@ -13,10 +13,10 @@ import { cn } from "@/shared/lib/utils";
  * crée un couplage inutile entre écrans — ces helpers sont donc isolés ici.
  */
 
-const DELIVERY_MODES: { value: DeliveryMode; label: string; hint: string; Icon: typeof Laptop }[] = [
-  { value: "remote", label: "À distance",  hint: "Aucune ville à préciser", Icon: Laptop },
-  { value: "hybrid", label: "Hybride",     hint: "Selon les besoins",       Icon: Shuffle },
-  { value: "onsite", label: "En présentiel", hint: "Ville requise",         Icon: MapPin },
+const DELIVERY_MODES: { value: DeliveryMode; label: string }[] = [
+  { value: "remote", label: "À distance" },
+  { value: "hybrid", label: "Hybride" },
+  { value: "onsite", label: "En présentiel" },
 ];
 
 export function deliveryModeLabel(mode: string): string {
@@ -26,11 +26,15 @@ export function deliveryModeLabel(mode: string): string {
 /**
  * Où se déroule la prestation — à choisir avant la ville et le pays.
  *
- * Certaines prestations (design, développement, rédaction, conseil...) se
- * font entièrement à distance : demander une ville dans ce cas exclurait à
- * tort des prestataires capables de la réaliser depuis n'importe où. Le choix
- * précède donc les champs de localisation plutôt que de les accompagner, pour
- * que la question se pose avant que la ville n'ait même de sens.
+ * Décidé par le CLIENT, jamais par le prestataire : c'est le besoin exprimé
+ * qui détermine si la localisation compte, pas la vitrine du prestataire, qui
+ * a toujours une ville. À distance, la ville et le pays disparaissent du
+ * formulaire et le matching ignore la localisation des prestataires ; en
+ * présentiel ou hybride, ils filtrent réellement les résultats.
+ *
+ * Boutons simples, pas des cartes : c'est un choix rapide entre trois options
+ * courtes, pas une décision qui mérite de l'espace ou une explication à côté
+ * de chaque bouton.
  */
 export function DeliveryModeSelect({
   value, onChange,
@@ -39,25 +43,56 @@ export function DeliveryModeSelect({
     <div className="space-y-1.5">
       <Label className="text-xs">Où se fait la prestation ?</Label>
       <div className="grid grid-cols-3 gap-2">
-        {DELIVERY_MODES.map(({ value: v, label, hint, Icon }) => (
+        {DELIVERY_MODES.map(({ value: v, label }) => (
           <button
             key={v}
             type="button"
             onClick={() => onChange(v)}
             className={cn(
-              "flex flex-col items-center gap-1 rounded-xl border p-2.5 text-center transition-all",
+              "rounded-lg border px-2 py-2 text-center text-xs font-medium transition-colors",
               value === v
-                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                ? "border-primary bg-primary text-primary-foreground"
                 : "border-input hover:bg-muted/40"
             )}
           >
-            <Icon className={cn("h-4 w-4", value === v ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-[11px] font-semibold leading-tight">{label}</span>
-            <span className="text-[9px] leading-tight text-muted-foreground">{hint}</span>
+            {label}
           </button>
         ))}
       </div>
     </div>
+  );
+}
+
+const URL_PATTERN = /(https?:\/\/[^\s]+)/g;
+
+/**
+ * Texte libre avec liens cliquables — utilisé pour les réalisations, où le
+ * prestataire est explicitement invité à coller des liens en appui.
+ *
+ * Découpage par expression régulière plutôt qu'un rendu Markdown complet :
+ * le champ est du texte brut, pas du Markdown, et la seule mise en forme
+ * utile ici est de rendre les URL cliquables.
+ */
+export function Linkified({ text }: { text: string }) {
+  const parts = text.split(URL_PATTERN);
+  return (
+    <p className="whitespace-pre-wrap break-words">
+      {parts.map((part, i) =>
+        URL_PATTERN.test(part) ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline"
+          >
+            {part}
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </p>
   );
 }
 
