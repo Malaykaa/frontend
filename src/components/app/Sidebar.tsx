@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Compass, FolderOpen, TrendingUp, HelpCircle, LogOut } from "lucide-react";
+import { Compass, FolderOpen, TrendingUp, HelpCircle, LogOut, Handshake } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 const TABS = [
   { to: "/app/pour-moi",  labelKey: "app.tab_pour_moi",  descKey: "app.desc_pour_moi",  Icon: Compass    },
   { to: "/app/actions",   labelKey: "app.tab_livrables",  descKey: "app.desc_livrables", Icon: FolderOpen },
+  { to: "/app/services",  labelKey: "app.tab_services",   descKey: "app.desc_services",  Icon: Handshake  },
   { to: "/app/tendances", labelKey: "app.tab_trends",     descKey: "app.desc_trends",    Icon: TrendingUp },
   { to: "/app/aide",      labelKey: "app.tab_aide",       descKey: "app.desc_aide",      Icon: HelpCircle },
 ] as const;

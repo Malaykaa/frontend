@@ -355,7 +355,9 @@
     "no_notifications_hint": "Your recent conversations and activity will appear here.",
     "active_threads": "Goals with activity",
     "credits": "Credits",
-    "see_you_soon": "See you soon!"
+    "see_you_soon": "See you soon!",
+    "tab_services": "Services",
+    "desc_services": "Offer or find a provider"
   },
   "chat": {
     "placeholder": "Write your message…",
