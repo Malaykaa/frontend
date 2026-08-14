@@ -24,7 +24,7 @@ import { cn } from "@/shared/lib/utils";
 export default function RequestDetailPage() {
   const { requestId = "" } = useParams();
   const navigate = useNavigate();
-  const { data, isLoading, isError, refetch } = useRequest(requestId);
+  const { data, isLoading, isError, error, refetch } = useRequest(requestId);
   const goPublicMut = useGoPublic();
   const closeMut = useCloseRequest();
 
@@ -50,6 +50,7 @@ export default function RequestDetailPage() {
       {isError && (
         <QueryError
           message="Impossible de charger cette demande."
+          error={error}
           onRetry={() => void refetch()}
         />
       )}

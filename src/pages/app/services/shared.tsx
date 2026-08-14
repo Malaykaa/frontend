@@ -1,5 +1,6 @@
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { ApiError } from "@/shared/api/client";
 
 /**
  * Éléments partagés du module Services.
@@ -28,17 +29,39 @@ export function statusLabel(status: string): string {
  * chargement était en cours, s'il n'avait rien, ou si quelque chose avait
  * échoué. Une erreur doit se voir et proposer une action.
  */
+/** Détail technique d'une erreur : « 500 — la base est inaccessible ». */
+function errorDetail(error: unknown): string | null {
+  if (!error) return null;
+  const status = (error as ApiError)?.status;
+  const message = error instanceof Error ? error.message.trim() : "";
+  if (status && message && message !== `HTTP ${status}`) return `${status} — ${message}`;
+  if (status) return String(status);
+  return message || null;
+}
+
 export function QueryError({
   message = "Impossible de charger ces informations.",
+  error,
   onRetry,
 }: {
   message?: string;
+  /**
+   * L'erreur d'origine. Affichée en clair sous le message : sans elle,
+   * l'utilisateur ne peut rapporter qu'« ça ne marche pas », ce qui ne permet
+   * de distinguer ni une panne serveur, ni une session expirée, ni un
+   * problème de réseau — trois causes aux correctifs sans rapport.
+   */
+  error?: unknown;
   onRetry?: () => void;
 }) {
+  const detail = errorDetail(error);
   return (
     <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-center">
       <AlertCircle className="mx-auto h-5 w-5 text-destructive" />
       <p className="mt-2 text-sm font-medium text-destructive">{message}</p>
+      {detail && (
+        <p className="mt-1 break-words text-[11px] text-destructive/70">{detail}</p>
+      )}
       {onRetry && (
         <Button variant="outline" size="sm" className="mt-3 gap-1.5" onClick={onRetry}>
           <RefreshCw className="h-3.5 w-3.5" />

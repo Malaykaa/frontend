@@ -26,7 +26,7 @@ type Tab = "inbox" | "profile";
  */
 export default function ProviderPage() {
   const navigate = useNavigate();
-  const { data: provider, isLoading, isError, refetch } = useMyProvider();
+  const { data: provider, isLoading, isError, error, refetch } = useMyProvider();
   const [tab, setTab] = useState<Tab>("inbox");
 
   // Bascule automatique sur le formulaire tant qu'aucune vitrine n'existe :
@@ -62,6 +62,7 @@ export default function ProviderPage() {
       {isError ? (
         <QueryError
           message="Impossible de charger votre espace prestataire."
+          error={error}
           onRetry={() => void refetch()}
         />
       ) : isLoading ? (
@@ -98,12 +99,13 @@ function TabButton({
 // ── Boîte de réception ─────────────────────────────────────────────────────
 
 function InboxSection() {
-  const { data: items, isLoading, isError, refetch } = useInbox();
+  const { data: items, isLoading, isError, error, refetch } = useInbox();
 
   if (isError) {
     return (
       <QueryError
         message="Impossible de charger vos propositions."
+        error={error}
         onRetry={() => void refetch()}
       />
     );

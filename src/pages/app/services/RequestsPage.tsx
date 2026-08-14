@@ -26,7 +26,7 @@ const TYPES: { value: RequestType; label: string; hint: string }[] = [
  */
 export default function RequestsPage() {
   const navigate = useNavigate();
-  const { data: requests, isLoading, isError, refetch } = useMyRequests();
+  const { data: requests, isLoading, isError, error, refetch } = useMyRequests();
   const [creating, setCreating] = useState(false);
 
   return (
@@ -56,6 +56,7 @@ export default function RequestsPage() {
           {isError && (
             <QueryError
               message="Impossible de charger vos demandes."
+              error={error}
               onRetry={() => void refetch()}
             />
           )}

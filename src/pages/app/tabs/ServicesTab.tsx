@@ -15,9 +15,11 @@ import { cn } from "@/shared/lib/utils";
  */
 export default function ServicesTab() {
   const navigate = useNavigate();
-  const { data: provider, isError: providerError, refetch: refetchProvider } = useMyProvider();
+  const {
+    data: provider, isError: providerError, error: providerErrorObj, refetch: refetchProvider,
+  } = useMyProvider();
   const { data: inbox } = useInbox();
-  const { data: requests, isError: requestsError } = useMyRequests();
+  const { data: requests, isError: requestsError, error: requestsErrorObj } = useMyRequests();
 
   const pendingCount = (inbox ?? []).filter((i) => i.decision === "pending").length;
   const wonCount = (inbox ?? []).filter((i) => i.decision === "client_accepted").length;
@@ -35,7 +37,10 @@ export default function ServicesTab() {
       </div>
 
       {(providerError || requestsError) && (
-        <QueryError onRetry={() => void refetchProvider()} />
+        <QueryError
+          error={providerErrorObj ?? requestsErrorObj}
+          onRetry={() => void refetchProvider()}
+        />
       )}
 
       {/* Les deux portes d'entrée */}
