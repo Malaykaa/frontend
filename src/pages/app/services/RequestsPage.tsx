@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CountrySelect } from "@/components/auth/CountrySelect";
 import { useCreateRequest, useMyRequests } from "@/hooks/queries/use-services";
-import type { RequestType } from "@/services/api/services.api";
-import { QueryError, statusLabel } from "@/pages/app/services/shared";
+import type { DeliveryMode, RequestType } from "@/services/api/services.api";
+import { DeliveryModeSelect, QueryError, statusLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 const TYPES: { value: RequestType; label: string; hint: string }[] = [
@@ -103,7 +103,8 @@ function NewRequestForm({ onDone }: { onDone: (id: string) => void }) {
   const create = useCreateRequest();
   const [form, setForm] = useState({
     request_type: "prestation" as RequestType,
-    title: "", description: "", keywordsRaw: "", city: "", country: "", budget_hint: "",
+    title: "", description: "", keywordsRaw: "",
+    delivery_mode: "onsite" as DeliveryMode, city: "", country: "", budget_hint: "",
   });
 
   const canSubmit = form.title.trim().length >= 3 && form.description.trim().length >= 10;
@@ -115,8 +116,9 @@ function NewRequestForm({ onDone }: { onDone: (id: string) => void }) {
         title: form.title.trim(),
         description: form.description.trim(),
         keywords: form.keywordsRaw.split(",").map((k) => k.trim()).filter(Boolean).slice(0, 15),
-        city: form.city || null,
-        country: form.country || null,
+        delivery_mode: form.delivery_mode,
+        city: form.delivery_mode === "remote" ? null : form.city || null,
+        country: form.delivery_mode === "remote" ? null : form.country || null,
         budget_hint: form.budget_hint || null,
       },
       { onSuccess: (detail) => onDone(detail.id) }
@@ -152,7 +154,7 @@ function NewRequestForm({ onDone }: { onDone: (id: string) => void }) {
           autoFocus
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          placeholder="Plombier pour une fuite dans la salle de bain"
+          placeholder="Développeur pour refondre mon site vitrine"
           maxLength={300}
         />
       </div>
@@ -174,31 +176,38 @@ function NewRequestForm({ onDone }: { onDone: (id: string) => void }) {
         <Input
           value={form.keywordsRaw}
           onChange={(e) => setForm((f) => ({ ...f, keywordsRaw: e.target.value }))}
-          placeholder="plomberie, fuite, urgence"
+          placeholder="développement web, React, intégration"
         />
         <p className="text-[11px] text-muted-foreground">
           Séparés par des virgules — ils affinent fortement la recherche
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs">Ville</Label>
-          <Input
-            value={form.city}
-            onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-            placeholder="Abidjan"
-          />
+      <DeliveryModeSelect
+        value={form.delivery_mode}
+        onChange={(delivery_mode) => setForm((f) => ({ ...f, delivery_mode }))}
+      />
+
+      {form.delivery_mode !== "remote" && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Ville</Label>
+            <Input
+              value={form.city}
+              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+              placeholder="Abidjan"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Pays</Label>
+            <CountrySelect
+              value={form.country}
+              onChange={(code) => setForm((f) => ({ ...f, country: code }))}
+              placeholder="Sélectionner"
+            />
+          </div>
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">Pays</Label>
-          <CountrySelect
-            value={form.country}
-            onChange={(code) => setForm((f) => ({ ...f, country: code }))}
-            placeholder="Sélectionner"
-          />
-        </div>
-      </div>
+      )}
 
       <div className="space-y-1.5">
         <Label className="text-xs">Budget indicatif</Label>

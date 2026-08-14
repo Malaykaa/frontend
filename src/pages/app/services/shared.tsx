@@ -1,6 +1,9 @@
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, Laptop, MapPin, RefreshCw, Shuffle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import type { ApiError } from "@/shared/api/client";
+import type { DeliveryMode } from "@/services/api/services.api";
+import { cn } from "@/shared/lib/utils";
 
 /**
  * Éléments partagés du module Services.
@@ -9,6 +12,54 @@ import type { ApiError } from "@/shared/api/client";
  * page lazy-loadée qui en importe une autre force le chargement des deux et
  * crée un couplage inutile entre écrans — ces helpers sont donc isolés ici.
  */
+
+const DELIVERY_MODES: { value: DeliveryMode; label: string; hint: string; Icon: typeof Laptop }[] = [
+  { value: "remote", label: "À distance",  hint: "Aucune ville à préciser", Icon: Laptop },
+  { value: "hybrid", label: "Hybride",     hint: "Selon les besoins",       Icon: Shuffle },
+  { value: "onsite", label: "En présentiel", hint: "Ville requise",         Icon: MapPin },
+];
+
+export function deliveryModeLabel(mode: string): string {
+  return DELIVERY_MODES.find((m) => m.value === mode)?.label ?? mode;
+}
+
+/**
+ * Où se déroule la prestation — à choisir avant la ville et le pays.
+ *
+ * Certaines prestations (design, développement, rédaction, conseil...) se
+ * font entièrement à distance : demander une ville dans ce cas exclurait à
+ * tort des prestataires capables de la réaliser depuis n'importe où. Le choix
+ * précède donc les champs de localisation plutôt que de les accompagner, pour
+ * que la question se pose avant que la ville n'ait même de sens.
+ */
+export function DeliveryModeSelect({
+  value, onChange,
+}: { value: DeliveryMode; onChange: (mode: DeliveryMode) => void }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">Où se fait la prestation ?</Label>
+      <div className="grid grid-cols-3 gap-2">
+        {DELIVERY_MODES.map(({ value: v, label, hint, Icon }) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => onChange(v)}
+            className={cn(
+              "flex flex-col items-center gap-1 rounded-xl border p-2.5 text-center transition-all",
+              value === v
+                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                : "border-input hover:bg-muted/40"
+            )}
+          >
+            <Icon className={cn("h-4 w-4", value === v ? "text-primary" : "text-muted-foreground")} />
+            <span className="text-[11px] font-semibold leading-tight">{label}</span>
+            <span className="text-[9px] leading-tight text-muted-foreground">{hint}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function statusLabel(status: string): string {
   switch (status) {

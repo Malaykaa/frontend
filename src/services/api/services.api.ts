@@ -3,6 +3,7 @@ import { apiRequest } from "@/shared/api/client";
 // ── Types (miroir de app/schemas/service.py) ───────────────────────────────
 
 export type ProviderStatus = "draft" | "published" | "paused" | "suspended";
+export type DeliveryMode = "remote" | "onsite" | "hybrid";
 export type RequestType = "prestation" | "emploi" | "stage" | "autre";
 export type RequestStatus = "open" | "public" | "fulfilled" | "closed" | "expired";
 export type MatchDecision =
@@ -15,6 +16,7 @@ export interface ProviderProfile {
   title: string;
   description: string;
   keywords: string[];
+  delivery_mode: DeliveryMode;
   city: string | null;
   country: string | null;
   rate_text: string | null;
@@ -30,6 +32,7 @@ export interface ProviderUpsertPayload {
   title: string;
   description: string;
   keywords: string[];
+  delivery_mode: DeliveryMode;
   city?: string | null;
   country?: string | null;
   rate_text?: string | null;
@@ -45,6 +48,7 @@ export interface ProviderPublicCard {
   title: string;
   description: string;
   keywords: string[];
+  delivery_mode: DeliveryMode;
   city: string | null;
   country: string | null;
   rate_text: string | null;
@@ -70,6 +74,7 @@ export interface ServiceRequest {
   title: string;
   description: string;
   keywords: string[];
+  delivery_mode: DeliveryMode;
   city: string | null;
   country: string | null;
   budget_hint: string | null;
@@ -91,6 +96,7 @@ export interface RequestCreatePayload {
   title: string;
   description: string;
   keywords: string[];
+  delivery_mode: DeliveryMode;
   city?: string | null;
   country?: string | null;
   budget_hint?: string | null;
@@ -102,6 +108,7 @@ export interface InboxItem {
   request_type: RequestType;
   title: string;
   description: string;
+  delivery_mode: DeliveryMode;
   city: string | null;
   country: string | null;
   budget_hint: string | null;
