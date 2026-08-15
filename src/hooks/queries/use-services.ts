@@ -3,8 +3,8 @@ import { toast } from "sonner";
 import {
   clientDecide, closeRequest, createRequest, fetchInbox, fetchMyProvider,
   fetchMyRequests, fetchRequest, goPublic, providerDecide, publishMyProvider,
-  unpublishMyProvider, upsertMyProvider,
-  type ProviderUpsertPayload, type RequestCreatePayload,
+  unpublishMyProvider, updateRequest, upsertMyProvider,
+  type ProviderUpsertPayload, type RequestCreatePayload, type RequestUpdatePayload,
 } from "@/services/api/services.api";
 
 // Une seule re-tentative sur les lectures. Par défaut React Query en fait
@@ -116,6 +116,20 @@ export function useCreateRequest() {
     mutationFn: (payload: RequestCreatePayload) => createRequest(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: serviceKeys.requests }),
     onError: () => toast.error("Impossible de publier la demande."),
+  });
+}
+
+export function useUpdateRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: RequestUpdatePayload }) =>
+      updateRequest(id, payload),
+    onSuccess: (_d, { id }) => {
+      qc.invalidateQueries({ queryKey: serviceKeys.request(id) });
+      qc.invalidateQueries({ queryKey: serviceKeys.requests });
+      toast.success("Demande mise à jour.");
+    },
+    onError: (e) => toast.error(reason(e, "Impossible de mettre à jour la demande.")),
   });
 }
 

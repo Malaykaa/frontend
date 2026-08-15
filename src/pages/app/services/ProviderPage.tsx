@@ -12,7 +12,7 @@ import {
   useUnpublishProvider, useUpsertProvider,
 } from "@/hooks/queries/use-services";
 import type { InboxItem } from "@/services/api/services.api";
-import { QueryError, deliveryModeLabel } from "@/pages/app/services/shared";
+import { Chip, QueryError, deliveryModeLabel } from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 type Tab = "inbox" | "profile";
@@ -195,9 +195,7 @@ function InboxCard({ item, actionable = false }: { item: InboxItem; actionable?:
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {TYPE_LABELS[item.request_type] ?? item.request_type}
-            </span>
+            <Chip tone="violet">{TYPE_LABELS[item.request_type] ?? item.request_type}</Chip>
             {item.match_score !== null && (
               <span className="text-[10px] font-medium text-primary">
                 {Math.round(item.match_score)} % de correspondance
@@ -209,14 +207,13 @@ function InboxCard({ item, actionable = false }: { item: InboxItem; actionable?:
         </div>
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <Chip tone="sky" icon={MapPin}>
           {item.delivery_mode === "remote"
             ? "À distance"
             : [item.city, item.country].filter(Boolean).join(", ") || deliveryModeLabel(item.delivery_mode)}
-        </span>
-        {item.budget_hint && <span>Budget : {item.budget_hint}</span>}
+        </Chip>
+        {item.budget_hint && <Chip tone="emerald">{item.budget_hint}</Chip>}
       </div>
 
       {/* Les coordonnées n'apparaissent qu'une fois la mise en relation faite. */}
@@ -357,14 +354,11 @@ function ProfileSection() {
         />
       </Field>
 
-      <Field
-        label="Décrivez de manière détaillée tout ce que vous savez bien faire"
-        hint="20 caractères minimum"
-      >
+      <Field label="Que savez-vous faire ?" hint="20 caractères minimum">
         <textarea
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-          placeholder="Ce que vous faites, votre expérience, vos spécialités…"
+          placeholder="Détaillez ce que vous savez faire. Exemple : je suis développeur Flutter, je développe des applications mobiles pour les entreprises et particuliers…"
           rows={5}
           maxLength={5000}
           className="w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

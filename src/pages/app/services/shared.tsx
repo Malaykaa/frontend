@@ -63,6 +63,41 @@ export function DeliveryModeSelect({
   );
 }
 
+const CHIP_TONES = {
+  violet:  "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300",
+  sky:     "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300",
+  emerald: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
+  amber:   "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
+} as const;
+
+/**
+ * Petite pastille colorée — domaine, localisation, budget…
+ *
+ * Reprend le principe déjà utilisé pour le badge « Prestation » (fond
+ * teinté, texte en majuscules, coins arrondis), mais avec une couleur par
+ * catégorie d'information plutôt qu'un gris uniforme : en un coup d'œil, le
+ * type d'information se distingue avant même d'en lire le contenu.
+ */
+export function Chip({
+  tone, icon: Icon, children,
+}: {
+  tone: keyof typeof CHIP_TONES;
+  icon?: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+        CHIP_TONES[tone]
+      )}
+    >
+      {Icon && <Icon className="h-3 w-3" />}
+      {children}
+    </span>
+  );
+}
+
 const URL_PATTERN = /(https?:\/\/[^\s]+)/g;
 
 /**

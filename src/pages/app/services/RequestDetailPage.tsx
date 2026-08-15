@@ -1,13 +1,19 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowLeft, Check, Clock, Globe2, Handshake, Loader2, MapPin, Phone, X,
+  ArrowLeft, Check, Clock, Globe2, Handshake, Loader2, MapPin, Pencil, Phone, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CountrySelect } from "@/components/auth/CountrySelect";
 import {
-  useClientDecide, useCloseRequest, useGoPublic, useRequest,
+  useClientDecide, useCloseRequest, useGoPublic, useRequest, useUpdateRequest,
 } from "@/hooks/queries/use-services";
-import type { MatchCard } from "@/services/api/services.api";
-import { Linkified, QueryError, deliveryModeLabel, statusLabel } from "@/pages/app/services/shared";
+import type { MatchCard, ServiceRequestDetail } from "@/services/api/services.api";
+import {
+  Chip, DeliveryModeSelect, Linkified, QueryError, deliveryModeLabel, statusLabel,
+} from "@/pages/app/services/shared";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -27,18 +33,34 @@ export default function RequestDetailPage() {
   const { data, isLoading, isError, error, refetch } = useRequest(requestId);
   const goPublicMut = useGoPublic();
   const closeMut = useCloseRequest();
+  const [editing, setEditing] = useState(false);
+
+  // Modifiable tant qu'aucun prestataire n'a été retenu et que la demande
+  // n'est pas clôturée — même règle que côté serveur.
+  const canEdit = data?.status === "open" || data?.status === "public";
 
   return (
     <div className="flex flex-col px-4 py-5">
       <div className="mb-4 flex items-center gap-3">
         <button
-          onClick={() => navigate("/app/services/demandes")}
+          onClick={() => (editing ? setEditing(false) : navigate("/app/services/demandes"))}
           className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-muted"
           aria-label="Retour"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <h1 className="truncate text-lg font-bold">{data?.title ?? "Demande"}</h1>
+        <h1 className="min-w-0 flex-1 truncate text-lg font-bold">
+          {editing ? "Modifier la demande" : (data?.title ?? "Demande")}
+        </h1>
+        {!editing && canEdit && (
+          <button
+            onClick={() => setEditing(true)}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-muted"
+            aria-label="Modifier"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {isLoading && (
@@ -55,20 +77,23 @@ export default function RequestDetailPage() {
         />
       )}
 
-      {data && (
+      {data && editing && (
+        <EditRequestForm data={data} onDone={() => setEditing(false)} />
+      )}
+
+      {data && !editing && (
         <div className="space-y-5">
           {/* Résumé */}
           <div className="rounded-xl border bg-card p-3.5">
             <p className="text-xs text-muted-foreground">{statusLabel(data.status)}</p>
             <p className="mt-1.5 text-sm">{data.description}</p>
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <Chip tone="sky" icon={MapPin}>
                 {data.delivery_mode === "remote"
                   ? "À distance"
                   : [data.city, data.country].filter(Boolean).join(", ") || deliveryModeLabel(data.delivery_mode)}
-              </span>
-              {data.budget_hint && <span>Budget : {data.budget_hint}</span>}
+              </Chip>
+              {data.budget_hint && <Chip tone="emerald">{data.budget_hint}</Chip>}
             </div>
           </div>
 
@@ -159,6 +184,141 @@ export default function RequestDetailPage() {
   );
 }
 
+/**
+ * Modification d'une demande déjà publiée.
+ *
+ * Mêmes champs qu'à la création, préremplis avec les valeurs actuelles.
+ * Volontairement séparé du formulaire de création : celui-ci n'a ni type de
+ * demande à choisir en avant-plan ni bouton « Trouver des prestataires » —
+ * la demande existe déjà, il ne s'agit que d'ajuster son contenu.
+ */
+function EditRequestForm({
+  data, onDone,
+}: { data: ServiceRequestDetail; onDone: () => void }) {
+  const update = useUpdateRequest();
+  const [form, setForm] = useState({
+    title: data.title,
+    description: data.description,
+    keywordsRaw: (data.keywords ?? []).join(", "),
+    delivery_mode: data.delivery_mode,
+    city: data.city ?? "",
+    country: data.country ?? "",
+    budget_hint: data.budget_hint ?? "",
+    contact_phone: data.contact_phone ?? "",
+  });
+
+  const canSave =
+    form.title.trim().length >= 3 && form.description.trim().length >= 10
+    && form.contact_phone.trim().length >= 6;
+
+  const save = () =>
+    update.mutate(
+      {
+        id: data.id,
+        payload: {
+          title: form.title.trim(),
+          description: form.description.trim(),
+          keywords: form.keywordsRaw.split(",").map((k) => k.trim()).filter(Boolean).slice(0, 15),
+          delivery_mode: form.delivery_mode,
+          city: form.delivery_mode === "remote" ? null : form.city || null,
+          country: form.delivery_mode === "remote" ? null : form.country || null,
+          budget_hint: form.budget_hint || null,
+          contact_phone: form.contact_phone.trim(),
+        },
+      },
+      { onSuccess: () => onDone() }
+    );
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <Label className="text-xs">Votre besoin en une ligne</Label>
+        <Input
+          value={form.title}
+          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+          maxLength={300}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">Détaillez votre demande</Label>
+        <textarea
+          value={form.description}
+          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          rows={5}
+          maxLength={5000}
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">Mots-clés</Label>
+        <Input
+          value={form.keywordsRaw}
+          onChange={(e) => setForm((f) => ({ ...f, keywordsRaw: e.target.value }))}
+          placeholder="développement web, React, intégration"
+        />
+      </div>
+
+      <DeliveryModeSelect
+        value={form.delivery_mode}
+        onChange={(delivery_mode) => setForm((f) => ({ ...f, delivery_mode }))}
+      />
+
+      {form.delivery_mode !== "remote" && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Ville</Label>
+            <Input
+              value={form.city}
+              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+              placeholder="Abidjan"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Pays</Label>
+            <CountrySelect
+              value={form.country}
+              onChange={(code) => setForm((f) => ({ ...f, country: code }))}
+              placeholder="Sélectionner"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">Budget indicatif</Label>
+        <Input
+          value={form.budget_hint}
+          onChange={(e) => setForm((f) => ({ ...f, budget_hint: e.target.value }))}
+          placeholder="Entre 20 000 et 50 000 FCFA"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">Numéro à contacter</Label>
+        <Input
+          type="tel"
+          value={form.contact_phone}
+          onChange={(e) => setForm((f) => ({ ...f, contact_phone: e.target.value }))}
+          placeholder="+225 07 00 00 00 00"
+        />
+      </div>
+
+      <Button className="w-full gap-2" disabled={!canSave || update.isPending} onClick={save}>
+        {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+        Enregistrer les modifications
+      </Button>
+
+      <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+        Les prestataires déjà sollicités ne sont pas prévenus du changement.
+        De nouveaux profils correspondant à la version modifiée pourront
+        apparaître.
+      </p>
+    </div>
+  );
+}
+
 const TONES = {
   amber: "text-amber-600",
   emerald: "text-emerald-600",
@@ -222,9 +382,7 @@ function ProviderCard({
       {card.keywords.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {card.keywords.slice(0, 6).map((k) => (
-            <span key={k} className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-              {k}
-            </span>
+            <Chip key={k} tone="violet">{k}</Chip>
           ))}
         </div>
       )}
@@ -243,14 +401,21 @@ function ProviderCard({
       )}
 
       {/* Le prestataire a toujours une ville et un pays. */}
-      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <Chip tone="sky" icon={MapPin}>
           {[card.city, card.country].filter(Boolean).join(", ")}
-        </span>
-        {card.rate_text && <span>{card.rate_text}</span>}
-        {card.availability_text && <span>{card.availability_text}</span>}
-        {card.years_experience !== null && <span>{card.years_experience} ans d'exp.</span>}
+        </Chip>
+        {card.rate_text && <Chip tone="emerald">{card.rate_text}</Chip>}
+        {card.availability_text && (
+          <span className="inline-flex items-center text-[11px] text-muted-foreground">
+            {card.availability_text}
+          </span>
+        )}
+        {card.years_experience !== null && (
+          <span className="inline-flex items-center text-[11px] text-muted-foreground">
+            {card.years_experience} ans d'exp.
+          </span>
+        )}
       </div>
 
       {/* Coordonnées — uniquement après double validation */}
