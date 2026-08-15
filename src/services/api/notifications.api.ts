@@ -19,6 +19,9 @@ export interface NotificationsResponse {
 export const fetchNotifications = () =>
   apiRequest<NotificationsResponse>("/notifications/");
 
+export const fetchNotification = (id: string) =>
+  apiRequest<OfferNotification>(`/notifications/${id}`);
+
 export const markAllNotificationsRead = () =>
   apiRequest<{ ok: boolean }>("/notifications/mark-read", { method: "POST" });
 

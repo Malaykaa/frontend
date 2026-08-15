@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchNotifications, markAllNotificationsRead, markNotificationRead } from "@/services/api/notifications.api";
+import {
+  fetchNotification, fetchNotifications, markAllNotificationsRead, markNotificationRead,
+} from "@/services/api/notifications.api";
 
 const NOTIF_KEY = ["notifications"] as const;
 
@@ -9,6 +11,15 @@ export function useOfferNotifications() {
     queryFn: fetchNotifications,
     staleTime: 60_000,   // revalidé toutes les 60s — synchrone avec le polling du panel
     refetchInterval: 120_000, // polling passif toutes les 2 minutes
+  });
+}
+
+export function useNotification(id: string) {
+  return useQuery({
+    queryKey: [...NOTIF_KEY, id],
+    queryFn: () => fetchNotification(id),
+    enabled: !!id,
+    retry: 1,
   });
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Suspense } from "react";
 import { AppHeader } from "@/components/app/AppHeader";
@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/app/BottomNav";
 import { Sidebar } from "@/components/app/Sidebar";
 import { SettingsPanel } from "@/components/app/SettingsPanel";
 import { NotificationPanel } from "@/components/app/NotificationPanel";
+import { syncPushSubscription } from "@/services/api/profile.api";
 
 function TabLoader() {
   return (
@@ -19,6 +20,8 @@ export default function AppPage() {
   const location = useLocation();
   const [settingsOpen, setSettingsOpen]      = useState(false);
   const [notifOpen,    setNotifOpen]         = useState(false);
+
+  useEffect(() => { syncPushSubscription(); }, []);
 
   return (
     <>
