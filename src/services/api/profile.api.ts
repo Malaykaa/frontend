@@ -65,12 +65,71 @@ export function initTheme(): void {
   applyTheme(getTheme());
 }
 
-// ── Notifications push (browser API) ────────────────────────────────────
+// ── Notifications push (Web Push + service worker) ──────────────────────
+//
+// Deux étapes distinctes, souvent confondues : la permission du navigateur
+// (« ce site peut-il notifier ? ») et l'abonnement push (« à quel endpoint
+// le serveur doit-il envoyer ? »). Avoir l'une sans l'autre ne sert à rien —
+// la permission seule ne fait jamais arriver de notification.
+
+/** Convertit la clé VAPID (base64url) au format attendu par PushManager. */
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  const bytes = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; i++) bytes[i] = rawData.charCodeAt(i);
+  return bytes;
+}
+
+async function subscribeToPush(): Promise<void> {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      const { public_key } = await apiRequest<{ public_key: string | null }>("/push/vapid-public-key");
+      // Le serveur peut ne pas encore avoir de clés VAPID configurées —
+      // la permission navigateur reste accordée, l'abonnement attendra.
+      if (!public_key) return;
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(public_key),
+      });
+    }
+    await apiRequest("/push/subscribe", {
+      method: "POST",
+      body: JSON.stringify(subscription.toJSON()),
+    });
+  } catch (e) {
+    console.error("[Push] Abonnement impossible :", e);
+  }
+}
+
+/**
+ * Resynchronise l'abonnement push si la permission est déjà accordée.
+ *
+ * À appeler au chargement de l'application authentifiée — pas seulement au
+ * moment où l'utilisateur clique « Activer » dans les réglages. Sans ça, un
+ * utilisateur ayant déjà autorisé les notifications lors d'une session
+ * précédente, mais dont l'abonnement a expiré ou n'a jamais atteint le
+ * serveur (ex. clés VAPID absentes à l'époque), resterait silencieusement
+ * privé de push malgré une permission accordée.
+ */
+export function syncPushSubscription(): void {
+  if (getPushPermission() === "granted") void subscribeToPush();
+}
 
 export async function requestPushPermission(): Promise<NotificationPermission> {
   if (!("Notification" in window)) return "denied";
-  if (Notification.permission === "granted") return "granted";
-  return Notification.requestPermission();
+  let permission = Notification.permission;
+  if (permission !== "granted") {
+    permission = await Notification.requestPermission();
+  }
+  if (permission === "granted") {
+    await subscribeToPush();
+  }
+  return permission;
 }
 
 export function getPushPermission(): NotificationPermission {

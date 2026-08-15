@@ -27,13 +27,18 @@ type Tab = "inbox" | "profile";
 export default function ProviderPage() {
   const navigate = useNavigate();
   const { data: provider, isLoading, isError, error, refetch } = useMyProvider();
+  const { data: inboxItems } = useInbox();
   const [tab, setTab] = useState<Tab>("inbox");
+  const hasInboxItems = (inboxItems?.length ?? 0) > 0;
 
-  // Bascule automatique sur le formulaire tant qu'aucune vitrine n'existe :
-  // la boîte de réception serait vide et n'apprendrait rien.
+  // Bascule automatique sur le formulaire tant qu'aucune vitrine n'existe —
+  // SAUF s'il y a déjà des propositions à voir : un utilisateur du grand
+  // public sollicité via son objectif n'a jamais de vitrine, mais doit
+  // pouvoir atterrir sur sa boîte de réception en cliquant la notification,
+  // pas sur un formulaire de création qui ne le concerne pas.
   useEffect(() => {
-    if (!isLoading && !isError && !provider) setTab("profile");
-  }, [isLoading, isError, provider]);
+    if (!isLoading && !isError && !provider && !hasInboxItems) setTab("profile");
+  }, [isLoading, isError, provider, hasInboxItems]);
 
   return (
     <div className="flex flex-col px-4 py-5">
@@ -48,7 +53,7 @@ export default function ProviderPage() {
         <h1 className="text-lg font-bold">Proposer mes services</h1>
       </div>
 
-      {provider && (
+      {(provider || hasInboxItems) && (
         <div className="mb-4 flex gap-1 border-b">
           <TabButton active={tab === "inbox"} onClick={() => setTab("inbox")}>
             Mes propositions

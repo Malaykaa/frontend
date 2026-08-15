@@ -24,6 +24,7 @@ const ServicesTab        = lazyRoute(() => import("@/pages/app/tabs/ServicesTab"
 const ProviderPage       = lazyRoute(() => import("@/pages/app/services/ProviderPage"));
 const RequestsPage       = lazyRoute(() => import("@/pages/app/services/RequestsPage"));
 const RequestDetailPage  = lazyRoute(() => import("@/pages/app/services/RequestDetailPage"));
+const NotificationDetailPage = lazyRoute(() => import("@/pages/app/NotificationDetailPage"));
 const ChatView           = lazyRoute(() => import("@/pages/app/chat/ChatView"));
 const AdminLayout        = lazyRoute(() => import("@/layouts/AdminLayout"));
 const AdminDashboard     = lazyRoute(() => import("@/pages/admin/AdminDashboard"));
@@ -124,6 +125,7 @@ export default function App() {
                   <Route path="services/prestataire" element={<ProviderPage />} />
                   <Route path="services/demandes" element={<RequestsPage />} />
                   <Route path="services/demandes/:requestId" element={<RequestDetailPage />} />
+                  <Route path="notifications/:notificationId" element={<NotificationDetailPage />} />
                 </Route>
 
                 <Route path="/app/chat/:threadId" element={<PrivateRoute><ChatView /></PrivateRoute>} />

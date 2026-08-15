@@ -11,7 +11,7 @@ import type { OfferNotification } from "@/services/api/notifications.api";
 
 // ── Labels types d'offres ─────────────────────────────────────────────────────
 
-const TYPE_LABELS: Record<string, string> = {
+export const TYPE_LABELS: Record<string, string> = {
   job:                   "Emploi",
   scholarship:           "Bourse",
   grant:                 "Financement",
@@ -21,7 +21,7 @@ const TYPE_LABELS: Record<string, string> = {
   partnership:           "Partenariat",
 };
 
-const TYPE_COLORS: Record<string, string> = {
+export const TYPE_COLORS: Record<string, string> = {
   job:                   "bg-blue-100 text-blue-700",
   scholarship:           "bg-violet-100 text-violet-700",
   grant:                 "bg-emerald-100 text-emerald-700",
@@ -36,13 +36,16 @@ const TYPE_COLORS: Record<string, string> = {
 function TendancesDeltaItem({
   notif,
   onRead,
+  onClose,
 }: {
   notif: OfferNotification;
   onRead: (id: string) => void;
+  onClose: () => void;
 }) {
   const navigate = useNavigate();
   const handleClick = () => {
     if (!notif.seen) onRead(notif.id);
+    onClose();
     navigate("/app/tendances");
   };
 
@@ -81,16 +84,34 @@ function TendancesDeltaItem({
 
 // ── Item offre haute-pertinence ───────────────────────────────────────────────
 
+// Notifications dont l'URL pointe DANS l'application — un clic doit naviguer
+// sur place, jamais ouvrir un nouvel onglet/fenêtre externe. Tout ce qui n'est
+// pas dans cette liste (offres d'emploi, bourses…) pointe vers un site tiers :
+// la page de détail sert alors d'étape intermédiaire, pour lire le titre en
+// entier avant de quitter l'application.
+const INTERNAL_NOTIF_TYPES = new Set([
+  "course_assigned", "tendances_delta",
+  "service_new_request", "service_selected", "service_provider_accepted",
+]);
+
 function OfferNotificationItem({
   notif,
   onRead,
+  onClose,
 }: {
   notif: OfferNotification;
   onRead: (id: string) => void;
+  onClose: () => void;
 }) {
+  const navigate = useNavigate();
   const handleClick = () => {
     if (!notif.seen) onRead(notif.id);
-    if (notif.offer_url) window.open(notif.offer_url, "_blank", "noopener,noreferrer");
+    onClose();
+    if (notif.offer_type && INTERNAL_NOTIF_TYPES.has(notif.offer_type) && notif.offer_url) {
+      navigate(notif.offer_url);
+    } else {
+      navigate(`/app/notifications/${notif.id}`);
+    }
   };
 
   const typeColor = TYPE_COLORS[notif.offer_type ?? ""] ?? "bg-muted text-muted-foreground";
@@ -127,7 +148,7 @@ function OfferNotificationItem({
             </span>
           )}
         </div>
-        <p className="text-sm font-medium leading-snug truncate">
+        <p className="line-clamp-2 text-sm font-medium leading-snug">
           {notif.offer_title ?? "Nouvelle offre"}
         </p>
         <div className="flex items-center justify-between mt-1">
@@ -304,12 +325,14 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
                     key={item.data.id}
                     notif={item.data}
                     onRead={(id) => markOne.mutate(id)}
+                    onClose={onClose}
                   />
                 ) : (
                   <OfferNotificationItem
                     key={item.data.id}
                     notif={item.data}
                     onRead={(id) => markOne.mutate(id)}
+                    onClose={onClose}
                   />
                 )
               ) : (

@@ -8,6 +8,18 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      // `injectManifest` plutôt que le mode par défaut `generateSW` : un
+      // service worker généré automatiquement ne peut pas répondre à un
+      // événement `push` ni à un clic sur une notification. `src/sw.ts` est
+      // le service worker réel ; ce plugin y injecte seulement la liste des
+      // fichiers à mettre en cache, exactement comme le faisait le mode
+      // automatique — rien ne change côté hors-ligne.
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+      },
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "icon.png", "pwa-96.png", "pwa-192.png", "pwa-512.png"],
       manifest: {
         name: "Malayka — Mentor IA",
@@ -33,20 +45,6 @@ export default defineConfig({
             description: "Accéder à mes objectifs",
             url: "/app/pour-moi",
             icons: [{ src: "/pwa-96.png", sizes: "96x96" }],
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts-cache",
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
           },
         ],
       },
