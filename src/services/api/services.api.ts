@@ -104,6 +104,19 @@ export interface RequestCreatePayload {
   contact_phone: string;
 }
 
+/** Toutes les clés sont optionnelles — seules celles fournies sont modifiées. */
+export interface RequestUpdatePayload {
+  request_type?: RequestType;
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  delivery_mode?: DeliveryMode;
+  city?: string | null;
+  country?: string | null;
+  budget_hint?: string | null;
+  contact_phone?: string;
+}
+
 export interface InboxItem {
   match_id: string;
   request_id: string;
@@ -148,6 +161,11 @@ export const fetchRequest = (id: string) =>
 export const createRequest = (payload: RequestCreatePayload) =>
   apiRequest<ServiceRequestDetail>("/services/requests", {
     method: "POST", body: JSON.stringify(payload),
+  });
+
+export const updateRequest = (id: string, payload: RequestUpdatePayload) =>
+  apiRequest<ServiceRequestDetail>(`/services/requests/${id}`, {
+    method: "PATCH", body: JSON.stringify(payload),
   });
 
 export const goPublic = (id: string) =>
