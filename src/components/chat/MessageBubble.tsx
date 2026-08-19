@@ -1,9 +1,11 @@
-import { Copy, Check, ChevronDown, ChevronRight, CheckCircle2 } from "lucide-react";
+import {
+  Copy, Check, ChevronDown, ChevronRight, CheckCircle2,
+  Building2, MapPin, Clock, ExternalLink, ArrowRight,
+} from "lucide-react";
 import { AiAvatar } from "./AiAvatar";
 import { useState } from "react";
 import { MarkdownContent } from "./MarkdownContent";
-import { cn } from "@/shared/lib/utils";
-import { formatRelativeTime } from "@/shared/lib/utils";
+import { cn, formatDate, formatRelativeTime } from "@/shared/lib/utils";
 import type { ChatMessage } from "@/shared/types";
 
 // ── Parser des marqueurs injectés par le backend ───────────────────────────
@@ -21,10 +23,21 @@ interface ParsedStep {
   subSteps?: ParsedSubStep[];
 }
 
+interface ParsedOffer {
+  offer_ref: string;
+  title: string;
+  url?: string | null;
+  company?: string | null;
+  location?: string | null;
+  description?: string | null;
+  expires_at?: string | null;
+}
+
 interface ParsedContent {
   text: string;
   steps: ParsedStep[];
   propositions: string[];
+  offers: ParsedOffer[];
 }
 
 /**
@@ -59,6 +72,7 @@ function parseContent(raw: string): ParsedContent {
   let text = raw ?? "";
   const steps: ParsedStep[] = [];
   const propositions: string[] = [];
+  const offers: ParsedOffer[] = [];
 
   // ── 1. Extraire @@STEPS@@ ─────────────────────────────────────────────────
   const stepsMatch = text.match(/@@STEPS@@\s+(\S+)/);
@@ -80,13 +94,23 @@ function parseContent(raw: string): ParsedContent {
     text = text.replace(/\s*@@PROPOSITIONS@@\s+\S+/, "");
   }
 
-  // ── 3. Nettoyer les marqueurs résiduels (défensif) ─────────────────────────
+  // ── 3. Extraire @@OFFERS@@ ─────────────────────────────────────────────────
+  const offersMatch = text.match(/@@OFFERS@@\s+(\S+)/);
+  if (offersMatch) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(offersMatch[1])) as ParsedOffer[];
+      offers.push(...decoded);
+    } catch { /* ignore */ }
+    text = text.replace(/\s*@@OFFERS@@\s+\S+/, "");
+  }
+
+  // ── 4. Nettoyer les marqueurs résiduels (défensif) ─────────────────────────
   text = text.replace(/@@\w+@@[^\n]*/g, "").trim();
 
-  // ── 4. Supprimer Sources — maintenant en vraie queue du texte ─────────────
+  // ── 5. Supprimer Sources — maintenant en vraie queue du texte ─────────────
   text = stripSourcesBlock(text);
 
-  return { text, steps, propositions };
+  return { text, steps, propositions, offers };
 }
 
 // ── Carte d'étape cliquable avec sous-étapes ──────────────────────────────
@@ -226,6 +250,85 @@ function PropositionChip({
   );
 }
 
+// ── Carte d'offre ────────────────────────────────────────────────────────
+//
+// Chaque champ occupe sa propre ligne, clairement séparé des autres — pas de
+// texte mélangé. Le titre est son propre lien cliquable vers la source (pas
+// toute la carte), pour que le clic sur « Prochaines étapes » n'ouvre jamais
+// l'onglet externe par erreur.
+
+function OfferChatCard({
+  offer,
+  onAction,
+}: {
+  offer: ParsedOffer;
+  onAction?: (offerRef: string, title: string) => void;
+}) {
+  return (
+    <div className="w-full max-w-full rounded-xl border bg-card p-3.5">
+      <a
+        href={offer.url ?? undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(
+          "block text-sm font-semibold leading-snug text-primary",
+          offer.url ? "hover:underline" : "pointer-events-none text-foreground"
+        )}
+      >
+        {offer.title}
+      </a>
+
+      <div className="mt-2 flex flex-col gap-1">
+        {offer.company && (
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Building2 className="h-3.5 w-3.5 shrink-0" />
+            {offer.company}
+          </span>
+        )}
+        {offer.location && (
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            {offer.location}
+          </span>
+        )}
+        {offer.expires_at && (
+          <span className="flex items-center gap-1.5 text-xs text-amber-600">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            Clôture : {formatDate(offer.expires_at)}
+          </span>
+        )}
+      </div>
+
+      {offer.description && (
+        <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
+          {offer.description}
+        </p>
+      )}
+
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+          onClick={() => onAction?.(offer.offer_ref, offer.title)}
+        >
+          Prochaines étapes
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+        {offer.url && (
+          <a
+            href={offer.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-muted-foreground hover:bg-muted transition-colors"
+            title="Voir l'offre à la source"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── CopyButton ─────────────────────────────────────────────────────────────
 
 function CopyButton({ content }: { content: string }) {
@@ -256,6 +359,8 @@ interface MessageBubbleProps {
   onSend?: (text: string) => void;
   completedStepKeys?: Set<string>;
   onStepComplete?: (compositeKey: string, fullContext: string, displayContent: string) => void;
+  /** Clic sur « Prochaines étapes » d'une carte d'offre — (offer_ref, titre). */
+  onOfferAction?: (offerRef: string, offerTitle: string) => void;
 }
 
 export function MessageBubble({
@@ -264,6 +369,7 @@ export function MessageBubble({
   onSend,
   completedStepKeys,
   onStepComplete,
+  onOfferAction,
 }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
@@ -285,7 +391,7 @@ export function MessageBubble({
   }
 
   // Message IA — parser les marqueurs
-  const { text, steps, propositions } = parseContent(message.content);
+  const { text, steps, propositions, offers } = parseContent(message.content);
 
   // Filtrer les étapes visibles (non complétées gardent leurs positions, les complétées sont grisées)
   const visibleSteps = steps.filter((step) => {
@@ -305,6 +411,15 @@ export function MessageBubble({
             "min-w-0 max-w-full"
           )}>
             <MarkdownContent content={text} />
+          </div>
+        )}
+
+        {/* Offres réelles — une carte par offre, jamais rédigées par le LLM */}
+        {offers.length > 0 && (
+          <div className="space-y-2 max-w-full">
+            {offers.map((offer) => (
+              <OfferChatCard key={offer.offer_ref} offer={offer} onAction={onOfferAction} />
+            ))}
           </div>
         )}
 

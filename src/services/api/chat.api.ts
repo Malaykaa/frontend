@@ -222,11 +222,15 @@ export async function* streamMessage(
   onSection?: (label: string, status: "running" | "complete") => void,
   displayContent?: string,
   stepKey?: string,
+  offerRef?: string,
 ): AsyncGenerator<string> {
   const body: Record<string, unknown> = { content };
   if (attachmentIds.length > 0) body.attachment_ids = attachmentIds;
   if (displayContent) body.display_content = displayContent;
   if (stepKey) body.metadata = { completed_step_key: stepKey };
+  // Ancre la réponse sur UNE offre précise (carte affichée dans le chat) —
+  // même s'il y en a plusieurs dans le fil, seule celle-ci est transmise.
+  if (offerRef) body.offer_ref = offerRef;
   let _currentSectionLabel = "";
 
   for await (const raw of apiStream(

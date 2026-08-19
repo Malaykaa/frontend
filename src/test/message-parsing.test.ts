@@ -73,6 +73,18 @@ describe("stripSourcesBlock", () => {
     expect(stripSourcesBlock(content)).toBe(content);
   });
 
+  it("préserve les @@OFFERS@@ qui suivent Sources", () => {
+    const content = [
+      "Voici une offre.",
+      "",
+      "**Sources :**",
+      "- [Link](https://example.com)",
+      "",
+      "@@OFFERS@@ %5B%7B%22offer_ref%22%3A%221%22%7D%5D",
+    ].join("\n");
+    expect(stripSourcesBlock(content)).toBe(content);
+  });
+
   it("préserve les questions de clarification qui suivent Sources", () => {
     const content = [
       "Voici les infos.",
@@ -101,11 +113,13 @@ describe("stripSourcesBlock", () => {
 
 const STEPS_RE = /@@STEPS@@\s+(\S+)/;
 const PROPS_RE = /@@PROPOSITIONS@@\s+(\S+)/;
+const OFFERS_RE = /@@OFFERS@@\s+(\S+)/;
 
 function parseMarkers(raw: string) {
   let text = raw;
   let steps: unknown[] = [];
   let propositions: string[] = [];
+  let offers: unknown[] = [];
 
   const stepsMatch = text.match(STEPS_RE);
   if (stepsMatch) {
@@ -119,7 +133,13 @@ function parseMarkers(raw: string) {
     text = text.replace(/\s*@@PROPOSITIONS@@\s+\S+/, "");
   }
 
-  return { text: text.replace(/@@\w+@@[^\n]*/g, "").trim(), steps, propositions };
+  const offersMatch = text.match(OFFERS_RE);
+  if (offersMatch) {
+    try { offers = JSON.parse(decodeURIComponent(offersMatch[1])); } catch { /* */ }
+    text = text.replace(/\s*@@OFFERS@@\s+\S+/, "");
+  }
+
+  return { text: text.replace(/@@\w+@@[^\n]*/g, "").trim(), steps, propositions, offers };
 }
 
 describe("parseMarkers (@@STEPS@@ / @@PROPOSITIONS@@)", () => {
@@ -156,5 +176,37 @@ describe("parseMarkers (@@STEPS@@ / @@PROPOSITIONS@@)", () => {
     const raw = "Texte.\n\n@@STEPS@@ INVALID_JSON";
     const { steps } = parseMarkers(raw);
     expect(steps).toHaveLength(0);
+  });
+
+  it("extrait les offres encodées, avec date de clôture", () => {
+    const offersJson = JSON.stringify([{
+      offer_ref: "scraped:abc", title: "Développeur Flutter",
+      url: "https://exemple.com/offre", company: "TechCo", location: "Abidjan",
+      description: "Applications mobiles.", expires_at: "2026-09-15T00:00:00+00:00",
+    }]);
+    const raw = `Voici une offre.\n\n@@OFFERS@@ ${encodeURIComponent(offersJson)}`;
+    const { offers, text } = parseMarkers(raw);
+
+    expect(offers).toHaveLength(1);
+    expect((offers[0] as { title: string }).title).toBe("Développeur Flutter");
+    expect(text).toBe("Voici une offre.");
+  });
+
+  it("extrait steps, propositions et offers ensemble, sans se marcher dessus", () => {
+    const stepsJson = JSON.stringify([{ id: "1", title: "Étape 1" }]);
+    const propsJson = JSON.stringify(["Option 1"]);
+    const offersJson = JSON.stringify([{ offer_ref: "scraped:x", title: "Offre X" }]);
+    const raw = [
+      "Voici tout.",
+      `@@STEPS@@ ${encodeURIComponent(stepsJson)}`,
+      `@@PROPOSITIONS@@ ${encodeURIComponent(propsJson)}`,
+      `@@OFFERS@@ ${encodeURIComponent(offersJson)}`,
+    ].join("\n\n");
+    const { text, steps, propositions, offers } = parseMarkers(raw);
+
+    expect(text).toBe("Voici tout.");
+    expect(steps).toHaveLength(1);
+    expect(propositions).toHaveLength(1);
+    expect(offers).toHaveLength(1);
   });
 });

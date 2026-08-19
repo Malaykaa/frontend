@@ -237,7 +237,10 @@ export default function ChatView() {
 
   // ── Envoi message classique ─────────────────────────────────────────────
   const handleSend = useCallback(
-    async (content: string, attachmentIds: string[], displayContent?: string, stepKey?: string) => {
+    async (
+      content: string, attachmentIds: string[], displayContent?: string, stepKey?: string,
+      offerRef?: string,
+    ) => {
       if (!threadId || isActiveRef.current) return;
 
       // Bulle user : affiche displayContent si fourni (ex: "Étape : X"), sinon content complet
@@ -275,6 +278,7 @@ export default function ChatView() {
           },
           displayContent,
           stepKey, // clé d'étape → stockée en DB dans le payload du message user
+          offerRef, // ancre la réponse sur UNE offre précise (carte du chat)
         )) {
           if (!isActiveRef.current) break;
           if (firstToken) { firstToken = false; setStream((s) => ({ ...s, phase: "streaming" })); }
@@ -361,6 +365,15 @@ export default function ChatView() {
       setCompletedStepKeys((prev) => new Set([...prev, compositeKey]));
       // Le compositeKey est envoyé dans le metadata → stocké en DB → relu au prochain chargement
       void handleSend(fullContext, [], displayContent, compositeKey);
+    },
+    [handleSend]
+  );
+
+  // ── Action sur une carte d'offre (« Prochaines étapes pour cette offre ») ──
+  const handleOfferAction = useCallback(
+    (offerRef: string, offerTitle: string) => {
+      const display = `Prochaines étapes pour : "${offerTitle}"`;
+      void handleSend(display, [], display, undefined, offerRef);
     },
     [handleSend]
   );
@@ -452,6 +465,7 @@ export default function ChatView() {
                   onSend={(text) => void handleSend(text, [])}
                   completedStepKeys={completedStepKeys}
                   onStepComplete={handleStepComplete}
+                  onOfferAction={handleOfferAction}
                 />
               );
             })}
