@@ -18,6 +18,8 @@ export interface ProfileUpdatePayload {
   current_status?: string | null;
   preferred_content?: string | null;
   phone?: string | null;
+  interests?: string[] | null;
+  self_description?: string | null;
 }
 
 interface WrappedProfileResponse {

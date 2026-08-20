@@ -25,6 +25,8 @@ export interface Profile {
   skills: string[];
   preferred_content: string | null;
   language: string | null;
+  interests: string[] | null;
+  self_description: string | null;
 }
 
 export interface AuthUser {
