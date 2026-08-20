@@ -11,6 +11,7 @@ import { formatRelativeTime } from "@/shared/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { InitialsAvatar } from "@/components/structures/InitialsAvatar";
+import { PhasedGenerationProgress, useSimulatedPhases } from "@/components/structures/PhasedGenerationProgress";
 import { SendConfirmDialog } from "@/components/structures/SendConfirmDialog";
 import { StatTile } from "@/components/structures/StatTile";
 import { cn } from "@/shared/lib/utils";
@@ -212,6 +213,10 @@ export default function ClassroomDetailPage() {
     classroomId,
   );
   const generateEvolutionPlans = useGenerateEvolutionPlans(structureId, classroomId);
+  const evolutionPlanPhases = useSimulatedPhases(
+    ["Analyse de la progression de chaque étudiant…", "Génération des plans personnalisés…", "Envoi aux étudiants…"],
+    generateEvolutionPlans.isPending, 20_000,
+  );
   const { data: exercises, isLoading: exercisesLoading } = useExercises(structureId, classroomId);
   const { data: difficulty, isLoading: difficultyLoading } = useClassroomDifficulty(structureId, classroomId);
 
@@ -793,6 +798,10 @@ export default function ClassroomDetailPage() {
                 {generateEvolutionPlans.isPending ? "Génération…" : "Générer les plans"}
               </Button>
             </div>
+
+            {generateEvolutionPlans.isPending && (
+              <PhasedGenerationProgress phases={evolutionPlanPhases} />
+            )}
 
             {/* Plans list */}
             {evolutionPlans.length === 0 ? (

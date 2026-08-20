@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
+import { PhasedGenerationProgress, useSimulatedPhases } from "@/components/structures/PhasedGenerationProgress";
 import {
   useClassrooms,
   useCreateExercise,
@@ -58,6 +59,10 @@ export default function ExerciseEditorPage() {
   const createExercise = useCreateExercise(structureId, classroomId);
   const updateQuestions = useUpdateExerciseQuestions(structureId, classroomId, exercise?.id ?? "");
   const sendExercise = useSendExercise(structureId, classroomId, exercise?.id ?? "");
+  const generationPhases = useSimulatedPhases(
+    ["Analyse de la consigne…", "Génération des questions…", "Vérification des réponses…"],
+    phase === "generating", 6_000,
+  );
 
   const canGenerate = title.trim().length > 0 && topicHint.trim().length > 0;
 
@@ -138,13 +143,10 @@ export default function ExerciseEditorPage() {
         <div>
           <h2 className="text-xl font-bold">Génération du QCM en cours…</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            L'IA prépare {questionCount} questions à partir de ta consigne.
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
             Cette opération prend généralement 20 à 40 secondes — ne quittez pas la page.
           </p>
         </div>
-        <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
+        <PhasedGenerationProgress phases={generationPhases} />
       </div>
     );
   }
