@@ -7,30 +7,45 @@ import {
   completeCourseStep,
   createClassroom,
   createCourse,
+  createExercise,
   createInvitation,
+  type ExerciseKind,
+  fetchClassroomDifficulty,
   fetchClassroomJoinPreview,
   fetchClassrooms,
+  fetchClassroomDashboard,
   fetchCourse,
   fetchCourseProgress,
   fetchCourses,
   downloadImpactReport,
-  fetchClassroomDashboard,
+  fetchExercise,
+  fetchExerciseResults,
+  fetchExerciseToTake,
+  fetchExercises,
   fetchImpactReport,
   fetchInvitationPreview,
   fetchInvitations,
   fetchJoinRequests,
   fetchMembers,
   fetchMyCourseProgress,
+  fetchMyExerciseAttempts,
+  fetchMyExerciseResult,
   fetchMyStructures,
   fetchRoster,
   fetchStructureDashboard,
+  fetchStudentDifficulty,
   generateEvolutionPlans,
   importRoster,
   joinClassroom,
+  type QuestionEditInput,
   rejectInvitation,
   rejectJoinRequest,
   requestStructure,
   sendCourse,
+  sendExercise,
+  startExerciseSubmission,
+  submitExercise,
+  updateExerciseQuestions,
   validateInvitation,
   validateJoinRequest,
 } from "@/services/api/structure.api";
@@ -58,6 +73,20 @@ export const structureKeys = {
     ["structures", structureId, "classrooms", classroomId, "dashboard"] as const,
   structureDashboard: (structureId: string) => ["structures", structureId, "dashboard"] as const,
   impactReport: (structureId: string) => ["structures", structureId, "impact-report"] as const,
+  exercises: (structureId: string, classroomId: string, kind?: ExerciseKind) =>
+    ["structures", structureId, "classrooms", classroomId, "exercises", kind ?? "all"] as const,
+  exercise: (structureId: string, classroomId: string, exerciseId: string) =>
+    ["structures", structureId, "classrooms", classroomId, "exercises", "detail", exerciseId] as const,
+  exerciseResults: (structureId: string, classroomId: string, exerciseId: string) =>
+    ["structures", structureId, "classrooms", classroomId, "exercises", exerciseId, "results"] as const,
+  classroomDifficulty: (structureId: string, classroomId: string) =>
+    ["structures", structureId, "classrooms", classroomId, "difficulty"] as const,
+  studentDifficulty: (structureId: string, classroomId: string, userId: string) =>
+    ["structures", structureId, "classrooms", classroomId, "difficulty", userId] as const,
+  exerciseTake: (exerciseId: string) => ["classrooms", "exercises", exerciseId, "take"] as const,
+  myExerciseResult: (exerciseId: string, attempt?: number) =>
+    ["classrooms", "exercises", exerciseId, "my-result", attempt ?? "latest"] as const,
+  myExerciseAttempts: (exerciseId: string) => ["classrooms", "exercises", exerciseId, "my-attempts"] as const,
 };
 
 export const useMyStructures = () =>
@@ -363,3 +392,123 @@ export function useAiAssistSection(structureId: string, classroomId: string) {
     onError: () => toast.error("L'assistance IA a échoué. Réessaie."),
   });
 }
+
+// ── Exercices / évaluations (QCM) ──────────────────────────────────────────
+
+export const useExercises = (structureId: string, classroomId: string, kind?: ExerciseKind) =>
+  useQuery({
+    queryKey: structureKeys.exercises(structureId, classroomId, kind),
+    queryFn: () => fetchExercises(structureId, classroomId, kind),
+    enabled: !!structureId && !!classroomId,
+  });
+
+export const useExercise = (structureId: string, classroomId: string, exerciseId: string) =>
+  useQuery({
+    queryKey: structureKeys.exercise(structureId, classroomId, exerciseId),
+    queryFn: () => fetchExercise(structureId, classroomId, exerciseId),
+    enabled: !!structureId && !!classroomId && !!exerciseId,
+  });
+
+export function useCreateExercise(structureId: string, classroomId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: {
+      title: string; topic_hint: string; subject?: string; kind: ExerciseKind;
+      question_count?: number; source_course_id?: string;
+    }) => createExercise(structureId, classroomId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: structureKeys.exercises(structureId, classroomId) });
+      toast.success("Exercice généré.");
+    },
+    onError: () => toast.error("Erreur lors de la génération de l'exercice."),
+  });
+}
+
+export function useUpdateExerciseQuestions(structureId: string, classroomId: string, exerciseId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (questions: QuestionEditInput[]) =>
+      updateExerciseQuestions(structureId, classroomId, exerciseId, questions),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: structureKeys.exercise(structureId, classroomId, exerciseId) });
+      toast.success("Questions mises à jour.");
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Erreur."),
+  });
+}
+
+export function useSendExercise(structureId: string, classroomId: string, exerciseId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { target: "classroom" | "student"; student_user_id?: string }) =>
+      sendExercise(structureId, classroomId, exerciseId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: structureKeys.exercises(structureId, classroomId) });
+      qc.invalidateQueries({ queryKey: structureKeys.exerciseResults(structureId, classroomId, exerciseId) });
+      toast.success("Exercice envoyé.");
+    },
+    onError: () => toast.error("Erreur lors de l'envoi."),
+  });
+}
+
+export const useExerciseResults = (structureId: string, classroomId: string, exerciseId: string) =>
+  useQuery({
+    queryKey: structureKeys.exerciseResults(structureId, classroomId, exerciseId),
+    queryFn: () => fetchExerciseResults(structureId, classroomId, exerciseId),
+    enabled: !!structureId && !!classroomId && !!exerciseId,
+  });
+
+export const useClassroomDifficulty = (structureId: string, classroomId: string) =>
+  useQuery({
+    queryKey: structureKeys.classroomDifficulty(structureId, classroomId),
+    queryFn: () => fetchClassroomDifficulty(structureId, classroomId),
+    enabled: !!structureId && !!classroomId,
+  });
+
+export const useStudentDifficulty = (structureId: string, classroomId: string, userId: string) =>
+  useQuery({
+    queryKey: structureKeys.studentDifficulty(structureId, classroomId, userId),
+    queryFn: () => fetchStudentDifficulty(structureId, classroomId, userId),
+    enabled: !!structureId && !!classroomId && !!userId,
+  });
+
+export const useExerciseToTake = (exerciseId: string) =>
+  useQuery({
+    queryKey: structureKeys.exerciseTake(exerciseId),
+    queryFn: () => fetchExerciseToTake(exerciseId),
+    enabled: !!exerciseId,
+  });
+
+export function useStartExerciseSubmission() {
+  return useMutation({
+    mutationFn: (exerciseId: string) => startExerciseSubmission(exerciseId),
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Erreur."),
+  });
+}
+
+export function useSubmitExercise(exerciseId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (answers: { question_id: string; selected_choice_index: number | null }[]) =>
+      submitExercise(exerciseId, answers),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: structureKeys.myExerciseResult(exerciseId) });
+      qc.invalidateQueries({ queryKey: structureKeys.myExerciseAttempts(exerciseId) });
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Erreur lors de l'envoi."),
+  });
+}
+
+export const useMyExerciseResult = (exerciseId: string, attemptNumber?: number) =>
+  useQuery({
+    queryKey: structureKeys.myExerciseResult(exerciseId, attemptNumber),
+    queryFn: () => fetchMyExerciseResult(exerciseId, attemptNumber),
+    enabled: !!exerciseId,
+  });
+
+export const useMyExerciseAttempts = (exerciseId: string) =>
+  useQuery({
+    queryKey: structureKeys.myExerciseAttempts(exerciseId),
+    queryFn: () => fetchMyExerciseAttempts(exerciseId),
+    enabled: !!exerciseId,
+  });

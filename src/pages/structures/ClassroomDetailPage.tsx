@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   AlertTriangle, ArrowLeft, ArrowRight, BarChart3, BookOpen,
   Check, Clock, Copy, FileUp, GraduationCap, ListChecks, Loader2,
-  Plus, Send, Sparkles, Users, X,
+  Plus, Send, Sparkles, TrendingDown, TrendingUp, Users, X, ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +16,10 @@ import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
 import {
   useClassroomDashboard,
+  useClassroomDifficulty,
   useClassrooms,
   useCourses,
+  useExercises,
   useGenerateEvolutionPlans,
   useJoinRequests,
   useImportRoster,
@@ -26,16 +28,19 @@ import {
   useRejectJoinRequest,
   useRoster,
   useSendCourse,
+  useSendExercise,
   useValidateJoinRequest,
 } from "@/hooks/queries/use-structure";
 
-type Tab = "overview" | "students" | "courses" | "plans";
+type Tab = "overview" | "students" | "courses" | "exercises" | "plans" | "difficulty";
 
 const TAB_LABELS: Record<Tab, string> = {
   overview: "Vue d'ensemble",
   students: "Étudiants",
   courses: "Cours",
+  exercises: "Exercices",
   plans: "Plans IA",
+  difficulty: "Difficultés",
 };
 
 function parseRosterText(text: string): { first_name: string; last_name: string }[] {
@@ -108,6 +113,57 @@ function CourseSendControls({
   );
 }
 
+function ExerciseSendControls({
+  structureId,
+  classroomId,
+  exerciseId,
+}: {
+  structureId: string;
+  classroomId: string;
+  exerciseId: string;
+}) {
+  const { data: members } = useMembers(structureId, classroomId);
+  const sendExercise = useSendExercise(structureId, classroomId, exerciseId);
+  const [studentId, setStudentId] = useState("");
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <select
+        className="h-8 rounded-md border bg-background px-2 text-xs"
+        value={studentId}
+        onChange={(e) => setStudentId(e.target.value)}
+      >
+        <option value="">Toute la salle</option>
+        {(members ?? []).map((m) => (
+          <option key={m.user_id} value={m.user_id}>
+            {m.requested_first_name} {m.requested_last_name}
+          </option>
+        ))}
+      </select>
+      <Button
+        size="icon"
+        variant="outline"
+        className="h-8 w-8"
+        disabled={sendExercise.isPending}
+        onClick={() =>
+          sendExercise.mutate(
+            studentId
+              ? { target: "student", student_user_id: studentId }
+              : { target: "classroom" },
+          )
+        }
+        title="Envoyer"
+      >
+        {sendExercise.isPending ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Send className="h-3.5 w-3.5" />
+        )}
+      </Button>
+    </div>
+  );
+}
+
 export default function ClassroomDetailPage() {
   const { structureId = "", classroomId = "" } = useParams<{
     structureId: string;
@@ -137,6 +193,8 @@ export default function ClassroomDetailPage() {
     classroomId,
   );
   const generateEvolutionPlans = useGenerateEvolutionPlans(structureId, classroomId);
+  const { data: exercises, isLoading: exercisesLoading } = useExercises(structureId, classroomId);
+  const { data: difficulty, isLoading: difficultyLoading } = useClassroomDifficulty(structureId, classroomId);
 
   if (!structure || !classroom) {
     return (
@@ -256,7 +314,7 @@ export default function ClassroomDetailPage() {
 
       {/* ── Tab bar ──────────────────────────────────────── */}
       <nav className="mt-5 flex gap-0.5 overflow-x-auto border-b bg-card px-6">
-        {(["overview", "students", "courses", "plans"] as Tab[]).map((t) => (
+        {(["overview", "students", "courses", "exercises", "plans", "difficulty"] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -601,6 +659,95 @@ export default function ClassroomDetailPage() {
           </div>
         )}
 
+        {/* ━━ Exercices / évaluations (QCM) ━━━━━━━━━━━━━━━━ */}
+        {tab === "exercises" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold">Exercices &amp; évaluations</h2>
+                <p className="text-xs text-muted-foreground">
+                  {(exercises ?? []).filter((e) => e.kind === "exercise").length} exercice(s) ·{" "}
+                  {(exercises ?? []).filter((e) => e.kind === "evaluation").length} évaluation(s)
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() =>
+                  navigate(`/structures/${structureId}/classrooms/${classroomId}/exercises/new`)
+                }
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> Créer un exercice
+              </Button>
+            </div>
+
+            {exercisesLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            ) : (exercises ?? []).length === 0 ? (
+              <SectionEmpty message="Aucun exercice. Crée un premier QCM à partir d'une consigne !" />
+            ) : (
+              <div className="rounded-xl border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/40">
+                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Titre / Matière</th>
+                      <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Type</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Questions</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Destinataires</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">Créé</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Envoyer</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(exercises ?? []).map((ex) => (
+                      <tr key={ex.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
+                        <td className="px-5 py-3">
+                          <Link
+                            to={`/structures/${structureId}/classrooms/${classroomId}/exercises/${ex.id}/results`}
+                            className="flex items-center gap-2.5 hover:text-primary"
+                          >
+                            <div className={cn(
+                              "h-8 w-8 shrink-0 rounded-lg flex items-center justify-center",
+                              ex.kind === "evaluation" ? "bg-rose-100 text-rose-600" : "bg-sky-100 text-sky-600",
+                            )}>
+                              <ClipboardList className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium leading-tight">{ex.title}</p>
+                              {ex.subject && (
+                                <Badge variant="secondary" className="text-[10px] mt-0.5">{ex.subject}</Badge>
+                              )}
+                            </div>
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge variant={ex.kind === "evaluation" ? "destructive" : "secondary"} className="text-[10px]">
+                            {ex.kind === "evaluation" ? "Évaluation" : "Exercice"}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums font-semibold">{ex.questions_count}</td>
+                        <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{ex.recipients_count}</td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3 shrink-0" />
+                            {formatRelativeTime(ex.created_at)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <ExerciseSendControls
+                            structureId={structureId}
+                            classroomId={classroomId}
+                            exerciseId={ex.id}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ━━ Plans IA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {tab === "plans" && (
           <div className="space-y-5">
@@ -651,6 +798,86 @@ export default function ClassroomDetailPage() {
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </Link>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ━━ Difficultés ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {tab === "difficulty" && (
+          <div className="space-y-5">
+            {difficultyLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            ) : !difficulty || difficulty.insufficient_data ? (
+              <SectionEmpty message="Pas encore assez de données — les élèves doivent avoir soumis au moins un exercice pour que la détection de difficulté fonctionne." />
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Notions les plus difficiles pour la classe */}
+                <div className="rounded-xl border bg-card p-5">
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Notions les plus difficiles
+                  </p>
+                  {difficulty.topics.length === 0 ? (
+                    <SectionEmpty message="Aucune notion identifiée." />
+                  ) : (
+                    <div className="space-y-3">
+                      {difficulty.topics.slice(0, 8).map((t) => (
+                        <div key={t.topic_tag}>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="min-w-0 truncate text-sm font-medium">{t.topic_tag}</span>
+                            <span className={cn(
+                              "shrink-0 text-sm font-bold",
+                              t.class_success_rate < 50 ? "text-destructive" : "text-primary",
+                            )}>
+                              {t.class_success_rate}% réussite
+                            </span>
+                          </div>
+                          <Progress value={t.class_success_rate} className="mt-1.5 h-1.5" />
+                          {t.students_flagged_count > 0 && (
+                            <p className="mt-1 text-[11px] text-muted-foreground">
+                              {t.students_flagged_count} élève{t.students_flagged_count > 1 ? "s" : ""} en difficulté sur cette notion
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Élèves flagués */}
+                <div className="rounded-xl border bg-card p-5">
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Élèves à surveiller
+                  </p>
+                  {difficulty.students.filter((s) => s.flagged_topics.length > 0).length === 0 ? (
+                    <SectionEmpty message="Aucun élève en difficulté identifié pour l'instant." />
+                  ) : (
+                    <div className="space-y-3">
+                      {difficulty.students
+                        .filter((s) => s.flagged_topics.length > 0)
+                        .sort((a, b) => a.avg_score_pct - b.avg_score_pct)
+                        .map((s) => (
+                          <div key={s.user_id} className="rounded-lg border p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-medium">{s.user_name ?? "—"}</span>
+                              <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                                {s.trend === "improving" && <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />}
+                                {s.trend === "declining" && <TrendingDown className="h-3.5 w-3.5 text-destructive" />}
+                                {s.avg_score_pct}% en moyenne
+                              </span>
+                            </div>
+                            <div className="mt-1.5 flex flex-wrap gap-1">
+                              {s.flagged_topics.map((f) => (
+                                <Badge key={f.topic_tag} variant="warning" className="text-[10px]">
+                                  {f.topic_tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

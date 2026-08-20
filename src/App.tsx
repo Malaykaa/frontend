@@ -47,6 +47,10 @@ const ClassroomJoinPage  = lazyRoute(() => import("@/pages/structures/ClassroomJ
 const CourseProgressPage = lazyRoute(() => import("@/pages/structures/CourseProgressPage"));
 const CourseEditorPage   = lazyRoute(() => import("@/pages/structures/CourseEditorPage"));
 const MyCoursePage       = lazyRoute(() => import("@/pages/structures/MyCoursePage"));
+const ExerciseEditorPage  = lazyRoute(() => import("@/pages/structures/ExerciseEditorPage"));
+const ExerciseResultsPage = lazyRoute(() => import("@/pages/structures/ExerciseResultsPage"));
+const TakeExercisePage    = lazyRoute(() => import("@/pages/structures/TakeExercisePage"));
+const ExerciseResultPage  = lazyRoute(() => import("@/pages/structures/ExerciseResultPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -137,6 +141,10 @@ export default function App() {
                 <Route path="/structures/:structureId/classrooms/:classroomId/courses/new" element={<PrivateRoute><CourseEditorPage /></PrivateRoute>} />
                 <Route path="/structures/:structureId/classrooms/:classroomId/courses/:courseId" element={<PrivateRoute><CourseProgressPage /></PrivateRoute>} />
                 <Route path="/classrooms/courses/:courseId" element={<PrivateRoute><MyCoursePage /></PrivateRoute>} />
+                <Route path="/structures/:structureId/classrooms/:classroomId/exercises/new" element={<PrivateRoute><ExerciseEditorPage /></PrivateRoute>} />
+                <Route path="/structures/:structureId/classrooms/:classroomId/exercises/:exerciseId/results" element={<PrivateRoute><ExerciseResultsPage /></PrivateRoute>} />
+                <Route path="/classrooms/exercises/:exerciseId" element={<PrivateRoute><TakeExercisePage /></PrivateRoute>} />
+                <Route path="/classrooms/exercises/:exerciseId/result" element={<PrivateRoute><ExerciseResultPage /></PrivateRoute>} />
 
                 <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
                   <Route index element={<AdminDashboard />} />

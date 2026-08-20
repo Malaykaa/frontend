@@ -366,6 +366,239 @@ export const fetchImpactReport = (structureId: string) =>
 export const downloadImpactReport = (structureId: string, format: "pdf" | "csv") =>
   apiBlobRequest(`/structures/${structureId}/impact-report/export?format=${format}`);
 
+// ── Exercices / évaluations (QCM) ──────────────────────────────────────────
+
+export type ExerciseKind = "exercise" | "evaluation";
+
+export interface ExerciseQuestionAnswerKeyResponse {
+  id: string;
+  prompt: string;
+  choices: string[];
+  correct_choice_index: number;
+  explanation: string | null;
+  points: number;
+  order: number;
+  topic_tag: string | null;
+}
+
+export interface ExerciseResponse {
+  id: string;
+  classroom_id: string;
+  title: string;
+  subject: string | null;
+  kind: ExerciseKind;
+  topic_hint: string | null;
+  instructions: string | null;
+  source_course_id: string | null;
+  created_at: string;
+  questions: ExerciseQuestionAnswerKeyResponse[];
+}
+
+export interface ExerciseListItem {
+  id: string;
+  classroom_id: string;
+  title: string;
+  subject: string | null;
+  kind: ExerciseKind;
+  created_at: string;
+  questions_count: number;
+  recipients_count: number;
+}
+
+export interface QuestionEditInput {
+  prompt: string;
+  choices: string[];
+  correct_choice_index: number;
+  explanation?: string | null;
+  topic_tag?: string | null;
+  points?: number;
+}
+
+export interface ExerciseSendResult {
+  new_recipients_count: number;
+}
+
+export interface ExerciseTakeQuestion {
+  id: string;
+  prompt: string;
+  choices: string[];
+  order: number;
+}
+
+export interface ExerciseTakeResponse {
+  exercise_id: string;
+  title: string;
+  instructions: string | null;
+  kind: ExerciseKind;
+  questions: ExerciseTakeQuestion[];
+}
+
+export interface ExerciseSubmissionResponse {
+  submission_id: string;
+  attempt_number: number;
+  status: "in_progress" | "submitted";
+}
+
+export interface ExerciseAnswerResult {
+  question_id: string;
+  prompt: string;
+  choices: string[];
+  selected_choice_index: number | null;
+  correct_choice_index: number;
+  is_correct: boolean;
+  explanation: string | null;
+}
+
+export interface ExerciseResultResponse {
+  exercise_id: string;
+  attempt_number: number;
+  status: "in_progress" | "submitted";
+  score_points: number | null;
+  max_points: number | null;
+  score_pct: number | null;
+  submitted_at: string | null;
+  answers: ExerciseAnswerResult[];
+}
+
+export interface ExerciseAttemptSummary {
+  attempt_number: number;
+  score_pct: number | null;
+  submitted_at: string | null;
+}
+
+export interface ExerciseRecipientResult {
+  user_id: string;
+  user_email: string | null;
+  user_name: string | null;
+  attempted: boolean;
+  score_pct: number | null;
+  submitted_at: string | null;
+}
+
+export interface ExerciseResultsMatrixResponse {
+  exercise_id: string;
+  title: string;
+  kind: ExerciseKind;
+  recipients: ExerciseRecipientResult[];
+}
+
+export interface StudentTopicFlag {
+  topic_tag: string;
+  wrong_rate: number;
+  questions_seen: number;
+}
+
+export interface ClassroomDifficultyStudentItem {
+  user_id: string;
+  user_name: string | null;
+  avg_score_pct: number;
+  flagged_topics: StudentTopicFlag[];
+  trend: "improving" | "flat" | "declining" | null;
+}
+
+export interface TopicDifficultyItem {
+  topic_tag: string;
+  class_success_rate: number;
+  students_flagged_count: number;
+}
+
+export interface ClassroomDifficultyReportResponse {
+  students: ClassroomDifficultyStudentItem[];
+  topics: TopicDifficultyItem[];
+  insufficient_data: boolean;
+}
+
+export interface StudentDifficultyDetailResponse {
+  insufficient_data: boolean;
+  student: ClassroomDifficultyStudentItem | null;
+}
+
+export const createExercise = (
+  structureId: string,
+  classroomId: string,
+  payload: {
+    title: string; topic_hint: string; subject?: string; kind: ExerciseKind;
+    question_count?: number; source_course_id?: string;
+  },
+) =>
+  apiRequest<ExerciseResponse>(`/structures/${structureId}/classrooms/${classroomId}/exercises`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    timeoutMs: 120_000, // génération LLM — peut prendre 30-60 s
+  });
+
+export const updateExerciseQuestions = (
+  structureId: string,
+  classroomId: string,
+  exerciseId: string,
+  questions: QuestionEditInput[],
+) =>
+  apiRequest<ExerciseResponse>(
+    `/structures/${structureId}/classrooms/${classroomId}/exercises/${exerciseId}/questions`,
+    { method: "PATCH", body: JSON.stringify({ questions }) },
+  );
+
+export const fetchExercises = (structureId: string, classroomId: string, kind?: ExerciseKind) =>
+  apiRequest<ExerciseListItem[]>(
+    `/structures/${structureId}/classrooms/${classroomId}/exercises${kind ? `?kind=${kind}` : ""}`,
+  );
+
+export const fetchExercise = (structureId: string, classroomId: string, exerciseId: string) =>
+  apiRequest<ExerciseResponse>(
+    `/structures/${structureId}/classrooms/${classroomId}/exercises/${exerciseId}`,
+  );
+
+export const sendExercise = (
+  structureId: string,
+  classroomId: string,
+  exerciseId: string,
+  payload: { target: "classroom" | "student"; student_user_id?: string },
+) =>
+  apiRequest<ExerciseSendResult>(
+    `/structures/${structureId}/classrooms/${classroomId}/exercises/${exerciseId}/send`,
+    { method: "POST", body: JSON.stringify(payload), timeoutMs: 60_000 },
+  );
+
+export const fetchExerciseResults = (structureId: string, classroomId: string, exerciseId: string) =>
+  apiRequest<ExerciseResultsMatrixResponse>(
+    `/structures/${structureId}/classrooms/${classroomId}/exercises/${exerciseId}/results`,
+  );
+
+export const fetchClassroomDifficulty = (structureId: string, classroomId: string) =>
+  apiRequest<ClassroomDifficultyReportResponse>(
+    `/structures/${structureId}/classrooms/${classroomId}/difficulty`,
+  );
+
+export const fetchStudentDifficulty = (structureId: string, classroomId: string, userId: string) =>
+  apiRequest<StudentDifficultyDetailResponse>(
+    `/structures/${structureId}/classrooms/${classroomId}/difficulty/${userId}`,
+  );
+
+export const fetchExerciseToTake = (exerciseId: string) =>
+  apiRequest<ExerciseTakeResponse>(`/structures/classroom-exercises/${exerciseId}/take`);
+
+export const startExerciseSubmission = (exerciseId: string) =>
+  apiRequest<ExerciseSubmissionResponse>(`/structures/classroom-exercises/${exerciseId}/start`, {
+    method: "POST",
+  });
+
+export const submitExercise = (
+  exerciseId: string,
+  answers: { question_id: string; selected_choice_index: number | null }[],
+) =>
+  apiRequest<ExerciseResultResponse>(`/structures/classroom-exercises/${exerciseId}/submit`, {
+    method: "POST",
+    body: JSON.stringify({ answers }),
+  });
+
+export const fetchMyExerciseResult = (exerciseId: string, attemptNumber?: number) =>
+  apiRequest<ExerciseResultResponse>(
+    `/structures/classroom-exercises/${exerciseId}/my-result${attemptNumber ? `?attempt_number=${attemptNumber}` : ""}`,
+  );
+
+export const fetchMyExerciseAttempts = (exerciseId: string) =>
+  apiRequest<ExerciseAttemptSummary[]>(`/structures/classroom-exercises/${exerciseId}/my-attempts`);
+
 export type AiAssistAction = "analyze" | "develop" | "correct";
 
 export const aiAssistSection = (
