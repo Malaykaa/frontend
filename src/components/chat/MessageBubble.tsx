@@ -137,7 +137,7 @@ function StepCard({ step, index, completed = false, onSend, onComplete }: StepCa
     // sinon fallback : onSend avec contexte complet (chemin legacy)
     onComplete?.();
     if (!onComplete) {
-      let text = `Traitons l'étape : **${step.title}**`;
+      let text = `[ÉTAPE]: ${step.title}`;
       if (step.description) text += `\n\nContexte : ${step.description}`;
       if (hasSubSteps) {
         text += `\n\nSous-plans à couvrir :\n${step.subSteps!.map((s) => `- ${s.title}`).join("\n")}`;
@@ -228,10 +228,10 @@ function StepCard({ step, index, completed = false, onSend, onComplete }: StepCa
 
 function PropositionChip({
   label,
-  onSend,
+  onComplete,
 }: {
   label: string;
-  onSend?: (text: string) => void;
+  onComplete?: (fullContext: string, displayContent: string) => void;
 }) {
   const clean = label
     .replace(/^si tu veux je peux te\s*[:·-]\s*/i, "")
@@ -239,11 +239,15 @@ function PropositionChip({
     .trim();
 
   const display = clean.charAt(0).toUpperCase() + clean.slice(1);
+  // Même convention que les étapes : [ÉTAPE]: déclenche la section "Exécution
+  // d'étape" des prompts agents, pour un traitement concret plutôt qu'une
+  // relance vague qui pourrait reposer des questions déjà répondues.
+  const fullContext = `[ÉTAPE]: ${display}`;
 
   return (
     <button
       className="rounded-full border border-primary/30 bg-primary/5 px-3 py-2.5 text-xs font-medium text-primary hover:bg-primary/10 active:scale-[0.98] transition-all text-left"
-      onClick={() => onSend?.(display)}
+      onClick={() => onComplete?.(fullContext, display)}
     >
       {display}
     </button>
@@ -361,6 +365,8 @@ interface MessageBubbleProps {
   onStepComplete?: (compositeKey: string, fullContext: string, displayContent: string) => void;
   /** Clic sur « Prochaines étapes » d'une carte d'offre — (offer_ref, titre). */
   onOfferAction?: (offerRef: string, offerTitle: string) => void;
+  /** Clic sur une proposition — (fullContext envoyé au LLM, texte affiché dans la bulle). */
+  onPropositionComplete?: (fullContext: string, displayContent: string) => void;
 }
 
 export function MessageBubble({
@@ -370,6 +376,7 @@ export function MessageBubble({
   completedStepKeys,
   onStepComplete,
   onOfferAction,
+  onPropositionComplete,
 }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
@@ -441,8 +448,9 @@ export function MessageBubble({
                   onComplete={() => {
                     // Texte court affiché dans la bulle utilisateur
                     const display = `Étape : "${step.title}"`;
-                    // Contexte complet envoyé au LLM (invisible pour l'user)
-                    let fullCtx = `Traitons l'étape : **${step.title}**`;
+                    // Contexte complet envoyé au LLM (invisible pour l'user) — le préfixe
+                    // [ÉTAPE]: déclenche la section "Exécution d'étape" des prompts agents.
+                    let fullCtx = `[ÉTAPE]: ${step.title}`;
                     if (step.description) fullCtx += `\n\nContexte : ${step.description}`;
                     if (step.subSteps?.length) {
                       fullCtx += `\n\nSous-plans à couvrir :\n${step.subSteps.map((s) => `- ${s.title}`).join("\n")}`;
@@ -473,7 +481,7 @@ export function MessageBubble({
         {propositions.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-0.5">
             {propositions.map((p, i) => (
-              <PropositionChip key={i} label={p} onSend={onSend} />
+              <PropositionChip key={i} label={p} onComplete={onPropositionComplete} />
             ))}
           </div>
         )}

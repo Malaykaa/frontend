@@ -378,6 +378,14 @@ export default function ChatView() {
     [handleSend]
   );
 
+  // ── Clic sur une proposition — même traitement qu'une étape (contexte complet) ──
+  const handlePropositionComplete = useCallback(
+    (fullContext: string, displayContent: string) => {
+      void handleSend(fullContext, [], displayContent);
+    },
+    [handleSend]
+  );
+
   // ── Cleanup ─────────────────────────────────────────────────────────────
   useEffect(() => () => { isActiveRef.current = false; }, []);
 
@@ -466,6 +474,7 @@ export default function ChatView() {
                   completedStepKeys={completedStepKeys}
                   onStepComplete={handleStepComplete}
                   onOfferAction={handleOfferAction}
+                  onPropositionComplete={handlePropositionComplete}
                 />
               );
             })}
