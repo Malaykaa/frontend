@@ -1,15 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/shared/lib/utils";
+import { ScoreBadge } from "@/components/structures/ScoreBadge";
 import { useExercise, useExerciseResults } from "@/hooks/queries/use-structure";
-
-function scoreColor(pct: number | null): string {
-  if (pct === null) return "text-muted-foreground";
-  if (pct >= 70) return "text-emerald-600";
-  if (pct >= 50) return "text-amber-600";
-  return "text-destructive";
-}
 
 export default function ExerciseResultsPage() {
   const { structureId = "", classroomId = "", exerciseId = "" } =
@@ -47,9 +40,9 @@ export default function ExerciseResultsPage() {
           </Badge>
         </div>
         {avgScore !== null && (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Moyenne de la classe : <span className={cn("font-bold", scoreColor(avgScore))}>{avgScore}%</span>
-            {" "}sur {attempted.length} tentative{attempted.length > 1 ? "s" : ""}
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+            Moyenne de la classe : <ScoreBadge pct={avgScore} size="sm" />
+            sur {attempted.length} tentative{attempted.length > 1 ? "s" : ""}
           </p>
         )}
       </header>
@@ -76,8 +69,8 @@ export default function ExerciseResultsPage() {
                         {r.attempted ? "Terminé" : "Pas encore fait"}
                       </Badge>
                     </td>
-                    <td className={cn("px-4 py-2.5 text-right font-bold tabular-nums", scoreColor(r.score_pct))}>
-                      {r.score_pct !== null ? `${r.score_pct}%` : "—"}
+                    <td className="px-4 py-2.5 text-right">
+                      <ScoreBadge pct={r.score_pct} size="sm" />
                     </td>
                   </tr>
                 ))}

@@ -28,6 +28,7 @@ import {
   fetchJoinRequests,
   fetchMembers,
   fetchMyCourseProgress,
+  fetchMyDeliveries,
   fetchMyExerciseAttempts,
   fetchMyExerciseResult,
   fetchMyStructures,
@@ -87,6 +88,7 @@ export const structureKeys = {
   myExerciseResult: (exerciseId: string, attempt?: number) =>
     ["classrooms", "exercises", exerciseId, "my-result", attempt ?? "latest"] as const,
   myExerciseAttempts: (exerciseId: string) => ["classrooms", "exercises", exerciseId, "my-attempts"] as const,
+  myDeliveries: ["classrooms", "my-deliveries"] as const,
 };
 
 export const useMyStructures = () =>
@@ -512,3 +514,6 @@ export const useMyExerciseAttempts = (exerciseId: string) =>
     queryFn: () => fetchMyExerciseAttempts(exerciseId),
     enabled: !!exerciseId,
   });
+
+export const useMyDeliveries = () =>
+  useQuery({ queryKey: structureKeys.myDeliveries, queryFn: fetchMyDeliveries });

@@ -811,6 +811,7 @@
     "switch_workspace": "Switch workspace",
     "personal_account": "My account",
     "back_home": "Back to home",
+    "back_to_my_courses": "My courses & exercises",
     "not_found": "Structure not found.",
     "status_pending": "pending validation",
     "role_super_admin": "Structure administrator",

@@ -11,6 +11,7 @@ import { formatRelativeTime } from "@/shared/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { InitialsAvatar } from "@/components/structures/InitialsAvatar";
+import { SendConfirmDialog } from "@/components/structures/SendConfirmDialog";
 import { StatTile } from "@/components/structures/StatTile";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
@@ -74,6 +75,9 @@ function CourseSendControls({
   const { data: members } = useMembers(structureId, classroomId);
   const sendCourse = useSendCourse(structureId, classroomId, courseId);
   const [studentId, setStudentId] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const selectedMember = (members ?? []).find((m) => m.user_id === studentId);
 
   return (
     <div className="flex items-center gap-1.5">
@@ -95,11 +99,9 @@ function CourseSendControls({
         className="h-8 w-8"
         disabled={sendCourse.isPending}
         onClick={() =>
-          sendCourse.mutate(
-            studentId
-              ? { target: "student", student_user_id: studentId }
-              : { target: "classroom" },
-          )
+          studentId
+            ? sendCourse.mutate({ target: "student", student_user_id: studentId })
+            : setConfirmOpen(true)
         }
         title="Envoyer"
       >
@@ -109,6 +111,15 @@ function CourseSendControls({
           <Send className="h-3.5 w-3.5" />
         )}
       </Button>
+      <SendConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        loading={sendCourse.isPending}
+        targetLabel={selectedMember ? `${selectedMember.requested_first_name} ${selectedMember.requested_last_name}` : "toute la salle"}
+        onConfirm={() => {
+          sendCourse.mutate({ target: "classroom" }, { onSuccess: () => setConfirmOpen(false) });
+        }}
+      />
     </div>
   );
 }
@@ -125,6 +136,7 @@ function ExerciseSendControls({
   const { data: members } = useMembers(structureId, classroomId);
   const sendExercise = useSendExercise(structureId, classroomId, exerciseId);
   const [studentId, setStudentId] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
     <div className="flex items-center gap-1.5">
@@ -146,11 +158,9 @@ function ExerciseSendControls({
         className="h-8 w-8"
         disabled={sendExercise.isPending}
         onClick={() =>
-          sendExercise.mutate(
-            studentId
-              ? { target: "student", student_user_id: studentId }
-              : { target: "classroom" },
-          )
+          studentId
+            ? sendExercise.mutate({ target: "student", student_user_id: studentId })
+            : setConfirmOpen(true)
         }
         title="Envoyer"
       >
@@ -160,6 +170,15 @@ function ExerciseSendControls({
           <Send className="h-3.5 w-3.5" />
         )}
       </Button>
+      <SendConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        loading={sendExercise.isPending}
+        targetLabel="toute la salle"
+        onConfirm={() => {
+          sendExercise.mutate({ target: "classroom" }, { onSuccess: () => setConfirmOpen(false) });
+        }}
+      />
     </div>
   );
 }

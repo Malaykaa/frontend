@@ -599,6 +599,27 @@ export const fetchMyExerciseResult = (exerciseId: string, attemptNumber?: number
 export const fetchMyExerciseAttempts = (exerciseId: string) =>
   apiRequest<ExerciseAttemptSummary[]>(`/structures/classroom-exercises/${exerciseId}/my-attempts`);
 
+// ── Index élève : cours + exercices reçus ──────────────────────────────────
+
+export type DeliveryKind = "course" | "evolution_plan" | "exercise" | "evaluation";
+
+export interface DeliveryItem {
+  kind: DeliveryKind;
+  id: string;
+  title: string;
+  classroom_name: string;
+  created_at: string;
+  completion_pct: number;
+  score_pct: number | null;
+}
+
+export interface MyDeliveriesResponse {
+  items: DeliveryItem[];
+}
+
+export const fetchMyDeliveries = () =>
+  apiRequest<MyDeliveriesResponse>("/structures/my-deliveries");
+
 export type AiAssistAction = "analyze" | "develop" | "correct";
 
 export const aiAssistSection = (

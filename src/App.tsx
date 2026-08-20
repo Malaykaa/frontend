@@ -51,6 +51,7 @@ const ExerciseEditorPage  = lazyRoute(() => import("@/pages/structures/ExerciseE
 const ExerciseResultsPage = lazyRoute(() => import("@/pages/structures/ExerciseResultsPage"));
 const TakeExercisePage    = lazyRoute(() => import("@/pages/structures/TakeExercisePage"));
 const ExerciseResultPage  = lazyRoute(() => import("@/pages/structures/ExerciseResultPage"));
+const MyCoursesAndExercisesPage = lazyRoute(() => import("@/pages/structures/MyCoursesAndExercisesPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -145,6 +146,7 @@ export default function App() {
                 <Route path="/structures/:structureId/classrooms/:classroomId/exercises/:exerciseId/results" element={<PrivateRoute><ExerciseResultsPage /></PrivateRoute>} />
                 <Route path="/classrooms/exercises/:exerciseId" element={<PrivateRoute><TakeExercisePage /></PrivateRoute>} />
                 <Route path="/classrooms/exercises/:exerciseId/result" element={<PrivateRoute><ExerciseResultPage /></PrivateRoute>} />
+                <Route path="/classrooms/mine" element={<PrivateRoute><MyCoursesAndExercisesPage /></PrivateRoute>} />
 
                 <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
                   <Route index element={<AdminDashboard />} />

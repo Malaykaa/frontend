@@ -30,6 +30,10 @@ export default function TakeExercisePage() {
   const isEvaluation = exercise.kind === "evaluation";
   const previousAttempts = attempts ?? [];
   const hasPreviousAttempt = previousAttempts.length > 0;
+  // Une évaluation n'autorise qu'une tentative côté backend — la retenter
+  // échouerait systématiquement (409). On redirige directement vers le résultat
+  // au lieu d'afficher un bouton "Commencer" voué à l'échec.
+  const alreadySubmittedEvaluation = isEvaluation && hasPreviousAttempt;
 
   const handleStart = async () => {
     await startSubmission.mutateAsync(exerciseId);
@@ -47,6 +51,25 @@ export default function TakeExercisePage() {
   };
 
   if (!started) {
+    if (alreadySubmittedEvaluation) {
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6 text-center">
+          <div>
+            <h1 className="text-xl font-bold">{exercise.title}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tu as déjà soumis cette évaluation — une seule tentative est comptée.
+            </p>
+          </div>
+          <Button onClick={() => navigate(`/classrooms/exercises/${exerciseId}/result`)}>
+            Voir mon résultat
+          </Button>
+          <Link to="/app" className="text-xs text-muted-foreground hover:text-foreground">
+            ← Retour à l'accueil
+          </Link>
+        </div>
+      );
+    }
+
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6 text-center">
         <div>
