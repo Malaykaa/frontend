@@ -21,3 +21,17 @@ export function isProfileComplete(profile: Profile | null | undefined): boolean 
     return value !== null && value !== undefined && value !== "";
   });
 }
+
+/**
+ * Intérêts + description libre — demandés juste après le profil de base, à la
+ * création d'objectif (cf. NewObjectiveSheet). Contrairement à
+ * isProfileComplete, une valeur VIDE compte comme "traité" (l'utilisateur a
+ * vu l'étape et a choisi de ne rien mettre) — seul `null`/`undefined`
+ * (jamais demandé) redéclenche l'étape. Ces champs sont plus personnels que
+ * pays/genre : on ne force pas leur remplissage.
+ */
+export function isEnrichedProfileComplete(profile: Profile | null | undefined): boolean {
+  if (!profile) return false;
+  return profile.interests !== null && profile.interests !== undefined
+    && profile.self_description !== null && profile.self_description !== undefined;
+}

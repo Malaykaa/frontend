@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Loader2, Lock, GraduationCap, Briefcase, Search, Eye, EyeOff, Check, Square, CheckSquare } from "lucide-react";
+import { Loader2, GraduationCap, Briefcase, Search, Eye, EyeOff, Check, Square, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +37,7 @@ interface OnboardingData {
   cvFile: File | null;
 }
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 
 // ── Composants d'étapes ────────────────────────────────────────────────────
 
@@ -323,7 +323,7 @@ function StepRole({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
         <h2 className="text-xl font-bold">{t("onboarding.role_title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -331,33 +331,33 @@ function StepRole({
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {roles.map(({ value, label, desc, Icon }) => (
           <button
             key={value}
             type="button"
             className={cn(
-              "flex w-full items-start gap-4 rounded-xl border p-4 text-left transition-all",
+              "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all active:scale-[0.99]",
               data.role === value
                 ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                : "border-input hover:bg-muted/30"
+                : "border-input active:bg-muted/30"
             )}
             onClick={() => onChange({ role: value })}
           >
             <div
               className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+                "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
                 data.role === value ? "bg-primary text-primary-foreground" : "bg-muted"
               )}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-4 w-4" />
             </div>
-            <div>
-              <p className="font-semibold text-sm">{label}</p>
-              <p className="text-xs text-muted-foreground">{desc}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-tight">{label}</p>
+              <p className="text-xs text-muted-foreground leading-tight">{desc}</p>
             </div>
             {data.role === value && (
-              <Check className="ml-auto h-5 w-5 shrink-0 text-primary" />
+              <Check className="h-4 w-4 shrink-0 text-primary" />
             )}
           </button>
         ))}
@@ -370,57 +370,6 @@ function StepRole({
         disabled={!data.role}
       >
         {t("onboarding.continue")}
-      </Button>
-    </div>
-  );
-}
-
-function StepGoal({
-  data,
-  onNext,
-}: {
-  data: OnboardingData;
-  onNext: () => void;
-}) {
-  const { t } = useTranslation();
-  const role = data.role!;
-
-  const GOAL_BY_ROLE: Record<Role, { label: string; icon: string; desc: string }> = {
-    student:      { label: t("onboarding.goal_studies"),  icon: "🎓", desc: t("onboarding.goal_studies_hint")  },
-    professional: { label: t("onboarding.goal_career"),   icon: "📈", desc: t("onboarding.goal_career_hint")   },
-    jobseeker:    { label: t("onboarding.goal_job"),      icon: "💼", desc: t("onboarding.goal_job_hint")      },
-  };
-
-  const goal = GOAL_BY_ROLE[role];
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold">{t("onboarding.goal_title_label")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t("onboarding.goal_hint_text")}
-        </p>
-      </div>
-
-      <div className="rounded-xl border-2 border-primary bg-primary/5 p-5">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">{goal.icon}</span>
-          <div className="flex-1">
-            <p className="font-bold">{goal.label}</p>
-            <p className="text-sm text-muted-foreground">{goal.desc}</p>
-          </div>
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted">
-            <Lock className="h-3 w-3 text-muted-foreground" />
-          </div>
-        </div>
-      </div>
-
-      <p className="text-center text-xs text-muted-foreground">
-        {t("onboarding.goal_note")}
-      </p>
-
-      <Button className="w-full" size="lg" onClick={onNext}>
-        {t("onboarding.go")}
       </Button>
     </div>
   );
@@ -644,9 +593,11 @@ export default function OnboardingPage() {
     }
   };
 
+  // L'écran de confirmation d'objectif induit par le rôle a été retiré de
+  // l'UI (redondant, ralentissait l'inscription) — le rôle seul suffit à
+  // déterminer l'objectif implicite, calculé côté backend/agents à partir
+  // de primary_role, jamais affiché comme étape séparée.
   const handleRole = () => setStep(4);
-
-  const handleGoal = () => setStep(5);
 
   const handleDomain = async () => {
     setLoading(true);
@@ -697,8 +648,7 @@ export default function OnboardingPage() {
     <StepPersonalInfo key={1} data={data} onChange={patch} onNext={handleNameStep} />,
     <StepPassword key={2} data={data} onChange={patch} onNext={handlePassword} loading={loading} error={error} />,
     <StepRole key={3} data={data} onChange={patch} onNext={handleRole} />,
-    <StepGoal key={4} data={data} onNext={handleGoal} />,
-    <StepDomain key={5} data={data} onChange={patch} onNext={handleDomain} loading={loading} />,
+    <StepDomain key={4} data={data} onChange={patch} onNext={handleDomain} loading={loading} />,
   ];
 
   return (

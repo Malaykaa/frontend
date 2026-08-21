@@ -1,21 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   Briefcase, GraduationCap, Banknote, Trophy, FileText,
   Laptop, BookOpen, Compass, NotebookPen, Plus, Loader2, Check, Bell, Clock,
-  Sparkles,
 } from "lucide-react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CountrySelect } from "@/components/auth/CountrySelect";
+import { TagInput } from "@/components/ui/tag-input";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreateThread } from "@/hooks/queries/use-chat-threads";
 import { updateProfile } from "@/services/api/profile.api";
-import { isProfileComplete } from "@/shared/lib/profile";
+import { isProfileComplete, isEnrichedProfileComplete } from "@/shared/lib/profile";
 import type { ChatThread } from "@/shared/types";
 
 // ── Thèmes disponibles — labels et placeholders via i18n ───────────────────
@@ -73,13 +73,6 @@ function StepCompleteProfile({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-2.5 rounded-lg bg-primary/5 p-3">
-        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          {t("goals.complete_profile_hint")}
-        </p>
-      </div>
-
       <div className="space-y-1.5">
         <Label className="text-xs">{t("settings.country")}</Label>
         <CountrySelect
@@ -152,7 +145,65 @@ function StepCompleteProfile({
   );
 }
 
-// ── Étape 1 — Choix du thème ───────────────────────────────────────────────
+// ── Étape 1 — Intérêts (skippable, cf. commentaire dans NewObjectiveSheet) ──
+function StepInterests({
+  value,
+  onChange,
+  onSubmit,
+  loading,
+}: {
+  value: string[];
+  onChange: (v: string[]) => void;
+  onSubmit: () => void;
+  loading: boolean;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="space-y-5">
+      <TagInput value={value} onChange={onChange} placeholder={t("goals.interests_placeholder")} />
+
+      <Button className="w-full gap-2" onClick={onSubmit} disabled={loading}>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+        {t("common.next")}
+      </Button>
+    </div>
+  );
+}
+
+// ── Étape 2 — Description libre (skippable) ─────────────────────────────────
+function StepSelfDescription({
+  value,
+  onChange,
+  onSubmit,
+  loading,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onSubmit: () => void;
+  loading: boolean;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="space-y-5">
+      <textarea
+        className="min-h-[140px] w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={t("goals.self_description_placeholder")}
+        maxLength={4000}
+      />
+
+      <Button className="w-full gap-2" onClick={onSubmit} disabled={loading}>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+        {t("common.next")}
+      </Button>
+    </div>
+  );
+}
+
+// ── Étape 3 — Choix du thème ───────────────────────────────────────────────
 function StepTopics({
   selected,
   onSelect,
@@ -165,7 +216,7 @@ function StepTopics({
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-1.5">
         {TOPICS_CONFIG.map(({ preset, labelKey, Icon, color }) => {
           const label = t(labelKey);
           return (
@@ -173,10 +224,10 @@ function StepTopics({
             key={preset}
             type="button"
             className={cn(
-              "flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-all duration-150",
+              "flex items-center gap-2 rounded-lg border bg-card px-2.5 py-2 text-left transition-all active:scale-[0.98]",
               selected === preset
                 ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                : "border-input hover:bg-muted/40"
+                : "border-input hover:bg-muted/30"
             )}
             onClick={() => onSelect(preset as PresetKey)}
           >
@@ -203,7 +254,7 @@ function StepTopics({
   );
 }
 
-// ── Étape 2 — Titre + notifications ───────────────────────────────────────
+// ── Étape 4 — Titre + notifications ───────────────────────────────────────
 function StepDetails({
   preset,
   title,
@@ -330,7 +381,7 @@ function StepDetails({
 
 // ── Composant principal ────────────────────────────────────────────────────
 export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveSheetProps) {
-  const [step, setStep]           = useState<0 | 1 | 2>(1);
+  const [step, setStep]           = useState<0 | 1 | 2 | 3 | 4>(3);
   const [preset, setPreset]       = useState<PresetKey | null>(null);
   const [title, setTitle]         = useState("");
   const [notifMode, setNotifMode] = useState<"realtime" | "scheduled">("realtime");
@@ -339,6 +390,10 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
     country: "", city: "", nationality: "", gender: "", birth_year: "",
   });
   const [savingProfile, setSavingProfile] = useState(false);
+  const [interestsForm, setInterestsForm] = useState<string[]>([]);
+  const [savingInterests, setSavingInterests] = useState(false);
+  const [selfDescriptionForm, setSelfDescriptionForm] = useState("");
+  const [savingSelfDescription, setSavingSelfDescription] = useState(false);
   const { t } = useTranslation();
   const { profile, refreshProfile } = useAuth();
 
@@ -349,19 +404,41 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
   // redemander cette étape. Le sheet reste monté en permanence (Radix Dialog
   // ne démonte pas ses enfants), d'où la réinitialisation explicite ici
   // plutôt qu'un simple état initial.
+  //
+  // `initializedRef` évite de refaire ce calcul à CHAQUE changement de
+  // `profile` pendant que le sheet est ouvert : handleProfileSubmit/
+  // handleInterestsSubmit appellent refreshProfile() puis avancent
+  // manuellement setStep(n+1) — sans ce garde-fou, le profile qui vient de
+  // changer redéclenchait cet effect, qui recalculait l'étape depuis zéro et
+  // renvoyait l'utilisateur en arrière (ex: valider les intérêts renvoyait
+  // sur l'étape intérêts, puisque self_description n'était pas encore rempli).
+  // On ne réévalue donc qu'une fois par ouverture, pas à chaque soumission.
+  const initializedRef = useRef(false);
+
   useEffect(() => {
-    if (!open) return;
-    if (isProfileComplete(profile)) {
-      setStep(1);
-    } else {
+    if (!open) {
+      initializedRef.current = false;
+      return;
+    }
+    if (initializedRef.current) return;
+    if (!profile) return; // attend le chargement du profil avant de décider
+    initializedRef.current = true;
+
+    if (!isProfileComplete(profile)) {
       setProfileForm({
-        country:     profile?.country     ?? "",
-        city:        profile?.city        ?? "",
-        nationality: profile?.nationality ?? "",
-        gender:      profile?.gender      ?? "",
-        birth_year:  profile?.birth_year?.toString() ?? "",
+        country:     profile.country     ?? "",
+        city:        profile.city        ?? "",
+        nationality: profile.nationality ?? "",
+        gender:      profile.gender      ?? "",
+        birth_year:  profile.birth_year?.toString() ?? "",
       });
       setStep(0);
+    } else if (!isEnrichedProfileComplete(profile)) {
+      setInterestsForm(profile.interests ?? []);
+      setSelfDescriptionForm(profile.self_description ?? "");
+      setStep(1);
+    } else {
+      setStep(3);
     }
   }, [open, profile]);
 
@@ -396,13 +473,44 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
     }
   };
 
+  // Étapes intérêts/description : toujours envoyées telles quelles (même
+  // vides) — c'est cette valeur non-nulle qui marque l'étape comme traitée
+  // et l'empêche de réapparaître à la prochaine création d'objectif (cf.
+  // isEnrichedProfileComplete). Pas de blocage sur le contenu : plus
+  // personnel qu'un menu déroulant, on ne force pas le remplissage.
+  const handleInterestsSubmit = async () => {
+    setSavingInterests(true);
+    try {
+      await updateProfile({ interests: interestsForm });
+      await refreshProfile();
+      setStep(2);
+    } catch {
+      toast.error(t("goals.complete_profile_error"));
+    } finally {
+      setSavingInterests(false);
+    }
+  };
+
+  const handleSelfDescriptionSubmit = async () => {
+    setSavingSelfDescription(true);
+    try {
+      await updateProfile({ self_description: selfDescriptionForm.trim() });
+      await refreshProfile();
+      setStep(3);
+    } catch {
+      toast.error(t("goals.complete_profile_error"));
+    } finally {
+      setSavingSelfDescription(false);
+    }
+  };
+
   const handleTopicSelected = (p: PresetKey) => {
     setPreset(p);
   };
 
   const handleNext = () => {
     if (!preset) return;
-    setStep(2);
+    setStep(4);
   };
 
   const handleSubmit = async () => {
@@ -424,13 +532,17 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
 
   const titles = {
     0: t("goals.complete_profile_title"),
-    1: t("goals.new_goal_title"),
-    2: t("goals.sheet_details_title"),
+    1: t("goals.interests_title"),
+    2: t("goals.self_description_title"),
+    3: t("goals.new_goal_title"),
+    4: t("goals.sheet_details_title"),
   } as const;
   const descriptions = {
     0: t("goals.complete_profile_subtitle"),
-    1: t("goals.sheet_choose_hint"),
-    2: t("goals.sheet_details_hint"),
+    1: t("goals.interests_subtitle"),
+    2: t("goals.self_description_subtitle"),
+    3: t("goals.sheet_choose_hint"),
+    4: t("goals.sheet_details_hint"),
   } as const;
 
   return (
@@ -440,7 +552,7 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
       title={titles[step]}
       description={descriptions[step]}
       maxHeight="max-h-[85vh]"
-      locked={isPending || savingProfile}
+      locked={isPending || savingProfile || savingInterests || savingSelfDescription}
     >
       {step === 0 ? (
         <StepCompleteProfile
@@ -450,6 +562,20 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
           loading={savingProfile}
         />
       ) : step === 1 ? (
+        <StepInterests
+          value={interestsForm}
+          onChange={setInterestsForm}
+          onSubmit={handleInterestsSubmit}
+          loading={savingInterests}
+        />
+      ) : step === 2 ? (
+        <StepSelfDescription
+          value={selfDescriptionForm}
+          onChange={setSelfDescriptionForm}
+          onSubmit={handleSelfDescriptionSubmit}
+          loading={savingSelfDescription}
+        />
+      ) : step === 3 ? (
         <StepTopics
           selected={preset}
           onSelect={handleTopicSelected}
@@ -464,7 +590,7 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
           onNotifModeChange={setNotifMode}
           notifTime={notifTime}
           onNotifTimeChange={setNotifTime}
-          onBack={() => setStep(1)}
+          onBack={() => setStep(3)}
           onSubmit={handleSubmit}
           loading={isPending}
         />

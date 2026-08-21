@@ -10,7 +10,9 @@ import { RecommendationFeed } from "@/components/recommendations/RecommendationF
 import { BrowseOffersFeed } from "@/components/recommendations/BrowseOffersFeed";
 import { Button } from "@/components/ui/button";
 import { NewObjectiveSheet } from "@/components/app/NewObjectiveSheet";
+import { ObjectiveSimulation } from "@/components/app/ObjectiveSimulation";
 import { useChatThreads, isActionThread } from "@/hooks/queries/use-chat-threads";
+import { useRecommendations } from "@/hooks/queries/use-recommendations";
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import type { ChatThread } from "@/shared/types";
 
@@ -185,17 +187,9 @@ function TopicCard({
 function EmptyState({ onNew }: { onNew: () => void }) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-muted py-14 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-        <Sparkles className="h-7 w-7 text-primary" />
-      </div>
-      <div>
-        <p className="font-semibold">{t("app.no_goals")}</p>
-        <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-          {t("app.no_goals_long")}
-        </p>
-      </div>
-      <Button onClick={onNew} className="gap-2">
+    <div className="space-y-3">
+      <ObjectiveSimulation />
+      <Button onClick={onNew} className="w-full gap-2">
         <Plus className="h-4 w-4" />
         {t("app.create_first")}
       </Button>
@@ -210,6 +204,11 @@ export default function PourMoiTab() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: allThreads, isLoading, isError, refetch } = useChatThreads();
+  // "Pour toi" ne doit apparaître qu'une fois qu'il y a au moins une
+  // recommandation — le hook est aussi appelé dans RecommendationFeed, React
+  // Query dédoublonne par queryKey, pas de fetch en double.
+  const { data: recommendations, isLoading: recsLoading } = useRecommendations();
+  const hasRecommendations = recsLoading || (recommendations?.length ?? 0) > 0;
 
   // Filtres depuis les query params (liens depuis Tendances)
   const filterOfferTypes = searchParams.get("offer_types") ?? undefined;
@@ -322,15 +321,17 @@ export default function PourMoiTab() {
       )}
 
       {/* ── Section recommandations ──────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Target className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            {t("app.for_you")}
-          </h2>
+      {hasRecommendations && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              {t("app.for_you")}
+            </h2>
+          </div>
+          <RecommendationFeed />
         </div>
-        <RecommendationFeed />
-      </div>
+      )}
 
       {/* Sheet création */}
       <NewObjectiveSheet
