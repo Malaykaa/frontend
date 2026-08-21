@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, RefreshCw, ChevronDown } from "lucide-react";
+import { RefreshCw, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RecommendationCard } from "./RecommendationCard";
 import { useRecommendations } from "@/hooks/queries/use-recommendations";
@@ -24,28 +24,6 @@ function CardSkeleton() {
         <div className="h-6 w-20 rounded-lg bg-muted" />
         <div className="h-6 w-24 rounded-lg bg-muted" />
       </div>
-    </div>
-  );
-}
-
-// ── Empty state ────────────────────────────────────────────────────────────
-
-function EmptyState({ onRefresh }: { onRefresh: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-muted py-10 text-center px-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-        <Sparkles className="h-6 w-6 text-primary" />
-      </div>
-      <div>
-        <p className="font-semibold text-sm">Aucune recommandation pour l'instant</p>
-        <p className="mt-1 text-xs text-muted-foreground max-w-xs">
-          Continue à discuter avec l'IA pour affiner ton profil et recevoir des opportunités personnalisées.
-        </p>
-      </div>
-      <Button variant="outline" size="sm" className="gap-2" onClick={onRefresh}>
-        <RefreshCw className="h-3.5 w-3.5" />
-        Actualiser
-      </Button>
     </div>
   );
 }
@@ -89,8 +67,11 @@ export function RecommendationFeed() {
     return <ErrorState onRetry={() => void refetch()} />;
   }
 
+  // Rien à montrer tant qu'il n'y a pas au moins une recommandation — la
+  // section "Pour toi" (titre inclus) est masquée par le parent (PourMoiTab)
+  // dans ce cas, pas juste ce feed.
   if (!data || data.length === 0) {
-    return <EmptyState onRefresh={() => void refetch()} />;
+    return null;
   }
 
   return (

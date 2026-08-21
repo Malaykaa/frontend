@@ -214,28 +214,48 @@ function RequestStatusDot({ status }: { status: string }) {
   return <span className={cn("h-2 w-2 shrink-0 rounded-full", color)} />;
 }
 
+function HowItWorksList({ steps }: { steps: { Icon: typeof Search; text: string }[] }) {
+  return (
+    <ol className="mt-2.5 space-y-2.5">
+      {steps.map(({ Icon, text }, i) => (
+        <li key={i} className="flex items-start gap-3">
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Icon className="h-3.5 w-3.5 text-primary" />
+          </div>
+          <p className="text-xs leading-relaxed text-muted-foreground">{text}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function HowItWorks() {
-  const steps = [
+  const clientSteps = [
     { Icon: Search, text: "Vous décrivez votre besoin en quelques mots" },
     { Icon: Clock, text: "Les prestataires correspondants reçoivent votre demande" },
     { Icon: CheckCircle2, text: "Ceux qui sont disponibles acceptent" },
     { Icon: Handshake, text: "Vous choisissez — les coordonnées sont alors échangées" },
   ];
+  const providerSteps = [
+    { Icon: Store, text: "Vous créez votre vitrine — compétences, prix, localisation" },
+    { Icon: Inbox, text: "Vous recevez les demandes qui correspondent à votre profil" },
+    { Icon: CheckCircle2, text: "Vous acceptez celles qui vous intéressent" },
+    { Icon: Handshake, text: "Le client vous choisit — les coordonnées sont alors échangées" },
+  ];
   return (
-    <section className="rounded-2xl border border-dashed p-4">
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Comment ça marche
-      </h2>
-      <ol className="mt-3 space-y-3">
-        {steps.map(({ Icon, text }, i) => (
-          <li key={i} className="flex items-start gap-3">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Icon className="h-3.5 w-3.5 text-primary" />
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">{text}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
+    <div className="space-y-3">
+      <section className="rounded-2xl border border-dashed p-4">
+        <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <Search className="h-3.5 w-3.5" /> Comment ça marche — côté client
+        </h2>
+        <HowItWorksList steps={clientSteps} />
+      </section>
+      <section className="rounded-2xl border border-dashed p-4">
+        <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <Store className="h-3.5 w-3.5" /> Comment ça marche — côté prestataire
+        </h2>
+        <HowItWorksList steps={providerSteps} />
+      </section>
+    </div>
   );
 }

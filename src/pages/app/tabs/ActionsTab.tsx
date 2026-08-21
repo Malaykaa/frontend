@@ -5,7 +5,7 @@ import { usePageTitle } from "@/hooks/use-page-title";
 import {
   Plus, FileText, Building2, TrendingUp, PieChart,
   FolderKanban, BarChart3, GraduationCap, ClipboardCheck, Mic,
-  HandshakeIcon, FileSignature, Loader2, ChevronRight, Zap,
+  HandshakeIcon, FileSignature, Loader2, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,18 +147,6 @@ function EmptyTopicGrid({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border-2 border-dashed border-muted p-5 text-center space-y-2">
-        <div className="flex justify-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100">
-            <Zap className="h-6 w-6 text-amber-600" />
-          </div>
-        </div>
-        <p className="font-semibold text-sm">{t("actions.empty_title")}</p>
-        <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-          {t("actions.empty_hint")}
-        </p>
-      </div>
-
       <div className="grid grid-cols-2 gap-1.5">
         {ACTIONS.map(({ Icon, label, color, preset }) => (
           <button
