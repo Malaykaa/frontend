@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -426,20 +426,38 @@ export function NewObjectiveSheet({ open, onClose, onCreated }: NewObjectiveShee
   // redemander cette étape. Le sheet reste monté en permanence (Radix Dialog
   // ne démonte pas ses enfants), d'où la réinitialisation explicite ici
   // plutôt qu'un simple état initial.
+  //
+  // `initializedRef` évite de refaire ce calcul à CHAQUE changement de
+  // `profile` pendant que le sheet est ouvert : handleProfileSubmit/
+  // handleInterestsSubmit appellent refreshProfile() puis avancent
+  // manuellement setStep(n+1) — sans ce garde-fou, le profile qui vient de
+  // changer redéclenchait cet effect, qui recalculait l'étape depuis zéro et
+  // renvoyait l'utilisateur en arrière (ex: valider les intérêts renvoyait
+  // sur l'étape intérêts, puisque self_description n'était pas encore rempli).
+  // On ne réévalue donc qu'une fois par ouverture, pas à chaque soumission.
+  const initializedRef = useRef(false);
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      initializedRef.current = false;
+      return;
+    }
+    if (initializedRef.current) return;
+    if (!profile) return; // attend le chargement du profil avant de décider
+    initializedRef.current = true;
+
     if (!isProfileComplete(profile)) {
       setProfileForm({
-        country:     profile?.country     ?? "",
-        city:        profile?.city        ?? "",
-        nationality: profile?.nationality ?? "",
-        gender:      profile?.gender      ?? "",
-        birth_year:  profile?.birth_year?.toString() ?? "",
+        country:     profile.country     ?? "",
+        city:        profile.city        ?? "",
+        nationality: profile.nationality ?? "",
+        gender:      profile.gender      ?? "",
+        birth_year:  profile.birth_year?.toString() ?? "",
       });
       setStep(0);
     } else if (!isEnrichedProfileComplete(profile)) {
-      setInterestsForm(profile?.interests ?? []);
-      setSelfDescriptionForm(profile?.self_description ?? "");
+      setInterestsForm(profile.interests ?? []);
+      setSelfDescriptionForm(profile.self_description ?? "");
       setStep(1);
     } else {
       setStep(3);
