@@ -466,13 +466,11 @@
     "complete_profile_continue": "Continuer",
     "complete_profile_error": "Impossible d'enregistrer ton profil. Réessaie.",
     "interests_title": "Tes centres d'intérêt",
-    "interests_subtitle": "Pour te proposer de meilleures opportunités",
-    "interests_hint": "Qu'est-ce qui t'intéresse ou te passionne ? Ça nous aide à repérer les opportunités qui te correspondent vraiment. Tu peux passer cette étape si tu préfères.",
+    "interests_subtitle": "Pour te proposer des opportunités plus adaptées",
     "interests_placeholder": "Ex : informatique, agriculture, mode…",
     "self_description_title": "Parle-nous un peu de toi",
-    "self_description_subtitle": "Pour te proposer de meilleures opportunités",
-    "self_description_hint": "Décris-toi le plus clairement possible : qui tu es, ce que tu sais faire, ce que tu recherches. Plus c'est clair, mieux on pourra te trouver des opportunités adaptées à ta situation. Tu peux passer cette étape si tu préfères.",
-    "self_description_placeholder": "Ex : je suis étudiante en informatique à Abidjan, je cherche un stage en développement web pour cet été…"
+    "self_description_subtitle": "Pour te proposer des offres adaptées à ta situation",
+    "self_description_placeholder": "Ex : Je suis Jean Koffi, je suis financièrement moyen, je cherche des offres de classe moyenne."
   },
   "recommendations": {
     "title": "Pour toi",

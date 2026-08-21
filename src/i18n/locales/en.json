@@ -466,13 +466,11 @@
     "complete_profile_continue": "Continue",
     "complete_profile_error": "Couldn't save your profile. Please try again.",
     "interests_title": "Your interests",
-    "interests_subtitle": "To suggest better opportunities",
-    "interests_hint": "What interests or excites you? This helps us spot opportunities that truly fit you. You can skip this step if you prefer.",
+    "interests_subtitle": "To suggest opportunities more suited to you",
     "interests_placeholder": "E.g.: technology, agriculture, fashion…",
     "self_description_title": "Tell us a bit about yourself",
-    "self_description_subtitle": "To suggest better opportunities",
-    "self_description_hint": "Describe yourself as clearly as possible: who you are, what you can do, what you're looking for. The clearer it is, the better we can find opportunities that fit your situation. You can skip this step if you prefer.",
-    "self_description_placeholder": "E.g.: I'm a computer science student in Abidjan, looking for a web development internship this summer…"
+    "self_description_subtitle": "To suggest offers suited to your situation",
+    "self_description_placeholder": "E.g.: I'm Jean Koffi, I'm financially average, I'm looking for middle-class offers."
   },
   "recommendations": {
     "title": "For you",

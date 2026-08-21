@@ -169,13 +169,6 @@ function StepInterests({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-2.5 rounded-lg bg-primary/5 p-3">
-        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          {t("goals.interests_hint")}
-        </p>
-      </div>
-
       <TagInput value={value} onChange={onChange} placeholder={t("goals.interests_placeholder")} />
 
       <Button className="w-full gap-2" onClick={onSubmit} disabled={loading}>
@@ -202,13 +195,6 @@ function StepSelfDescription({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-2.5 rounded-lg bg-primary/5 p-3">
-        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          {t("goals.self_description_hint")}
-        </p>
-      </div>
-
       <textarea
         className="min-h-[140px] w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         value={value}
