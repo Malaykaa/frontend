@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import {
   Briefcase, GraduationCap, Banknote, Trophy, FileText,
   Laptop, BookOpen, Compass, NotebookPen, Plus, Loader2, Check, Bell, Clock,
-  Sparkles,
 } from "lucide-react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
@@ -74,13 +73,6 @@ function StepCompleteProfile({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-2.5 rounded-lg bg-primary/5 p-3">
-        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          {t("goals.complete_profile_hint")}
-        </p>
-      </div>
-
       <div className="space-y-1.5">
         <Label className="text-xs">{t("settings.country")}</Label>
         <CountrySelect

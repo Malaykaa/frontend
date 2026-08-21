@@ -185,17 +185,17 @@ function TopicCard({
 function EmptyState({ onNew }: { onNew: () => void }) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-muted py-14 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-        <Sparkles className="h-7 w-7 text-primary" />
+    <div className="flex flex-col items-center gap-3 rounded-xl bg-muted/30 px-4 py-8 text-center">
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+        <Sparkles className="h-5 w-5 text-primary" />
       </div>
       <div>
         <p className="font-semibold">{t("app.no_goals")}</p>
-        <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           {t("app.no_goals_long")}
         </p>
       </div>
-      <Button onClick={onNew} className="gap-2">
+      <Button onClick={onNew} className="w-full gap-2 sm:w-auto">
         <Plus className="h-4 w-4" />
         {t("app.create_first")}
       </Button>
