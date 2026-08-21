@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Check, Circle, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { ProgressBar } from "@/components/structures/ProgressBar";
 import { useCompleteCourseStep, useMyCourseProgress } from "@/hooks/queries/use-structure";
 
 export default function MyCoursePage() {
@@ -19,16 +20,20 @@ export default function MyCoursePage() {
     );
   }
 
+  const doneCount = course.steps.filter((s) => s.status === "done").length;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b px-6 py-4">
-        <Link to="/app" className="mb-2 inline-block text-sm text-muted-foreground hover:text-foreground">
-          ← {t("structures.back_home")}
+        <Link to="/classrooms/mine" className="mb-2 inline-block text-sm text-muted-foreground hover:text-foreground">
+          ← {t("structures.back_to_my_courses")}
         </Link>
         <h1 className="text-xl font-bold">{course.title}</h1>
       </header>
 
       <main className="mx-auto max-w-2xl space-y-6 p-6">
+        <ProgressBar done={doneCount} total={course.steps.length} />
+
         <div className="prose prose-sm dark:prose-invert max-w-none rounded-xl border bg-card p-5">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{course.explanation}</ReactMarkdown>
         </div>

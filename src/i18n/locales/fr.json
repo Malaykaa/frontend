@@ -811,6 +811,7 @@
     "switch_workspace": "Basculer d'espace",
     "personal_account": "Mon compte",
     "back_home": "Retour à l'accueil",
+    "back_to_my_courses": "Mes cours & exercices",
     "not_found": "Structure introuvable.",
     "status_pending": "en attente de validation",
     "role_super_admin": "Administrateur de la structure",

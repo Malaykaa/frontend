@@ -1,13 +1,9 @@
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { CheckCircle2, Clock, Loader2, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { setPendingInviteRedirect } from "@/shared/lib/pending-invite";
 import { useClassroomJoinPreview, useJoinClassroom } from "@/hooks/queries/use-structure";
+import { NameConfirmForm } from "@/components/structures/NameConfirmForm";
 
 export default function ClassroomJoinPage() {
   const { t } = useTranslation();
@@ -16,123 +12,27 @@ export default function ClassroomJoinPage() {
   const { data: preview, isLoading, isError } = useClassroomJoinPreview(inviteCode);
   const joinMutation = useJoinClassroom();
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [result, setResult] = useState<"accepted" | "pending_review" | null>(null);
-
   const goAuth = (path: "/login" | "/onboarding") => {
     setPendingInviteRedirect(`/classrooms/join/${inviteCode}`);
     window.location.href = path;
   };
 
-  const handleJoin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await joinMutation.mutateAsync({ inviteCode, firstName, lastName });
-    setResult(res.status);
-  };
-
-  if (authLoading || isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (isError || !preview) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
-        <XCircle className="h-10 w-10 text-destructive" />
-        <p className="text-sm text-muted-foreground">{t("structures.classroom_invite_invalid")}</p>
-        <Link to="/" className="text-sm font-medium text-primary hover:underline">
-          {t("structures.back_home")}
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="flex items-center justify-center px-6 py-4">
-        <Link to="/">
-          <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
-        </Link>
-      </header>
-
-      <main className="flex flex-1 flex-col items-center justify-center px-6 py-8">
-        <div className="w-full max-w-sm space-y-6">
-          {result === "accepted" && (
-            <div className="flex flex-col items-center gap-4 text-center">
-              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
-              <h1 className="text-xl font-bold">{t("structures.classroom_join_success_title")}</h1>
-              <p className="text-sm text-muted-foreground">
-                {t("structures.classroom_join_success_hint", { classroom: preview.classroom_name })}
-              </p>
-              <Link to="/app">
-                <Button>{t("structures.go_to_app")}</Button>
-              </Link>
-            </div>
-          )}
-
-          {result === "pending_review" && (
-            <div className="flex flex-col items-center gap-4 text-center">
-              <Clock className="h-10 w-10 text-amber-500" />
-              <h1 className="text-xl font-bold">{t("structures.accept_pending_title")}</h1>
-              <p className="text-sm text-muted-foreground">{t("structures.classroom_join_pending_hint")}</p>
-              <Link to="/app">
-                <Button variant="outline">{t("structures.go_to_app")}</Button>
-              </Link>
-            </div>
-          )}
-
-          {result === null && (
-            <>
-              <div className="text-center">
-                <h1 className="text-xl font-bold">
-                  {t("structures.classroom_join_title", { classroom: preview.classroom_name })}
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t("structures.classroom_join_hint", { structure: preview.structure_name })}
-                </p>
-              </div>
-
-              {!isAuthenticated ? (
-                <div className="space-y-3">
-                  <Button className="w-full" size="lg" onClick={() => goAuth("/login")}>
-                    {t("structures.invite_login")}
-                  </Button>
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    variant="outline"
-                    onClick={() => goAuth("/onboarding")}
-                  >
-                    {t("structures.invite_signup")}
-                  </Button>
-                </div>
-              ) : (
-                <form onSubmit={handleJoin} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <Label>{t("onboarding.first_name")}</Label>
-                    <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>{t("onboarding.last_name")}</Label>
-                    <Input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-                  </div>
-                  <Button className="w-full" size="lg" type="submit" disabled={joinMutation.isPending}>
-                    {joinMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      t("structures.invite_confirm")
-                    )}
-                  </Button>
-                </form>
-              )}
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+    <NameConfirmForm
+      isLoading={isLoading}
+      isError={isError || !preview}
+      errorMessage={t("structures.classroom_invite_invalid")}
+      isAuthenticated={isAuthenticated}
+      authLoading={authLoading}
+      onAuthRedirect={goAuth}
+      title={t("structures.classroom_join_title", { classroom: preview?.classroom_name })}
+      hint={t("structures.classroom_join_hint", { structure: preview?.structure_name })}
+      isSubmitting={joinMutation.isPending}
+      onSubmit={(firstName, lastName) => joinMutation.mutateAsync({ inviteCode, firstName, lastName })}
+      successTitle={t("structures.classroom_join_success_title")}
+      successHint={t("structures.classroom_join_success_hint", { classroom: preview?.classroom_name })}
+      pendingTitle={t("structures.accept_pending_title")}
+      pendingHint={t("structures.classroom_join_pending_hint")}
+    />
   );
 }

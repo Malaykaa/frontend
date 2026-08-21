@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, CheckCircle2, Circle, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { RecipientMatrix, type MatrixColumn } from "@/components/structures/RecipientMatrix";
+import { SingleRecipientView } from "@/components/structures/SingleRecipientView";
 import { useCourse, useCourseProgress } from "@/hooks/queries/use-structure";
 
 export default function CourseProgressPage() {
@@ -20,6 +22,16 @@ export default function CourseProgressPage() {
       </div>
     );
   }
+
+  const columns: MatrixColumn[] = course.steps.map((s) => ({ id: s.id, label: s.label }));
+  const recipients = matrix?.recipients ?? [];
+
+  const stepIcon = (done: boolean) =>
+    done ? (
+      <CheckCircle2 className="mx-auto h-4 w-4 text-emerald-600" />
+    ) : (
+      <Circle className="mx-auto h-4 w-4 text-muted-foreground/40" />
+    );
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,47 +55,36 @@ export default function CourseProgressPage() {
             {t("structures.progress_matrix")}
           </h2>
 
-          {(matrix?.recipients ?? []).length === 0 ? (
+          {recipients.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("structures.no_recipients_yet")}</p>
+          ) : recipients.length === 1 ? (
+            // Plan d'évolution (toujours 1 destinataire) ou cours envoyé à un seul
+            // étudiant — une liste verticale se lit mieux qu'une table à une ligne.
+            <SingleRecipientView
+              recipientName={recipients[0].user_name ?? "—"}
+              columns={columns}
+              cells={Object.fromEntries(
+                columns.map((c) => {
+                  const stepProgress = recipients[0].steps.find((sp) => sp.step_id === c.id);
+                  return [c.id, stepIcon(stepProgress?.status === "done")];
+                }),
+              )}
+            />
           ) : (
-            <div className="overflow-x-auto rounded-xl border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40">
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground">
-                      {t("structures.student")}
-                    </th>
-                    {course.steps.map((s) => (
-                      <th key={s.id} className="px-3 py-2.5 text-center text-xs font-semibold text-muted-foreground">
-                        {s.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {matrix?.recipients.map((r) => (
-                    <tr key={r.user_id} className="border-b last:border-0">
-                      <td className="px-4 py-2.5 text-xs font-medium">
-                        {r.user_name ?? "—"}
-                      </td>
-                      {course.steps.map((s) => {
-                        const stepProgress = r.steps.find((sp) => sp.step_id === s.id);
-                        const done = stepProgress?.status === "done";
-                        return (
-                          <td key={s.id} className="px-3 py-2.5 text-center">
-                            {done ? (
-                              <CheckCircle2 className="mx-auto h-4 w-4 text-emerald-600" />
-                            ) : (
-                              <Circle className="mx-auto h-4 w-4 text-muted-foreground/40" />
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <RecipientMatrix
+              studentLabel={t("structures.student")}
+              columns={columns}
+              recipients={recipients.map((r) => ({
+                id: r.user_id,
+                name: r.user_name ?? "—",
+                cells: Object.fromEntries(
+                  columns.map((c) => {
+                    const stepProgress = r.steps.find((sp) => sp.step_id === c.id);
+                    return [c.id, stepIcon(stepProgress?.status === "done")];
+                  }),
+                ),
+              }))}
+            />
           )}
         </section>
       </main>

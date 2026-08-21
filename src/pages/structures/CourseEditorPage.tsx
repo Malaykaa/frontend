@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
 import { apiRequest } from "@/shared/api/client";
+import { PhasedGenerationProgress, useSimulatedPhases } from "@/components/structures/PhasedGenerationProgress";
 import {
   useAiAssistSection,
   useClassrooms,
@@ -201,6 +202,10 @@ export default function CourseEditorPage() {
   const createCourse = useCreateCourse(structureId, classroomId);
   const sendCourse   = useSendCourse(structureId, classroomId, resultCourse?.id ?? "");
   const aiAssist     = useAiAssistSection(structureId, classroomId);
+  const analysisPhases = useSimulatedPhases(
+    ["Lecture du contenu…", "Découpage en étapes pédagogiques…", "Finalisation du plan…"],
+    phase === "analyzing", 10_000,
+  );
 
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -357,13 +362,10 @@ export default function CourseEditorPage() {
         <div>
           <h2 className="text-xl font-bold">Analyse du cours en cours…</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            L'IA décompose votre cours en étapes pédagogiques claires.
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
             Cette opération prend généralement 30 à 60 secondes — ne quittez pas la page.
           </p>
         </div>
-        <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
+        <PhasedGenerationProgress phases={analysisPhases} />
       </div>
     );
   }
