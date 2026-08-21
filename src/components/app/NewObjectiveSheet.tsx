@@ -216,7 +216,7 @@ function StepTopics({
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-1.5">
         {TOPICS_CONFIG.map(({ preset, labelKey, Icon, color }) => {
           const label = t(labelKey);
           return (
@@ -224,10 +224,10 @@ function StepTopics({
             key={preset}
             type="button"
             className={cn(
-              "flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-all duration-150",
+              "flex items-center gap-2 rounded-lg border bg-card px-2.5 py-2 text-left transition-all active:scale-[0.98]",
               selected === preset
                 ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                : "border-input hover:bg-muted/40"
+                : "border-input hover:bg-muted/30"
             )}
             onClick={() => onSelect(preset as PresetKey)}
           >
