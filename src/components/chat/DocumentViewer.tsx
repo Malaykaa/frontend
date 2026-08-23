@@ -1,13 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  X, Eye, Edit3, FileDown, Share2, RotateCcw,
-  Check, Copy, Link, ExternalLink, ChevronLeft,
-} from "lucide-react";
+import { Eye, Edit3, FileDown, RotateCcw, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { MarkdownContent } from "@/components/chat/MarkdownContent";
-import { createShareToken, getShareUrl, printDocument, downloadAsWord } from "@/lib/document-utils";
+import { printDocument, downloadAsWord } from "@/lib/document-utils";
 import { cn } from "@/shared/lib/utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -24,69 +21,6 @@ interface DocumentViewerProps {
 type ActiveTab = "edit" | "preview";
 
 // ── Share Panel ────────────────────────────────────────────────────────────
-
-function SharePanel({
-  title,
-  content,
-  onClose,
-}: {
-  title: string;
-  content: string;
-  onClose: () => void;
-}) {
-  const { t } = useTranslation();
-  const [token] = useState(() => createShareToken(title, content));
-  const shareUrl = getShareUrl(token);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    toast.success(t("document.copy_link_success"));
-    setTimeout(() => setCopied(false), 2500);
-  };
-
-  return (
-    <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">{t("document.share_panel_title")}</p>
-        <button
-          onClick={onClose}
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        {t("document.share_link_hint")}
-      </p>
-
-      <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2">
-        <Link className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        <span className="flex-1 truncate text-xs font-mono text-muted-foreground">
-          {shareUrl}
-        </span>
-        <button
-          onClick={handleCopy}
-          className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
-        >
-          {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-        </button>
-      </div>
-
-      <a
-        href={shareUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1.5 text-xs text-primary hover:underline"
-      >
-        <ExternalLink className="h-3 w-3" />
-        {t("document.open_new_tab")}
-      </a>
-    </div>
-  );
-}
 
 // ── Icône Word ─────────────────────────────────────────────────────────────
 function WordIcon({ className }: { className?: string }) {
@@ -108,8 +42,6 @@ interface ToolbarProps {
   activeTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
   isDesktop: boolean;
-  shareOpen: boolean;
-  onShareToggle: () => void;
 }
 
 function Toolbar({
@@ -120,8 +52,6 @@ function Toolbar({
   activeTab,
   onTabChange,
   isDesktop,
-  shareOpen,
-  onShareToggle,
 }: ToolbarProps) {
   const { t } = useTranslation();
 
@@ -181,19 +111,6 @@ function Toolbar({
         )}
 
         <button
-          onClick={onShareToggle}
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-lg border transition-colors",
-            shareOpen
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-input hover:bg-muted text-muted-foreground"
-          )}
-          title={t("document.share")}
-        >
-          <Share2 className="h-4 w-4" />
-        </button>
-
-        <button
           onClick={handlePrint}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-input hover:bg-muted text-muted-foreground transition-colors"
           title={t("document.export_pdf")}
@@ -226,7 +143,6 @@ export function DocumentViewer({
   const { t } = useTranslation();
   const [content, setContent]     = useState(initialContent);
   const [activeTab, setActiveTab] = useState<ActiveTab>("preview");
-  const [shareOpen, setShareOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
   useEffect(() => {
@@ -270,19 +186,7 @@ export function DocumentViewer({
         activeTab={activeTab}
         onTabChange={setActiveTab}
         isDesktop={isDesktop}
-        shareOpen={shareOpen}
-        onShareToggle={() => setShareOpen((v) => !v)}
       />
-
-      {shareOpen && (
-        <div className="border-b px-4 py-3">
-          <SharePanel
-            title={title}
-            content={content}
-            onClose={() => setShareOpen(false)}
-          />
-        </div>
-      )}
 
       <div className="flex flex-1 overflow-hidden">
         {isDesktop ? (

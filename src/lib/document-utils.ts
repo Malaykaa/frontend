@@ -1,4 +1,20 @@
 // ── Share token (localStorage) ─────────────────────────────────────────────
+//
+// MECANISME CONSERVE MAIS NON EXPOSE — l'interface de partage a ete retiree de
+// DocumentViewer, volontairement.
+//
+// Raison : le document est stocke dans le localStorage de CELUI QUI PARTAGE.
+// Le lien /share/{token} ne fonctionne donc que dans son propre navigateur ;
+// tout destinataire voit "document introuvable". Le defaut passait inapercu en
+// test, ou l'on ouvre le lien depuis le meme navigateur — et se manifestait
+// uniquement chez le destinataire, typiquement un recruteur.
+//
+// Le code reste ici parce qu'un vrai partage (table serveur avec jeton,
+// expiration et revocation) se construira sur la meme forme d'API. Tant que
+// c'est cote navigateur, ne pas le rebrancher a l'interface.
+//
+// La route /share/:token reste declaree : sans emetteur de liens, elle n'est
+// plus atteignable, et elle affiche deja un etat "introuvable" propre.
 
 const SHARE_PREFIX = "mlk_share_";
 
