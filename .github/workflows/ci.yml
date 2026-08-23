@@ -6,6 +6,16 @@ on:
   pull_request:
     branches: [main]
 
+# Un seul run à la fois par branche — même garde-fou que côté backend. Deux
+# fusions rapprochées déclenchaient deux déploiements simultanés sur le même
+# serveur, chacun synchronisant la config nginx puis rechargeant le conteneur.
+#
+# cancel-in-progress: false est délibéré : le second déploiement doit ATTENDRE
+# la fin du premier, pas l'interrompre pendant l'écriture de la config nginx.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   REGISTRY: ghcr.io
 
