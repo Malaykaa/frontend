@@ -85,7 +85,7 @@ export function markdownToHtml(md: string): string {
       // Inline code
       .replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:2px 5px;border-radius:3px;font-size:0.9em">$1</code>')
       // Links
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#4f46e5">$1</a>');
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#141416">$1</a>');
   };
 
   for (let i = 0; i < lines.length; i++) {
@@ -245,7 +245,7 @@ export function printDocument(title: string, content: string): void {
     pre { background: #f5f5f5; padding: 14px; border-radius: 4px; overflow-x: auto; page-break-inside: avoid; }
     code { font-family: monospace; font-size: 10pt; }
     hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
-    a  { color: #4f46e5; }
+    a  { color: #141416; }
     .footer {
       margin-top: 60px;
       padding-top: 12px;
