@@ -1,10 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight, CheckCircle2, Globe2, FileText,
-  Bell, Zap, GraduationCap, Briefcase, Search, Sparkles,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { HeroWhatsAppSimulation } from "./HeroWhatsAppSimulation";
 
 export function HeroSection() {
   const { t } = useTranslation();
@@ -104,109 +102,12 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* ── Right: AI Dashboard ── */}
+          {/* ── Right: simulation d'une vraie conversation Malayka, jusqu'à
+              l'alerte WhatsApp. Remplace l'ancien tableau de bord factice
+              (barre de scan, liste de correspondances) : on montre le produit
+              plutôt que de le mettre en scène. ── */}
           <div className="order-2 lg:order-2 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-[390px]">
-
-              {/* Glow behind panel */}
-              <div className="absolute -inset-2 rounded-3xl bg-primary/15 blur-2xl" />
-
-              {/* Main panel */}
-              <div className="relative rounded-2xl border-2 border-primary/15 bg-secondary/40 dark:bg-card dark:border-border shadow-2xl overflow-hidden">
-
-                {/* macOS bar */}
-                <div className="flex items-center justify-between px-4 py-2.5 border-b bg-muted/40">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                      <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                    </div>
-                    <span className="font-mono text-[10px] text-muted-foreground">malayka.ai</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 dark:border-emerald-800 dark:bg-emerald-950/50">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="font-mono text-[9px] font-bold text-emerald-600 uppercase tracking-wide">Live</span>
-                  </div>
-                </div>
-
-                <div className="p-4 space-y-3.5">
-
-                  {/* Scan bar */}
-                  <div className="rounded-xl bg-muted/50 p-3 space-y-2">
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="flex items-center gap-1.5 font-mono text-muted-foreground">
-                        <Globe2 className="h-3 w-3 text-primary" />
-                        1 247 sources analysées…
-                      </span>
-                      <span className="font-mono font-bold text-primary">73%</span>
-                    </div>
-                    <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-primary to-violet-500"
-                        style={{ width: "73%", animation: "scan-grow 3s ease-in-out infinite alternate" }}
-                      />
-                    </div>
-                    <div className="flex gap-1">
-                      {["Abidjan", "Dakar", "Paris", "Douala"].map((c) => (
-                        <span key={c} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground">{c}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Matches */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="flex items-center gap-1.5 text-xs font-bold">
-                        <Sparkles className="h-3.5 w-3.5 text-primary" />
-                        Résultats matchés
-                      </span>
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-primary">+5</span>
-                    </div>
-                    {[
-                      { Icon: GraduationCap, label: "Bourse Master · Campus France", score: "96%", pill: "text-violet-600 bg-violet-50 border-violet-200 dark:bg-violet-950/40 dark:border-violet-800" },
-                      { Icon: Briefcase,     label: "Stage Développeur · Abidjan",   score: "91%", pill: "text-primary bg-primary/8 border-primary/25" },
-                      { Icon: Search,        label: "Appel à projets · BDC CI",       score: "88%", pill: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800" },
-                    ].map(({ Icon, label, score, pill }) => (
-                      <div key={label} className="flex items-center gap-2.5 rounded-lg border bg-muted/20 px-2.5 py-1.5">
-                        <Icon className="h-3 w-3 shrink-0 text-muted-foreground" />
-                        <p className="flex-1 truncate text-xs font-medium">{label}</p>
-                        <span className={`shrink-0 rounded-full border px-1.5 py-px font-mono text-[10px] font-bold ${pill}`}>{score}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Doc generated */}
-                  <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 dark:border-emerald-800 dark:bg-emerald-950/30">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/50">
-                      <FileText className="h-3.5 w-3.5 text-emerald-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Lettre de motivation générée</p>
-                      <p className="text-[10px] text-emerald-600/70">PDF prêt · 8 secondes</p>
-                    </div>
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                  </div>
-                </div>
-              </div>
-
-              {/* WhatsApp floating */}
-              <div className="absolute -bottom-4 -left-5 flex items-center gap-2 rounded-2xl border bg-background shadow-xl px-3 py-2">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#25D366]">
-                  <Bell className="h-3.5 w-3.5 text-white" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold leading-none">WhatsApp · maintenant</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Bourse — 96% match 🎯</p>
-                </div>
-              </div>
-
-              {/* Plan badge */}
-              <div className="absolute -top-3 -right-4 flex items-center gap-1.5 rounded-full border bg-background px-2.5 py-1 shadow-lg">
-                <Zap className="h-3 w-3 text-amber-500" />
-                <span className="font-mono text-[10px] font-bold">Plan · 8 étapes</span>
-              </div>
-            </div>
+            <HeroWhatsAppSimulation />
           </div>
         </div>
       </div>
