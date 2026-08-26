@@ -13,7 +13,6 @@ import { LandingLayout } from "@/pages/landing/LandingLayout";
 const ParticulierPage    = lazyRoute(() => import("@/pages/landing/pages/ParticulierPage"));
 const EducativePage      = lazyRoute(() => import("@/pages/landing/pages/EducativePage"));
 const EmploiPage         = lazyRoute(() => import("@/pages/landing/pages/EmploiPage"));
-const ServicesLandingPage = lazyRoute(() => import("@/pages/landing/pages/ServicesPage"));
 const AProposPage        = lazyRoute(() => import("@/pages/landing/pages/AProposPage"));
 const TemoignagesPage    = lazyRoute(() => import("@/pages/landing/pages/TemoignagesPage"));
 const PrivacyPolicy      = lazyRoute(() => import("@/pages/legal/PrivacyPolicy"));
@@ -128,7 +127,6 @@ export default function App() {
                   <Route path="/solutions/particulier" element={<ParticulierPage />} />
                   <Route path="/solutions/educative" element={<EducativePage />} />
                   <Route path="/solutions/emploi" element={<EmploiPage />} />
-                  <Route path="/services" element={<ServicesLandingPage />} />
                   <Route path="/a-propos" element={<AProposPage />} />
                   <Route path="/temoignages" element={<TemoignagesPage />} />
                 </Route>

@@ -43,8 +43,10 @@ const SOLUTIONS: SolutionLink[] = [
   },
 ];
 
+// Services n'a plus d'entrée propre : la mise en relation est décrite sur la
+// page « Structures d'emploi », là où se trouve son audience. Un recruteur n'a
+// pas à naviguer entre deux pages pour comprendre une seule proposition.
 const PAGES = [
-  { to: "/services", label: "Services" },
   { to: "/a-propos", label: "À propos" },
   { to: "/temoignages", label: "Témoignages" },
 ];

@@ -1,22 +1,18 @@
 import { Testimonials } from "../Testimonials";
 import { StatsSection } from "../StatsSection";
-import { CtaSection }   from "../CtaSection";
+import { PageHero } from "../ui";
 
 /** Temoignages — ce que les utilisateurs disent, et les chiffres qui vont avec. */
 export default function TemoignagesPage() {
   return (
-    <div className="pt-24 md:pt-28">
-      <div className="mx-auto max-w-3xl px-5 text-center">
-        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-          Temoignages
-        </p>
-        <h1 className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
-          Ils avancent avec Malayka
-        </h1>
-      </div>
+    <>
+      <PageHero
+        eyebrow="Temoignages"
+        title="Ils ont decroche ce qu'ils cherchaient"
+        intro="Etudiants, chercheurs d'emploi, entrepreneurs et etablissements : voici ce que Malayka a change dans leur parcours."
+      />
       <Testimonials />
       <StatsSection />
-      <CtaSection />
-    </div>
+    </>
   );
 }
