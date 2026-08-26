@@ -6,8 +6,16 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { InstallBanner } from "@/components/app/InstallBanner";
 import { Suspense, useEffect } from "react";
 import { clearChunkReloadMark, lazyRoute } from "@/shared/lib/lazy-route";
+import { LandingLayout } from "@/pages/landing/LandingLayout";
 
-const LandingPage        = lazyRoute(() => import("@/pages/landing"));
+// Site public multipage : chaque audience a sa page, au lieu d'une page unique
+// ou tout le monde defile dans un discours ecrit pour quelqu'un d'autre.
+const ParticulierPage    = lazyRoute(() => import("@/pages/landing/pages/ParticulierPage"));
+const EducativePage      = lazyRoute(() => import("@/pages/landing/pages/EducativePage"));
+const EmploiPage         = lazyRoute(() => import("@/pages/landing/pages/EmploiPage"));
+const ServicesLandingPage = lazyRoute(() => import("@/pages/landing/pages/ServicesPage"));
+const AProposPage        = lazyRoute(() => import("@/pages/landing/pages/AProposPage"));
+const TemoignagesPage    = lazyRoute(() => import("@/pages/landing/pages/TemoignagesPage"));
 const PrivacyPolicy      = lazyRoute(() => import("@/pages/legal/PrivacyPolicy"));
 const TermsOfService     = lazyRoute(() => import("@/pages/legal/TermsOfService"));
 const LoginPage           = lazyRoute(() => import("@/pages/auth/LoginPage"));
@@ -113,7 +121,17 @@ export default function App() {
           <AuthProvider>
             <Suspense fallback={<FullScreenLoader />}>
               <Routes>
-                <Route path="/" element={<PublicOnlyRoute><LandingPage /></PublicOnlyRoute>} />
+                <Route element={<PublicOnlyRoute><LandingLayout /></PublicOnlyRoute>}>
+                  <Route path="/" element={<ParticulierPage />} />
+                  {/* Alias : le menu Solutions pointe sur "/" pour Particulier,
+                      mais une URL explicite doit rester valide si elle circule. */}
+                  <Route path="/solutions/particulier" element={<ParticulierPage />} />
+                  <Route path="/solutions/educative" element={<EducativePage />} />
+                  <Route path="/solutions/emploi" element={<EmploiPage />} />
+                  <Route path="/services" element={<ServicesLandingPage />} />
+                  <Route path="/a-propos" element={<AProposPage />} />
+                  <Route path="/temoignages" element={<TemoignagesPage />} />
+                </Route>
                 <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />

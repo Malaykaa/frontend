@@ -1,27 +1,8 @@
-import { LandingNav }       from "./LandingNav";
-import { HeroSection }      from "./HeroSection";
-import { StatsSection }     from "./StatsSection";
-import { FeaturesSection }  from "./FeaturesSection";
-import { HowItWorks }       from "./HowItWorks";
-import { ForWhom }          from "./ForWhom";
-import { TechSimulation }   from "./TechSimulation";
-import { Testimonials }     from "./Testimonials";
-import { B2BSection }       from "./B2BSection";
-import { LandingFooter }    from "./LandingFooter";
-
-export default function LandingPage() {
-  return (
-    <div className="min-h-screen bg-background">
-      <LandingNav />
-      <HeroSection />
-      <StatsSection />
-      <FeaturesSection />
-      <HowItWorks />
-      <ForWhom />
-      <TechSimulation />
-      <B2BSection />
-      <Testimonials />
-      <LandingFooter />
-    </div>
-  );
-}
+/**
+ * Ancienne page unique — remplacee par le site multipage.
+ *
+ * Conservee comme point d'entree historique : elle redirige vers l'accueil
+ * Particulier, qui porte desormais la meme promesse. On ne supprime pas, on
+ * redirige : un lien deja partage vers "/" continue de fonctionner.
+ */
+export { default } from "./pages/ParticulierPage";
