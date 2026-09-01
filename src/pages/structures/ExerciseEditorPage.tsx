@@ -11,6 +11,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft, Loader2, Plus, Send, Sparkles, Trash2,
 } from "lucide-react";
@@ -37,6 +38,7 @@ function toEditInput(q: ExerciseResponse["questions"][number]): QuestionEditInpu
 }
 
 export default function ExerciseEditorPage() {
+  const { t } = useTranslation();
   const { structureId = "", classroomId = "" } = useParams<{
     structureId: string;
     classroomId: string;
@@ -60,7 +62,11 @@ export default function ExerciseEditorPage() {
   const updateQuestions = useUpdateExerciseQuestions(structureId, classroomId, exercise?.id ?? "");
   const sendExercise = useSendExercise(structureId, classroomId, exercise?.id ?? "");
   const generationPhases = useSimulatedPhases(
-    ["Analyse de la consigne…", "Génération des questions…", "Vérification des réponses…"],
+    [
+      t("structures.exercise_editor.phase_analyzing_prompt"),
+      t("structures.exercise_editor.phase_generating_questions"),
+      t("structures.exercise_editor.phase_verifying_answers"),
+    ],
     phase === "generating", 6_000,
   );
 
@@ -79,7 +85,7 @@ export default function ExerciseEditorPage() {
       setPhase("review");
     } catch {
       setPhase("compose");
-      toast.error("La génération a échoué. Vérifie ta connexion et réessaie.");
+      toast.error(t("structures.exercise_editor.generate_error"));
     }
   };
 
@@ -121,7 +127,7 @@ export default function ExerciseEditorPage() {
     try {
       if (questionsValid) await handleSaveQuestions();
       await sendExercise.mutateAsync({ target: "classroom" });
-      toast.success(kind === "evaluation" ? "Évaluation envoyée à toute la salle !" : "Exercice envoyé à toute la salle !");
+      toast.success(kind === "evaluation" ? t("structures.exercise_editor.evaluation_sent") : t("structures.exercise_editor.exercise_sent"));
       navigate(`/structures/${structureId}/classrooms/${classroomId}?tab=exercises`);
     } catch {
       setSendLoading(false);
@@ -130,7 +136,7 @@ export default function ExerciseEditorPage() {
 
   const handleSaveOnly = async () => {
     if (questionsValid) await handleSaveQuestions();
-    toast.success("Enregistré. Tu pourras l'envoyer depuis l'onglet Exercices.");
+    toast.success(t("structures.exercise_editor.saved_hint"));
     navigate(`/structures/${structureId}/classrooms/${classroomId}?tab=exercises`);
   };
 
@@ -141,9 +147,9 @@ export default function ExerciseEditorPage() {
           <Sparkles className="h-10 w-10 animate-pulse" />
         </div>
         <div>
-          <h2 className="text-xl font-bold">Génération du QCM en cours…</h2>
+          <h2 className="text-xl font-bold">{t("structures.exercise_editor.generating_title")}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Cette opération prend généralement 20 à 40 secondes — ne quittez pas la page.
+            {t("structures.exercise_editor.generating_hint")}
           </p>
         </div>
         <PhasedGenerationProgress phases={generationPhases} />
@@ -161,7 +167,7 @@ export default function ExerciseEditorPage() {
               onClick={() => setPhase("compose")}
               className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
-              <ArrowLeft className="h-4 w-4" /> Recommencer
+              <ArrowLeft className="h-4 w-4" /> {t("structures.exercise_editor.restart")}
             </button>
             <h1 className="flex-1 truncate text-center text-sm font-semibold">{exercise.title}</h1>
             <div className="w-24" />
@@ -171,8 +177,7 @@ export default function ExerciseEditorPage() {
         <main className="mx-auto max-w-2xl space-y-4 p-6">
           <div className="flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50/60 px-4 py-3 text-xs text-sky-800 dark:border-sky-900/30 dark:bg-sky-900/10 dark:text-sky-300">
             <Sparkles className="h-4 w-4 shrink-0" />
-            Vérifie et corrige les questions ci-dessous avant d'envoyer — rien n'est figé tant que
-            ce n'est pas envoyé.
+            {t("structures.exercise_editor.review_hint")}
           </div>
 
           {questions.map((q, qIndex) => (
@@ -183,7 +188,7 @@ export default function ExerciseEditorPage() {
                   type="button"
                   onClick={() => removeQuestion(qIndex)}
                   className="shrink-0 text-muted-foreground/50 hover:text-destructive"
-                  title="Supprimer cette question"
+                  title={t("structures.exercise_editor.delete_question_tooltip")}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -191,7 +196,7 @@ export default function ExerciseEditorPage() {
               <textarea
                 className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm"
                 rows={2}
-                placeholder="Énoncé de la question"
+                placeholder={t("structures.exercise_editor.prompt_placeholder")}
                 value={q.prompt}
                 onChange={(e) => updateQuestion(qIndex, { prompt: e.target.value })}
               />
@@ -210,7 +215,7 @@ export default function ExerciseEditorPage() {
                         "flex-1 rounded-md border bg-background px-2.5 py-1.5 text-sm",
                         q.correct_choice_index === cIndex && "border-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10",
                       )}
-                      placeholder={`Choix ${cIndex + 1}`}
+                      placeholder={t("structures.exercise_editor.choice_placeholder", { num: cIndex + 1 })}
                       value={choice}
                       onChange={(e) => updateChoice(qIndex, cIndex, e.target.value)}
                     />
@@ -220,13 +225,13 @@ export default function ExerciseEditorPage() {
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <Input
                   className="h-7 w-40 text-xs"
-                  placeholder="Notion (ex : dérivées)"
+                  placeholder={t("structures.exercise_editor.topic_tag_placeholder")}
                   value={q.topic_tag ?? ""}
                   onChange={(e) => updateQuestion(qIndex, { topic_tag: e.target.value || null })}
                 />
                 <Input
                   className="h-7 flex-1 text-xs"
-                  placeholder="Explication de la bonne réponse (optionnel)"
+                  placeholder={t("structures.exercise_editor.explanation_placeholder")}
                   value={q.explanation ?? ""}
                   onChange={(e) => updateQuestion(qIndex, { explanation: e.target.value || null })}
                 />
@@ -239,12 +244,12 @@ export default function ExerciseEditorPage() {
             onClick={addQuestion}
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
           >
-            <Plus className="h-4 w-4" /> Ajouter une question
+            <Plus className="h-4 w-4" /> {t("structures.exercise_editor.add_question")}
           </button>
 
           {!questionsValid && (
             <p className="text-xs text-destructive">
-              Chaque question doit avoir un énoncé et au moins 2 choix remplis.
+              {t("structures.exercise_editor.questions_invalid_hint")}
             </p>
           )}
         </main>
@@ -252,11 +257,11 @@ export default function ExerciseEditorPage() {
         <div className="fixed bottom-0 left-0 right-0 z-10 border-t bg-card px-6 py-4">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground">
-              {questions.length} question{questions.length !== 1 ? "s" : ""}
+              {t("structures.exercise_editor.questions_count", { count: questions.length })}
             </span>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={handleSaveOnly} disabled={sendLoading || !questionsValid}>
-                Sauvegarder sans envoyer
+                {t("structures.exercise_editor.save_without_sending")}
               </Button>
               <Button size="sm" onClick={handleSend} disabled={sendLoading || !questionsValid}>
                 {sendLoading ? (
@@ -264,7 +269,7 @@ export default function ExerciseEditorPage() {
                 ) : (
                   <Send className="mr-1.5 h-4 w-4" />
                 )}
-                Envoyer à la salle
+                {t("structures.exercise_editor.send_to_classroom")}
               </Button>
             </div>
           </div>
@@ -283,10 +288,10 @@ export default function ExerciseEditorPage() {
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
-            {classroom?.name ?? "Classroom"}
+            {classroom?.name ?? t("structures.exercise_editor.classroom_fallback")}
           </Link>
           <h1 className="flex-1 text-center text-sm font-semibold">
-            {title.trim() || "Nouvel exercice"}
+            {title.trim() || t("structures.exercise_editor.new_exercise_fallback")}
           </h1>
           <div className="w-32" />
         </div>
@@ -305,30 +310,30 @@ export default function ExerciseEditorPage() {
                 kind === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted",
               )}
             >
-              {k === "exercise" ? "Exercice (entraînement)" : "Évaluation (notée)"}
+              {k === "exercise" ? t("structures.exercise_editor.type_exercise") : t("structures.exercise_editor.type_evaluation")}
             </button>
           ))}
         </div>
         <p className="px-1 text-xs text-muted-foreground">
           {kind === "exercise"
-            ? "Les élèves peuvent recommencer autant de fois qu'ils veulent."
-            : "Une seule tentative comptée par élève — comme un vrai contrôle."}
+            ? t("structures.exercise_editor.type_exercise_hint")
+            : t("structures.exercise_editor.type_evaluation_hint")}
         </p>
 
         <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="border-b bg-muted/30 px-5 py-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Informations
+              {t("structures.exercise_editor.info_title")}
             </p>
           </div>
           <div className="space-y-3 p-5">
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                Titre <span className="text-destructive">*</span>
+                {t("structures.exercise_editor.title_label")} <span className="text-destructive">*</span>
               </label>
               <Input
                 autoFocus
-                placeholder="Ex : QCM dérivées et primitives"
+                placeholder={t("structures.exercise_editor.title_placeholder")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="text-base font-medium"
@@ -336,29 +341,29 @@ export default function ExerciseEditorPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                Matière (optionnel)
+                {t("structures.exercise_editor.subject_label")}
               </label>
               <Input
-                placeholder="Ex : Mathématiques"
+                placeholder={t("structures.exercise_editor.subject_placeholder")}
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
               />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                Consigne pour l'IA <span className="text-destructive">*</span>
+                {t("structures.exercise_editor.prompt_label")} <span className="text-destructive">*</span>
               </label>
               <textarea
                 className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm"
                 rows={4}
-                placeholder="Ex : dérivées de fonctions composées, niveau terminale, avec un focus sur les erreurs classiques"
+                placeholder={t("structures.exercise_editor.prompt_hint_placeholder")}
                 value={topicHint}
                 onChange={(e) => setTopicHint(e.target.value)}
               />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                Nombre de questions
+                {t("structures.exercise_editor.question_count_label")}
               </label>
               <Input
                 type="number"
@@ -374,11 +379,11 @@ export default function ExerciseEditorPage() {
 
         <div className="flex justify-end gap-2 pb-8">
           <Link to={`/structures/${structureId}/classrooms/${classroomId}`}>
-            <Button variant="outline" size="sm">Annuler</Button>
+            <Button variant="outline" size="sm">{t("structures.exercise_editor.cancel")}</Button>
           </Link>
           <Button size="sm" disabled={!canGenerate} onClick={handleGenerate}>
             <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-            Générer avec l'IA
+            {t("structures.exercise_editor.generate_with_ai")}
           </Button>
         </div>
       </main>

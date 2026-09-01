@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   AlertTriangle, ArrowLeft, ArrowRight, BarChart3, BookOpen,
   Check, Clock, Copy, FileUp, GraduationCap, ListChecks, Loader2,
@@ -36,15 +37,6 @@ import {
 
 type Tab = "overview" | "students" | "courses" | "exercises" | "plans" | "difficulty";
 
-const TAB_LABELS: Record<Tab, string> = {
-  overview: "Vue d'ensemble",
-  students: "Étudiants",
-  courses: "Cours",
-  exercises: "Exercices",
-  plans: "Plans IA",
-  difficulty: "Difficultés",
-};
-
 function parseRosterText(text: string): { first_name: string; last_name: string }[] {
   return text
     .split("\n")
@@ -73,6 +65,7 @@ function CourseSendControls({
   classroomId: string;
   courseId: string;
 }) {
+  const { t } = useTranslation();
   const { data: members } = useMembers(structureId, classroomId);
   const sendCourse = useSendCourse(structureId, classroomId, courseId);
   const [studentId, setStudentId] = useState("");
@@ -87,7 +80,7 @@ function CourseSendControls({
         value={studentId}
         onChange={(e) => setStudentId(e.target.value)}
       >
-        <option value="">Toute la salle</option>
+        <option value="">{t("structures.classroom_detail.toute_la_salle")}</option>
         {(members ?? []).map((m) => (
           <option key={m.user_id} value={m.user_id}>
             {m.requested_first_name} {m.requested_last_name}
@@ -104,7 +97,7 @@ function CourseSendControls({
             ? sendCourse.mutate({ target: "student", student_user_id: studentId })
             : setConfirmOpen(true)
         }
-        title="Envoyer"
+        title={t("structures.classroom_detail.send_tooltip")}
       >
         {sendCourse.isPending ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -116,7 +109,7 @@ function CourseSendControls({
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         loading={sendCourse.isPending}
-        targetLabel={selectedMember ? `${selectedMember.requested_first_name} ${selectedMember.requested_last_name}` : "toute la salle"}
+        targetLabel={selectedMember ? `${selectedMember.requested_first_name} ${selectedMember.requested_last_name}` : t("structures.classroom_detail.target_toute_la_salle")}
         onConfirm={() => {
           sendCourse.mutate({ target: "classroom" }, { onSuccess: () => setConfirmOpen(false) });
         }}
@@ -134,6 +127,7 @@ function ExerciseSendControls({
   classroomId: string;
   exerciseId: string;
 }) {
+  const { t } = useTranslation();
   const { data: members } = useMembers(structureId, classroomId);
   const sendExercise = useSendExercise(structureId, classroomId, exerciseId);
   const [studentId, setStudentId] = useState("");
@@ -146,7 +140,7 @@ function ExerciseSendControls({
         value={studentId}
         onChange={(e) => setStudentId(e.target.value)}
       >
-        <option value="">Toute la salle</option>
+        <option value="">{t("structures.classroom_detail.toute_la_salle")}</option>
         {(members ?? []).map((m) => (
           <option key={m.user_id} value={m.user_id}>
             {m.requested_first_name} {m.requested_last_name}
@@ -163,7 +157,7 @@ function ExerciseSendControls({
             ? sendExercise.mutate({ target: "student", student_user_id: studentId })
             : setConfirmOpen(true)
         }
-        title="Envoyer"
+        title={t("structures.classroom_detail.send_tooltip")}
       >
         {sendExercise.isPending ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -175,7 +169,7 @@ function ExerciseSendControls({
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         loading={sendExercise.isPending}
-        targetLabel="toute la salle"
+        targetLabel={t("structures.classroom_detail.target_toute_la_salle")}
         onConfirm={() => {
           sendExercise.mutate({ target: "classroom" }, { onSuccess: () => setConfirmOpen(false) });
         }}
@@ -185,12 +179,22 @@ function ExerciseSendControls({
 }
 
 export default function ClassroomDetailPage() {
+  const { t } = useTranslation();
   const { structureId = "", classroomId = "" } = useParams<{
     structureId: string;
     classroomId: string;
   }>();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");
+
+  const TAB_LABELS: Record<Tab, string> = {
+    overview: t("structures.classroom_detail.tab_overview"),
+    students: t("structures.classroom_detail.tab_students"),
+    courses: t("structures.classroom_detail.tab_courses"),
+    exercises: t("structures.classroom_detail.tab_exercises"),
+    plans: t("structures.classroom_detail.tab_plans"),
+    difficulty: t("structures.classroom_detail.tab_difficulty"),
+  };
 
   const [showImportRoster, setShowImportRoster] = useState(false);
   const [rosterText, setRosterText] = useState("");
@@ -214,7 +218,11 @@ export default function ClassroomDetailPage() {
   );
   const generateEvolutionPlans = useGenerateEvolutionPlans(structureId, classroomId);
   const evolutionPlanPhases = useSimulatedPhases(
-    ["Analyse de la progression de chaque étudiant…", "Génération des plans personnalisés…", "Envoi aux étudiants…"],
+    [
+      t("structures.classroom_detail.phase_analyzing_progress"),
+      t("structures.classroom_detail.phase_generating_plans"),
+      t("structures.classroom_detail.phase_sending"),
+    ],
     generateEvolutionPlans.isPending, 20_000,
   );
   const { data: exercises, isLoading: exercisesLoading } = useExercises(structureId, classroomId);
@@ -244,7 +252,7 @@ export default function ClassroomDetailPage() {
     navigator.clipboard.writeText(
       `${window.location.origin}/classrooms/join/${classroom.invite_code}`,
     );
-    toast.success("Lien copié.");
+    toast.success(t("structures.classroom_detail.link_copied"));
   };
 
   const handleImportRoster = async (e: React.FormEvent) => {
@@ -262,7 +270,7 @@ export default function ClassroomDetailPage() {
     if (!file) return;
     const text = await file.text();
     if (parseRosterText(text).length === 0) {
-      toast.error("Aucun nom valide trouvé dans ce fichier.");
+      toast.error(t("structures.classroom_detail.file_no_valid_name"));
       return;
     }
     setRosterText((prev) => (prev.trim() ? `${prev.trim()}\n${text.trim()}` : text.trim()));
@@ -291,7 +299,7 @@ export default function ClassroomDetailPage() {
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={copyInviteLink}>
-            <Copy className="mr-1.5 h-3.5 w-3.5" /> Lien étudiant
+            <Copy className="mr-1.5 h-3.5 w-3.5" /> {t("structures.classroom_detail.student_link")}
           </Button>
         </div>
       </header>
@@ -304,11 +312,8 @@ export default function ClassroomDetailPage() {
           className="mx-6 mt-4 flex w-[calc(100%-3rem)] items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 text-left text-sm text-amber-800 transition-colors hover:bg-amber-50 dark:border-amber-900/40 dark:bg-amber-900/10 dark:text-amber-300"
         >
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="flex-1">
-            <span className="font-semibold">
-              {pendingRequests.length} demande{pendingRequests.length > 1 ? "s" : ""}
-            </span>{" "}
-            d'étudiant en attente de validation
+          <span className="flex-1 font-semibold">
+            {t("structures.classroom_detail.pending_students", { count: pendingRequests.length })}
           </span>
           <ArrowRight className="h-4 w-4 shrink-0 opacity-60" />
         </button>
@@ -317,19 +322,19 @@ export default function ClassroomDetailPage() {
       {/* ── Stats strip ──────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-3 px-6 pt-5">
         <StatTile
-          label="Étudiants"
+          label={t("structures.classroom_detail.stat_students")}
           value={membersCount}
           Icon={Users}
           color="bg-sky-100 text-sky-600"
         />
         <StatTile
-          label="Cours"
+          label={t("structures.classroom_detail.stat_courses")}
           value={courseList.length}
           Icon={BookOpen}
           color="bg-orange-100 text-orange-600"
         />
         <StatTile
-          label="Complétion"
+          label={t("structures.classroom_detail.stat_completion")}
           value={`${avgCompletion}%`}
           Icon={BarChart3}
           color="bg-emerald-100 text-emerald-600"
@@ -366,7 +371,7 @@ export default function ClassroomDetailPage() {
         {/* ━━ Vue d'ensemble ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {tab === "overview" && (
           <div className="space-y-4">
-            <h2 className="font-semibold">Tableau de bord</h2>
+            <h2 className="font-semibold">{t("structures.classroom_detail.dashboard_title")}</h2>
 
             {dashboardLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -375,10 +380,10 @@ export default function ClassroomDetailPage() {
                 {/* Progression par cours */}
                 <div className="rounded-xl border bg-card p-5">
                   <p className="mb-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    <ListChecks className="h-3.5 w-3.5" /> Par cours
+                    <ListChecks className="h-3.5 w-3.5" /> {t("structures.classroom_detail.by_course_label")}
                   </p>
                   {(dashboard?.courses ?? []).length === 0 ? (
-                    <SectionEmpty message="Aucun cours envoyé." />
+                    <SectionEmpty message={t("structures.classroom_detail.no_courses_sent")} />
                   ) : (
                     <div className="space-y-4">
                       {(dashboard?.courses ?? []).map((c) => (
@@ -404,10 +409,10 @@ export default function ClassroomDetailPage() {
                 {/* Progression par étudiant */}
                 <div className="rounded-xl border bg-card p-5">
                   <p className="mb-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    <Users className="h-3.5 w-3.5" /> Par étudiant
+                    <Users className="h-3.5 w-3.5" /> {t("structures.classroom_detail.by_student_label")}
                   </p>
                   {(dashboard?.students ?? []).length === 0 ? (
-                    <SectionEmpty message="Aucun étudiant inscrit." />
+                    <SectionEmpty message={t("structures.classroom_detail.no_students_enrolled")} />
                   ) : (
                     <div className="space-y-4">
                       {(dashboard?.students ?? []).map((s) => (
@@ -442,7 +447,7 @@ export default function ClassroomDetailPage() {
             {pendingRequests.length > 0 && (
               <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
-                  Demandes en attente ({pendingRequests.length})
+                  {t("structures.classroom_detail.pending_requests_title", { count: pendingRequests.length })}
                 </p>
                 <div className="space-y-2">
                   {pendingRequests.map((req) => (
@@ -468,7 +473,7 @@ export default function ClassroomDetailPage() {
                           variant="ghost"
                           className="h-7 w-7 text-emerald-600"
                           onClick={() => validateRequest.mutate(req.id)}
-                          title="Valider"
+                          title={t("structures.classroom_detail.validate")}
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -477,7 +482,7 @@ export default function ClassroomDetailPage() {
                           variant="ghost"
                           className="h-7 w-7 text-destructive"
                           onClick={() => rejectRequest.mutate(req.id)}
-                          title="Refuser"
+                          title={t("structures.classroom_detail.reject")}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -492,11 +497,11 @@ export default function ClassroomDetailPage() {
             <div className="rounded-xl border overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/20">
                 <div>
-                  <h2 className="font-semibold text-sm">Liste d'appel</h2>
-                  <p className="text-xs text-muted-foreground">{(roster ?? []).length} élève{(roster ?? []).length !== 1 ? "s" : ""}</p>
+                  <h2 className="font-semibold text-sm">{t("structures.classroom_detail.roster_title")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("structures.classroom_detail.roster_count", { count: (roster ?? []).length })}</p>
                 </div>
                 <Button size="sm" variant="outline" onClick={() => setShowImportRoster(true)}>
-                  <Plus className="mr-1.5 h-3.5 w-3.5" /> Importer
+                  <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("structures.classroom_detail.import_btn")}
                 </Button>
               </div>
               {rosterLoading ? (
@@ -504,13 +509,13 @@ export default function ClassroomDetailPage() {
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               ) : (roster ?? []).length === 0 ? (
-                <SectionEmpty message="Aucune entrée. Importe ta liste d'élèves pour commencer." />
+                <SectionEmpty message={t("structures.classroom_detail.roster_empty")} />
               ) : (
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/30">
-                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Nom</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Statut</th>
+                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_name")}</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_status")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -526,7 +531,7 @@ export default function ClassroomDetailPage() {
                           <div className="flex items-center gap-1.5">
                             <span className={`h-1.5 w-1.5 rounded-full ${r.claimed ? "bg-emerald-500" : "bg-muted-foreground/40"}`} />
                             <Badge variant={r.claimed ? "success" : "secondary"} className="text-[10px]">
-                              {r.claimed ? "rattaché" : "libre"}
+                              {r.claimed ? t("structures.classroom_detail.roster_claimed") : t("structures.classroom_detail.roster_unclaimed")}
                             </Badge>
                           </div>
                         </td>
@@ -540,24 +545,24 @@ export default function ClassroomDetailPage() {
             {/* Membres inscrits */}
             <div className="rounded-xl border overflow-hidden">
               <div className="px-5 py-3 border-b bg-muted/20">
-                <h2 className="font-semibold text-sm">Membres inscrits</h2>
-                <p className="text-xs text-muted-foreground">{(members ?? []).length} membre{(members ?? []).length !== 1 ? "s" : ""} enregistré{(members ?? []).length !== 1 ? "s" : ""}</p>
+                <h2 className="font-semibold text-sm">{t("structures.classroom_detail.enrolled_members_title")}</h2>
+                <p className="text-xs text-muted-foreground">{t("structures.classroom_detail.enrolled_members_count", { count: (members ?? []).length })}</p>
               </div>
               {membersLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               ) : (members ?? []).length === 0 ? (
-                <SectionEmpty message="Aucun membre pour l'instant." />
+                <SectionEmpty message={t("structures.classroom_detail.no_members_yet")} />
               ) : (
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/30">
-                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Étudiant</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Statut</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Cours</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">Progression</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Inscrit</th>
+                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_student")}</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">{t("structures.classroom_detail.col_status")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_courses")}</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">{t("structures.classroom_detail.col_progress")}</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">{t("structures.classroom_detail.col_enrolled")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -572,7 +577,7 @@ export default function ClassroomDetailPage() {
                             <div className="flex items-center gap-1.5">
                               <span className={cn("h-1.5 w-1.5 rounded-full", m.status === "accepted" ? "bg-emerald-500" : "bg-amber-400")} />
                               <span className="text-xs text-muted-foreground">
-                                {m.status === "accepted" ? "Accepté" : m.status === "pending_review" ? "En attente" : "Refusé"}
+                                {m.status === "accepted" ? t("structures.classroom_detail.member_status_accepted") : m.status === "pending_review" ? t("structures.classroom_detail.member_status_pending") : t("structures.classroom_detail.member_status_rejected")}
                               </span>
                             </div>
                           </td>
@@ -609,9 +614,9 @@ export default function ClassroomDetailPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-semibold">Cours</h2>
+                <h2 className="font-semibold">{t("structures.classroom_detail.courses_title")}</h2>
                 <p className="text-xs text-muted-foreground">
-                  {courseList.length} cours · {evolutionPlans.length} plans IA
+                  {t("structures.classroom_detail.courses_count", { courses: courseList.length, plans: evolutionPlans.length })}
                 </p>
               </div>
               <Button
@@ -620,24 +625,24 @@ export default function ClassroomDetailPage() {
                   navigate(`/structures/${structureId}/classrooms/${classroomId}/courses/new`)
                 }
               >
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Créer un cours
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("structures.classroom_detail.create_course_btn")}
               </Button>
             </div>
 
             {coursesLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             ) : courseList.length === 0 ? (
-              <SectionEmpty message="Aucun cours. Crée un premier cours pour le décomposer en étapes !" />
+              <SectionEmpty message={t("structures.classroom_detail.no_courses_hint")} />
             ) : (
               <div className="rounded-xl border overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40">
-                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Titre / Matière</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Étapes</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Destinataires</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">Créé</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Envoyer</th>
+                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_title_subject")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_steps")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_recipients")}</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">{t("structures.classroom_detail.col_created")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_send")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -688,10 +693,12 @@ export default function ClassroomDetailPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-semibold">Exercices &amp; évaluations</h2>
+                <h2 className="font-semibold">{t("structures.classroom_detail.exercises_title")}</h2>
                 <p className="text-xs text-muted-foreground">
-                  {(exercises ?? []).filter((e) => e.kind === "exercise").length} exercice(s) ·{" "}
-                  {(exercises ?? []).filter((e) => e.kind === "evaluation").length} évaluation(s)
+                  {t("structures.classroom_detail.exercises_count", {
+                    exercises: (exercises ?? []).filter((e) => e.kind === "exercise").length,
+                    evaluations: (exercises ?? []).filter((e) => e.kind === "evaluation").length,
+                  })}
                 </p>
               </div>
               <Button
@@ -700,25 +707,25 @@ export default function ClassroomDetailPage() {
                   navigate(`/structures/${structureId}/classrooms/${classroomId}/exercises/new`)
                 }
               >
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Créer un exercice
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("structures.classroom_detail.create_exercise_btn")}
               </Button>
             </div>
 
             {exercisesLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             ) : (exercises ?? []).length === 0 ? (
-              <SectionEmpty message="Aucun exercice. Crée un premier QCM à partir d'une consigne !" />
+              <SectionEmpty message={t("structures.classroom_detail.no_exercises_hint")} />
             ) : (
               <div className="rounded-xl border overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40">
-                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Titre / Matière</th>
-                      <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Type</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Questions</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Destinataires</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">Créé</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Envoyer</th>
+                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_title_subject")}</th>
+                      <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_type")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_questions")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_recipients")}</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">{t("structures.classroom_detail.col_created")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.classroom_detail.col_send")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -745,7 +752,7 @@ export default function ClassroomDetailPage() {
                         </td>
                         <td className="px-4 py-3 text-center">
                           <Badge variant={ex.kind === "evaluation" ? "destructive" : "secondary"} className="text-[10px]">
-                            {ex.kind === "evaluation" ? "Évaluation" : "Exercice"}
+                            {ex.kind === "evaluation" ? t("structures.classroom_detail.type_evaluation") : t("structures.classroom_detail.type_exercise")}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums font-semibold">{ex.questions_count}</td>
@@ -778,10 +785,9 @@ export default function ClassroomDetailPage() {
             {/* Header + action */}
             <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl border bg-card p-5">
               <div>
-                <h2 className="font-semibold">Plans d'évolution personnalisés</h2>
+                <h2 className="font-semibold">{t("structures.classroom_detail.plans_title")}</h2>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  L'IA analyse la progression de chaque étudiant et génère un plan sur mesure
-                  adapté à son niveau et ses lacunes.
+                  {t("structures.classroom_detail.plans_hint")}
                 </p>
               </div>
               <Button
@@ -795,7 +801,7 @@ export default function ClassroomDetailPage() {
                 ) : (
                   <Sparkles className="mr-1.5 h-3.5 w-3.5" />
                 )}
-                {generateEvolutionPlans.isPending ? "Génération…" : "Générer les plans"}
+                {generateEvolutionPlans.isPending ? t("structures.classroom_detail.generating_plans") : t("structures.classroom_detail.generate_plans_btn")}
               </Button>
             </div>
 
@@ -805,7 +811,7 @@ export default function ClassroomDetailPage() {
 
             {/* Plans list */}
             {evolutionPlans.length === 0 ? (
-              <SectionEmpty message="Aucun plan généré. Lance la génération ci-dessus pour créer des plans personnalisés." />
+              <SectionEmpty message={t("structures.classroom_detail.no_plans_hint")} />
             ) : (
               <div className="space-y-3">
                 {evolutionPlans.map((p) => (
@@ -820,7 +826,7 @@ export default function ClassroomDetailPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{p.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {p.steps_count} étape{p.steps_count !== 1 ? "s" : ""}
+                        {t("structures.classroom_detail.steps_count", { count: p.steps_count })}
                       </p>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -837,33 +843,33 @@ export default function ClassroomDetailPage() {
             {difficultyLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             ) : !difficulty || difficulty.insufficient_data ? (
-              <SectionEmpty message="Pas encore assez de données — les élèves doivent avoir soumis au moins un exercice pour que la détection de difficulté fonctionne." />
+              <SectionEmpty message={t("structures.classroom_detail.no_difficulty_data")} />
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {/* Notions les plus difficiles pour la classe */}
                 <div className="rounded-xl border bg-card p-5">
                   <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Notions les plus difficiles
+                    {t("structures.classroom_detail.hardest_topics_title")}
                   </p>
                   {difficulty.topics.length === 0 ? (
-                    <SectionEmpty message="Aucune notion identifiée." />
+                    <SectionEmpty message={t("structures.classroom_detail.no_topics_identified")} />
                   ) : (
                     <div className="space-y-3">
-                      {difficulty.topics.slice(0, 8).map((t) => (
-                        <div key={t.topic_tag}>
+                      {difficulty.topics.slice(0, 8).map((topic) => (
+                        <div key={topic.topic_tag}>
                           <div className="flex items-center justify-between gap-2">
-                            <span className="min-w-0 truncate text-sm font-medium">{t.topic_tag}</span>
+                            <span className="min-w-0 truncate text-sm font-medium">{topic.topic_tag}</span>
                             <span className={cn(
                               "shrink-0 text-sm font-bold",
-                              t.class_success_rate < 50 ? "text-destructive" : "text-primary",
+                              topic.class_success_rate < 50 ? "text-destructive" : "text-primary",
                             )}>
-                              {t.class_success_rate}% réussite
+                              {topic.class_success_rate}{t("structures.classroom_detail.success_rate")}
                             </span>
                           </div>
-                          <Progress value={t.class_success_rate} className="mt-1.5 h-1.5" />
-                          {t.students_flagged_count > 0 && (
+                          <Progress value={topic.class_success_rate} className="mt-1.5 h-1.5" />
+                          {topic.students_flagged_count > 0 && (
                             <p className="mt-1 text-[11px] text-muted-foreground">
-                              {t.students_flagged_count} élève{t.students_flagged_count > 1 ? "s" : ""} en difficulté sur cette notion
+                              {t("structures.classroom_detail.students_flagged", { count: topic.students_flagged_count })}
                             </p>
                           )}
                         </div>
@@ -875,10 +881,10 @@ export default function ClassroomDetailPage() {
                 {/* Élèves flagués */}
                 <div className="rounded-xl border bg-card p-5">
                   <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Élèves à surveiller
+                    {t("structures.classroom_detail.students_to_watch_title")}
                   </p>
                   {difficulty.students.filter((s) => s.flagged_topics.length > 0).length === 0 ? (
-                    <SectionEmpty message="Aucun élève en difficulté identifié pour l'instant." />
+                    <SectionEmpty message={t("structures.classroom_detail.no_students_flagged")} />
                   ) : (
                     <div className="space-y-3">
                       {difficulty.students
@@ -891,7 +897,7 @@ export default function ClassroomDetailPage() {
                               <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
                                 {s.trend === "improving" && <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />}
                                 {s.trend === "declining" && <TrendingDown className="h-3.5 w-3.5 text-destructive" />}
-                                {s.avg_score_pct}% en moyenne
+                                {s.avg_score_pct}{t("structures.classroom_detail.avg_score")}
                               </span>
                             </div>
                             <div className="mt-1.5 flex flex-wrap gap-1">
@@ -916,14 +922,14 @@ export default function ClassroomDetailPage() {
       <BottomSheet
         open={showImportRoster}
         onClose={() => setShowImportRoster(false)}
-        title="Importer la liste d'élèves"
-        description="Une ligne par étudiant : Prénom, Nom"
+        title={t("structures.classroom_detail.import_roster_title")}
+        description={t("structures.classroom_detail.import_roster_desc")}
         locked={importRoster.isPending}
         maxHeight="max-h-[80vh]"
       >
         <form onSubmit={handleImportRoster} className="space-y-3 pt-2">
           <label className="flex cursor-pointer items-center gap-1.5 text-xs text-primary hover:underline">
-            <FileUp className="h-3.5 w-3.5" /> Importer un fichier (.csv, .txt)
+            <FileUp className="h-3.5 w-3.5" /> {t("structures.classroom_detail.import_file_cta")}
             <input
               type="file"
               accept=".csv,.txt"
@@ -934,12 +940,12 @@ export default function ClassroomDetailPage() {
           <textarea
             className="w-full rounded-md border bg-background px-3 py-2 text-sm"
             rows={7}
-            placeholder={"Prénom,Nom\nPrénom,Nom\n…"}
+            placeholder={t("structures.roster_import_placeholder")}
             value={rosterText}
             onChange={(e) => setRosterText(e.target.value)}
           />
           <p className="text-[11px] text-muted-foreground">
-            Virgule, point-virgule, tabulation ou espace acceptés.
+            {t("structures.classroom_detail.import_separators_hint")}
           </p>
           <Button
             type="submit"
@@ -947,7 +953,9 @@ export default function ClassroomDetailPage() {
             disabled={importRoster.isPending || parsedCount === 0}
           >
             {importRoster.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Importer{parsedCount > 0 ? ` ${parsedCount} étudiant${parsedCount > 1 ? "s" : ""}` : ""}
+            {parsedCount > 0
+              ? t("structures.classroom_detail.import_submit_count", { count: parsedCount })
+              : t("structures.classroom_detail.import_submit")}
           </Button>
         </form>
       </BottomSheet>

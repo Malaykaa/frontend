@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Check, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -11,6 +12,7 @@ function scoreColor(pct: number): string {
 }
 
 export default function ExerciseResultPage() {
+  const { t } = useTranslation();
   const { exerciseId = "" } = useParams<{ exerciseId: string }>();
   const navigate = useNavigate();
 
@@ -31,16 +33,16 @@ export default function ExerciseResultPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b px-6 py-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ton résultat</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.exercise_result.your_result")}</p>
         <p className={cn("mt-1 text-4xl font-bold tabular-nums", scoreColor(result.score_pct ?? 0))}>
           {result.score_pct}%
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {result.score_points}/{result.max_points} bonnes réponses
+          {t("structures.exercise_result.correct_answers", { score: result.score_points, max: result.max_points })}
         </p>
         {(attempts ?? []).length > 1 && (
           <p className="mt-2 text-xs text-muted-foreground">
-            Tentatives : {(attempts ?? []).map((a) => `${a.score_pct}%`).join(" → ")}
+            {t("structures.exercise_result.attempts_label", { attempts: (attempts ?? []).map((a) => `${a.score_pct}%`).join(" → ") })}
           </p>
         )}
       </header>
@@ -69,7 +71,7 @@ export default function ExerciseResultPage() {
                 >
                   {choice}
                   {cIndex === a.correct_choice_index && " ✓"}
-                  {cIndex === a.selected_choice_index && cIndex !== a.correct_choice_index && " (ta réponse)"}
+                  {cIndex === a.selected_choice_index && cIndex !== a.correct_choice_index && t("structures.exercise_result.your_answer")}
                 </p>
               ))}
             </div>
@@ -82,11 +84,11 @@ export default function ExerciseResultPage() {
         <div className="flex gap-2 pb-8 pt-2">
           {canRetry && (
             <Button className="flex-1" onClick={() => navigate(`/classrooms/exercises/${exerciseId}`)}>
-              Retenter
+              {t("structures.exercise_result.retry")}
             </Button>
           )}
           <Link to="/app" className="flex-1">
-            <Button variant="outline" className="w-full">Retour à l'accueil</Button>
+            <Button variant="outline" className="w-full">{t("structures.exercise_result.back_home")}</Button>
           </Link>
         </div>
       </main>
