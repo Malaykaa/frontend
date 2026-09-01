@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Bell, Settings } from "lucide-react";
 import { useNotificationCount } from "@/components/app/NotificationPanel";
 import { StructureSwitcher } from "@/components/structures/StructureSwitcher";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 interface AppHeaderProps {
   hideLogo?: boolean;
@@ -50,7 +51,7 @@ export function AppHeader({ hideLogo = false, compact = false, onOpenSettings, o
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Logo (mobile uniquement) */}
         {!hideLogo && (
-          <img src="/logo.png" alt="Malayka" className="h-7 w-auto shrink-0 dark:invert" />
+          <BrandLogo className="h-7 w-auto shrink-0" />
         )}
 
         {compact ? (

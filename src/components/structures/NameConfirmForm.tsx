@@ -13,6 +13,7 @@ import { CheckCircle2, Clock, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 export interface NameConfirmFormProps {
   isLoading: boolean;
@@ -82,7 +83,7 @@ export function NameConfirmForm({
     <div className="flex min-h-screen flex-col bg-background">
       <header className="flex items-center justify-center px-6 py-4">
         <Link to="/">
-          <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
+          <BrandLogo className="h-8 w-auto" />
         </Link>
       </header>
 

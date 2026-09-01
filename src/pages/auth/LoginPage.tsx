@@ -11,6 +11,7 @@ import { ApiError } from "@/shared/api/client";
 import { DEFAULT_COUNTRY } from "@/shared/data/countries";
 import { getPendingInviteRedirect, clearPendingInviteRedirect } from "@/shared/lib/pending-invite";
 import { setLanguage } from "@/i18n";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
@@ -63,7 +64,7 @@ export default function LoginPage() {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4">
         <Link to="/">
-          <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
+          <BrandLogo className="h-8 w-auto" />
         </Link>
 
         {/* Language toggle */}

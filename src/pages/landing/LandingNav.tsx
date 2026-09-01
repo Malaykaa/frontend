@@ -5,6 +5,7 @@ import { setLanguage } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 export function LandingNav() {
   const { t, i18n } = useTranslation();
@@ -30,7 +31,7 @@ export function LandingNav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 shrink-0">
-          <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
+          <BrandLogo className="h-8 w-auto" />
         </a>
 
         {/* Desktop nav */}

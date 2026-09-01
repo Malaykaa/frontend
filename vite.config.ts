@@ -25,7 +25,7 @@ export default defineConfig({
         name: "Malayka — Mentor IA",
         short_name: "Malayka",
         description: "Ton mentor IA pour la réussite professionnelle et académique",
-        theme_color: "#6366f1",
+        theme_color: "#141416",
         background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait",

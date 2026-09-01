@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MarkdownContent } from "@/components/chat/MarkdownContent";
 import { getSharedDocument, printDocument } from "@/lib/document-utils";
 import { formatDate } from "@/shared/lib/utils";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 export default function SharedDocumentPage() {
   const { token } = useParams<{ token: string }>();
@@ -43,7 +44,7 @@ export default function SharedDocumentPage() {
       <header className="sticky top-0 z-10 border-b bg-background/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           <Link to="/" className="mr-2">
-            <img src="/logo.png" alt="Malayka" className="h-6 w-auto dark:invert" />
+            <BrandLogo className="h-6 w-auto" />
           </Link>
 
           <div className="h-4 w-px bg-border" />

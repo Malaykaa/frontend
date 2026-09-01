@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { BarChart3, Brain, Briefcase, Building2, ClipboardEdit, FileText, LogOut, MessageSquare, RefreshCw, Settings, Target, Users, Handshake } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 const NAV = [
   { to: "/admin",            label: "Dashboard",    Icon: BarChart3,     exact: true  },
@@ -22,7 +23,7 @@ export function AdminSidebar() {
   return (
     <aside className="flex h-screen w-56 flex-col border-r bg-background shrink-0">
       <div className="flex items-center gap-2 px-4 py-4 border-b">
-        <img src="/logo.png" alt="Malayka" className="h-7 w-auto dark:invert" />
+        <BrandLogo className="h-7 w-auto" />
         <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wide">Admin</span>
       </div>
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">

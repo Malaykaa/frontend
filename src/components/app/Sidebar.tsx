@@ -4,6 +4,7 @@ import { Compass, FolderOpen, TrendingUp, HelpCircle, LogOut, Cog } from "lucide
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 const TABS = [
   { to: "/app/pour-moi",  labelKey: "app.tab_pour_moi",  descKey: "app.desc_pour_moi",  Icon: Compass    },
@@ -53,7 +54,7 @@ export function Sidebar() {
     <aside className="flex h-screen w-64 flex-col border-r bg-background">
       {/* Logo */}
       <div className="flex items-center px-5 py-4 border-b">
-        <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
+        <BrandLogo className="h-8 w-auto" />
       </div>
 
       {/* Nav */}
