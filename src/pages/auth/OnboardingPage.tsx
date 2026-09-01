@@ -15,6 +15,7 @@ import { apiRequest } from "@/shared/api/client";
 import { ApiError } from "@/shared/api/client";
 import { cn } from "@/shared/lib/utils";
 import { getPendingInviteRedirect, clearPendingInviteRedirect } from "@/shared/lib/pending-invite";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Role = "student" | "professional" | "jobseeker";
@@ -660,7 +661,7 @@ export default function OnboardingPage() {
       />
 
       <div className="flex justify-center py-4">
-        <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
+        <BrandLogo className="h-8 w-auto" />
       </div>
 
       <main className="flex flex-1 flex-col px-6 py-4">

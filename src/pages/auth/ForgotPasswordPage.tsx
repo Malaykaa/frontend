@@ -12,6 +12,7 @@ import { StepProgress } from "@/components/auth/StepProgress";
 import { DEFAULT_COUNTRY, type Country } from "@/shared/data/countries";
 import { apiRequest, ApiError } from "@/shared/api/client";
 import { cn } from "@/shared/lib/utils";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -445,7 +446,7 @@ export default function ForgotPasswordPage() {
       {/* Logo */}
       <div className="flex justify-center py-4">
         <Link to="/">
-          <img src="/logo.png" alt="Malayka" className="h-8 w-auto dark:invert" />
+          <BrandLogo className="h-8 w-auto" />
         </Link>
       </div>
 

@@ -2,6 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { MapPin, Mail, Phone, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 /* ── Social icon SVGs ── */
 function IconFacebook({ className }: { className?: string }) {
@@ -71,7 +72,7 @@ export function LandingFooter() {
           {/* 1 — Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Malayka" className="h-7 w-auto dark:invert" />
+              <BrandLogo className="h-7 w-auto" />
               <span className="flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 font-mono text-[9px] font-semibold text-emerald-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 {t("landing.footer_ai_status")}
