@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 /** Généralisée depuis la table inline de CourseProgressPage — étudiant × colonnes
  * arbitraires (icônes d'étape pour un cours, badges de score pour un exercice).
@@ -17,19 +18,20 @@ export interface MatrixRecipient {
 export function RecipientMatrix({
   columns,
   recipients,
-  studentLabel = "Étudiant",
+  studentLabel,
 }: {
   columns: MatrixColumn[];
   recipients: MatrixRecipient[];
   studentLabel?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="overflow-x-auto rounded-xl border">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/40">
             <th className="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground">
-              {studentLabel}
+              {studentLabel ?? t("structures.components.recipient_matrix_student")}
             </th>
             {columns.map((c) => (
               <th key={c.id} className="px-3 py-2.5 text-center text-xs font-semibold text-muted-foreground">

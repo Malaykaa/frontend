@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -8,6 +9,7 @@ import {
 } from "@/hooks/queries/use-structure";
 
 export default function TakeExercisePage() {
+  const { t } = useTranslation();
   const { exerciseId = "" } = useParams<{ exerciseId: string }>();
   const navigate = useNavigate();
 
@@ -57,14 +59,14 @@ export default function TakeExercisePage() {
           <div>
             <h1 className="text-xl font-bold">{exercise.title}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Tu as déjà soumis cette évaluation — une seule tentative est comptée.
+              {t("structures.take_exercise.already_submitted_hint")}
             </p>
           </div>
           <Button onClick={() => navigate(`/classrooms/exercises/${exerciseId}/result`)}>
-            Voir mon résultat
+            {t("structures.take_exercise.view_result")}
           </Button>
           <Link to="/app" className="text-xs text-muted-foreground hover:text-foreground">
-            ← Retour à l'accueil
+            ← {t("structures.take_exercise.back_home")}
           </Link>
         </div>
       );
@@ -75,29 +77,29 @@ export default function TakeExercisePage() {
         <div>
           <h1 className="text-xl font-bold">{exercise.title}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {exercise.instructions || `${exercise.questions.length} question${exercise.questions.length > 1 ? "s" : ""} à choix multiples.`}
+            {exercise.instructions || t("structures.take_exercise.questions_count", { count: exercise.questions.length })}
           </p>
         </div>
 
         {isEvaluation && (
           <p className="max-w-sm rounded-lg border border-rose-200 bg-rose-50/60 px-4 py-3 text-xs text-rose-800 dark:border-rose-900/30 dark:bg-rose-900/10 dark:text-rose-300">
-            C'est une évaluation notée — une seule tentative sera comptée.
+            {t("structures.take_exercise.evaluation_notice")}
           </p>
         )}
 
         {!isEvaluation && hasPreviousAttempt && (
           <p className="max-w-sm rounded-lg border border-sky-200 bg-sky-50/60 px-4 py-3 text-xs text-sky-800 dark:border-sky-900/30 dark:bg-sky-900/10 dark:text-sky-300">
-            Tentative précédente : {previousAttempts[previousAttempts.length - 1].score_pct}% — tu peux retenter.
+            {t("structures.take_exercise.previous_attempt", { score: previousAttempts[previousAttempts.length - 1].score_pct })}
           </p>
         )}
 
         <Button onClick={handleStart} disabled={startSubmission.isPending}>
           {startSubmission.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {hasPreviousAttempt ? "Retenter" : "Commencer"}
+          {hasPreviousAttempt ? t("structures.take_exercise.retry") : t("structures.take_exercise.start")}
         </Button>
 
         <Link to="/app" className="text-xs text-muted-foreground hover:text-foreground">
-          ← Retour à l'accueil
+          ← {t("structures.take_exercise.back_home")}
         </Link>
       </div>
     );
@@ -108,7 +110,7 @@ export default function TakeExercisePage() {
       <header className="sticky top-0 z-10 border-b bg-card px-6 py-4">
         <h1 className="text-sm font-semibold">{exercise.title}</h1>
         <p className="text-xs text-muted-foreground">
-          {Object.keys(answers).length}/{exercise.questions.length} répondues
+          {t("structures.take_exercise.answered_count", { answered: Object.keys(answers).length, total: exercise.questions.length })}
         </p>
       </header>
 
@@ -150,7 +152,7 @@ export default function TakeExercisePage() {
             ) : (
               <Send className="mr-2 h-4 w-4" />
             )}
-            Envoyer mes réponses
+            {t("structures.take_exercise.submit_answers")}
           </Button>
         </div>
       </div>

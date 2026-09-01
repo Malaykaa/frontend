@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   AlertTriangle, ArrowLeft, ArrowRight, BarChart3, BookOpen,
   Building2, Check, Copy, Download, FileSpreadsheet, GraduationCap,
@@ -114,6 +115,7 @@ function SectionEmpty({ message }: { message: string }) {
 }
 
 export default function StructureDashboardPage() {
+  const { t } = useTranslation();
   const { structureId = "" } = useParams<{ structureId: string }>();
   const [tab, setTab] = useState<Tab>("overview");
   const [showCreateClassroom, setShowCreateClassroom] = useState(false);
@@ -155,9 +157,9 @@ export default function StructureDashboardPage() {
   if (!structure) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="text-sm text-muted-foreground">Structure introuvable.</p>
+        <p className="text-sm text-muted-foreground">{t("structures.dashboard.not_found")}</p>
         <Link to="/app" className="text-sm font-medium text-primary hover:underline">
-          Retour à l'accueil
+          {t("structures.dashboard.back_home")}
         </Link>
       </div>
     );
@@ -202,7 +204,7 @@ export default function StructureDashboardPage() {
 
   const copyLink = (url: string) => {
     navigator.clipboard.writeText(url);
-    toast.success("Lien copié.");
+    toast.success(t("structures.link_copied"));
   };
 
   const toggleClassroom = (id: string) =>
@@ -211,13 +213,13 @@ export default function StructureDashboardPage() {
     );
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "overview", label: "Vue d'ensemble" },
-    { key: "classrooms", label: "Classrooms" },
+    { key: "overview", label: t("structures.dashboard.tab_overview") },
+    { key: "classrooms", label: t("structures.dashboard.tab_classrooms") },
     ...(isSuperAdmin
       ? [
-          { key: "team" as Tab, label: "Équipe" },
-          { key: "performance" as Tab, label: "Performance" },
-          { key: "report" as Tab, label: "Rapport d'impact" },
+          { key: "team" as Tab, label: t("structures.dashboard.tab_team") },
+          { key: "performance" as Tab, label: t("structures.dashboard.tab_performance") },
+          { key: "report" as Tab, label: t("structures.dashboard.tab_report") },
         ]
       : []),
   ];
@@ -230,7 +232,7 @@ export default function StructureDashboardPage() {
           to="/app"
           className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-3.5 w-3.5" /> Retour à l'accueil
+          <ArrowLeft className="h-3.5 w-3.5" /> {t("structures.dashboard.back_home")}
         </Link>
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
@@ -241,7 +243,7 @@ export default function StructureDashboardPage() {
               <h1 className="text-xl font-bold">{structure.name}</h1>
               <StructureSwitcher />
               {structure.status === "pending" && (
-                <Badge variant="warning">en attente de validation</Badge>
+                <Badge variant="warning">{t("structures.dashboard.pending_badge")}</Badge>
               )}
             </div>
             <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -250,7 +252,7 @@ export default function StructureDashboardPage() {
               ) : (
                 <GraduationCap className="h-3.5 w-3.5" />
               )}
-              {isSuperAdmin ? "Administrateur de la structure" : "Enseignant(e)"}
+              {isSuperAdmin ? t("structures.dashboard.role_admin") : t("structures.dashboard.role_teacher")}
             </p>
           </div>
         </div>
@@ -259,8 +261,7 @@ export default function StructureDashboardPage() {
       {/* ── Pending banner ───────────────────────────────── */}
       {structure.status === "pending" && (
         <div className="mx-6 mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
-          Cette structure est en attente de validation. Tu peux déjà préparer tes classrooms et
-          invitations.
+          {t("structures.dashboard.pending_banner")}
         </div>
       )}
 
@@ -272,11 +273,8 @@ export default function StructureDashboardPage() {
           className="mx-6 mt-3 flex w-[calc(100%-3rem)] items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 text-left text-sm text-amber-800 transition-colors hover:bg-amber-50 dark:border-amber-900/40 dark:bg-amber-900/10 dark:text-amber-300"
         >
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="flex-1">
-            <span className="font-semibold">
-              {pendingReview.length} demande{pendingReview.length > 1 ? "s" : ""}
-            </span>{" "}
-            d'enseignant en attente de validation
+          <span className="flex-1 font-semibold">
+            {t("structures.dashboard.pending_teachers", { count: pendingReview.length })}
           </span>
           <ArrowRight className="h-4 w-4 shrink-0 opacity-60" />
         </button>
@@ -286,25 +284,25 @@ export default function StructureDashboardPage() {
       {isSuperAdmin && (
         <div className="grid grid-cols-2 gap-3 px-6 pt-5 sm:grid-cols-4">
           <StatTile
-            label="Classrooms"
+            label={t("structures.dashboard.stat_classrooms")}
             value={(classrooms ?? []).length}
             Icon={GraduationCap}
             color="bg-sky-100 text-sky-600"
           />
           <StatTile
-            label="Enseignants actifs"
+            label={t("structures.dashboard.stat_active_teachers")}
             value={teachersCount}
             Icon={Users}
             color="bg-violet-100 text-violet-600"
           />
           <StatTile
-            label="Étudiants"
+            label={t("structures.dashboard.stat_students")}
             value={totalStudents}
             Icon={Users}
             color="bg-blue-100 text-blue-600"
           />
           <StatTile
-            label="Complétion moy."
+            label={t("structures.dashboard.stat_avg_completion")}
             value={`${avgCompletion}%`}
             Icon={BarChart3}
             color="bg-emerald-100 text-emerald-600"
@@ -347,19 +345,19 @@ export default function StructureDashboardPage() {
               <QuickCard
                 Icon={GraduationCap}
                 color="bg-sky-100 text-sky-600"
-                title="Classrooms"
-                description={`${(classrooms ?? []).length} salle${(classrooms ?? []).length !== 1 ? "s" : ""} de classe`}
-                cta="Gérer"
+                title={t("structures.dashboard.quick_classrooms_title")}
+                description={t("structures.dashboard.quick_classrooms_desc", { count: (classrooms ?? []).length })}
+                cta={t("structures.dashboard.cta_manage")}
                 onClick={() => setTab("classrooms")}
               />
               {isSuperAdmin && (
                 <QuickCard
                   Icon={Users}
                   color="bg-violet-100 text-violet-600"
-                  title="Équipe enseignante"
-                  description={`${teachersCount} enseignant${teachersCount !== 1 ? "s" : ""} actif${teachersCount !== 1 ? "s" : ""}`}
+                  title={t("structures.dashboard.quick_team_title")}
+                  description={t("structures.dashboard.quick_team_desc", { count: teachersCount })}
                   badge={pendingReview.length || undefined}
-                  cta="Gérer"
+                  cta={t("structures.dashboard.cta_manage")}
                   onClick={() => setTab("team")}
                 />
               )}
@@ -367,9 +365,9 @@ export default function StructureDashboardPage() {
                 <QuickCard
                   Icon={BarChart3}
                   color="bg-emerald-100 text-emerald-600"
-                  title="Performance"
-                  description={`${totalStudents} étudiant${totalStudents !== 1 ? "s" : ""} · ${totalCourses} cours`}
-                  cta="Voir"
+                  title={t("structures.dashboard.quick_performance_title")}
+                  description={t("structures.dashboard.quick_performance_desc", { count: totalStudents, students: totalStudents, courses: totalCourses })}
+                  cta={t("structures.dashboard.cta_view")}
                   onClick={() => setTab("performance")}
                 />
               )}
@@ -377,9 +375,9 @@ export default function StructureDashboardPage() {
                 <QuickCard
                   Icon={FileSpreadsheet}
                   color="bg-orange-100 text-orange-600"
-                  title="Rapport d'impact"
-                  description="Export PDF / CSV"
-                  cta="Voir"
+                  title={t("structures.dashboard.quick_report_title")}
+                  description={t("structures.dashboard.quick_report_desc")}
+                  cta={t("structures.dashboard.cta_view")}
                   onClick={() => setTab("report")}
                 />
               )}
@@ -388,19 +386,19 @@ export default function StructureDashboardPage() {
             {/* Classrooms preview */}
             <section className="rounded-xl border bg-card p-5">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-semibold">Classrooms</h2>
+                <h2 className="font-semibold">{t("structures.dashboard.classrooms_heading")}</h2>
                 <button
                   type="button"
                   className="text-xs text-primary hover:underline"
                   onClick={() => setTab("classrooms")}
                 >
-                  Voir tout →
+                  {t("structures.dashboard.view_all")}
                 </button>
               </div>
               {classroomsLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               ) : (classrooms ?? []).length === 0 ? (
-                <SectionEmpty message="Aucune classroom. Crée-en une depuis l'onglet Classrooms." />
+                <SectionEmpty message={t("structures.dashboard.no_classrooms_hint")} />
               ) : (
                 <div className="space-y-2">
                   {(classrooms ?? []).slice(0, 4).map((c) => (
@@ -412,7 +410,7 @@ export default function StructureDashboardPage() {
                       className="w-full rounded-lg border border-dashed py-2 text-xs text-muted-foreground hover:bg-muted/40"
                       onClick={() => setTab("classrooms")}
                     >
-                      +{(classrooms ?? []).length - 4} de plus
+                      {t("structures.dashboard.more_count", { count: (classrooms ?? []).length - 4 })}
                     </button>
                   )}
                 </div>
@@ -426,14 +424,14 @@ export default function StructureDashboardPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-semibold">Salles de classe</h2>
+                <h2 className="font-semibold">{t("structures.dashboard.classrooms_section_title")}</h2>
                 <p className="text-xs text-muted-foreground">
-                  {(classrooms ?? []).length} salle{(classrooms ?? []).length !== 1 ? "s" : ""}
+                  {t("structures.dashboard.classrooms_count", { count: (classrooms ?? []).length })}
                 </p>
               </div>
               {isSuperAdmin && (
                 <Button size="sm" onClick={() => setShowCreateClassroom(true)}>
-                  <Plus className="mr-1.5 h-3.5 w-3.5" /> Nouvelle classroom
+                  <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("structures.dashboard.create_classroom_cta")}
                 </Button>
               )}
             </div>
@@ -441,15 +439,15 @@ export default function StructureDashboardPage() {
             {classroomsLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             ) : (classrooms ?? []).length === 0 ? (
-              <SectionEmpty message="Aucune classroom pour l'instant." />
+              <SectionEmpty message={t("structures.dashboard.classroom_empty")} />
             ) : (
               <div className="rounded-xl border overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40">
-                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Nom</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">Code d'invitation</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Étudiants</th>
+                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.dashboard.col_name")}</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">{t("structures.dashboard.col_invite_code")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.dashboard.col_students")}</th>
                       <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"></th>
                     </tr>
                   </thead>
@@ -479,7 +477,7 @@ export default function StructureDashboardPage() {
                             className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                             onClick={e => e.stopPropagation()}
                           >
-                            Ouvrir <ArrowRight className="h-3 w-3" />
+                            {t("structures.dashboard.open_link")} <ArrowRight className="h-3 w-3" />
                           </Link>
                         </td>
                       </tr>
@@ -495,9 +493,9 @@ export default function StructureDashboardPage() {
         {tab === "team" && isSuperAdmin && (
           <div className="space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold">Équipe enseignante</h2>
+              <h2 className="font-semibold">{t("structures.dashboard.team_title")}</h2>
               <Button size="sm" onClick={() => setShowInviteTeacher(true)}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Inviter un enseignant
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("structures.dashboard.invite_teacher_btn")}
               </Button>
             </div>
 
@@ -505,7 +503,7 @@ export default function StructureDashboardPage() {
             {pendingReview.length > 0 && (
               <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
-                  Demandes en attente ({pendingReview.length})
+                  {t("structures.dashboard.pending_requests_title", { count: pendingReview.length })}
                 </p>
                 <div className="space-y-2">
                   {pendingReview.map((inv) => (
@@ -525,7 +523,7 @@ export default function StructureDashboardPage() {
                           variant="ghost"
                           className="h-7 w-7 text-emerald-600"
                           onClick={() => validateInvitation.mutate(inv.id)}
-                          title="Valider"
+                          title={t("structures.dashboard.validate")}
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -534,7 +532,7 @@ export default function StructureDashboardPage() {
                           variant="ghost"
                           className="h-7 w-7 text-destructive"
                           onClick={() => rejectInvitation.mutate(inv.id)}
-                          title="Refuser"
+                          title={t("structures.dashboard.reject")}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -549,20 +547,20 @@ export default function StructureDashboardPage() {
             <div className="rounded-xl border overflow-hidden">
               <div className="px-5 py-3 border-b bg-muted/20">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Invitations envoyées ({otherInvitations.length})
+                  {t("structures.dashboard.invitations_sent_title", { count: otherInvitations.length })}
                 </p>
               </div>
               {otherInvitations.length === 0 ? (
                 <div className="px-5 py-8">
-                  <SectionEmpty message="Aucune invitation pour l'instant. Invite ton premier enseignant !" />
+                  <SectionEmpty message={t("structures.dashboard.no_invitations_hint")} />
                 </div>
               ) : (
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/30">
-                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Enseignant</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Statut</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Action</th>
+                      <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.dashboard.col_teacher")}</th>
+                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.dashboard.col_status")}</th>
+                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("structures.dashboard.col_action")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -585,10 +583,10 @@ export default function StructureDashboardPage() {
                             }
                             className="text-[10px]"
                           >
-                            {inv.status === "pending" ? "en attente"
-                              : inv.status === "accepted" ? "acceptée"
-                              : inv.status === "rejected" ? "refusée"
-                              : "expirée"}
+                            {inv.status === "pending" ? t("structures.dashboard.invite_status_pending")
+                              : inv.status === "accepted" ? t("structures.dashboard.invite_status_accepted")
+                              : inv.status === "rejected" ? t("structures.dashboard.invite_status_rejected")
+                              : t("structures.dashboard.invite_status_expired")}
                           </Badge>
                         </td>
                         <td className="px-4 py-2.5 text-right">
@@ -598,7 +596,7 @@ export default function StructureDashboardPage() {
                               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                               onClick={() => copyLink(inv.invite_url)}
                             >
-                              <Copy className="h-3 w-3" /> Copier
+                              <Copy className="h-3 w-3" /> {t("structures.dashboard.copy")}
                             </button>
                           )}
                         </td>
@@ -614,12 +612,12 @@ export default function StructureDashboardPage() {
         {/* ━━ Performance ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {tab === "performance" && isSuperAdmin && (
           <div className="space-y-4">
-            <h2 className="font-semibold">Performance par classroom</h2>
+            <h2 className="font-semibold">{t("structures.dashboard.performance_title")}</h2>
 
             {dashboardLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             ) : dashboardClassrooms.length === 0 ? (
-              <SectionEmpty message="Aucune donnée de performance pour l'instant." />
+              <SectionEmpty message={t("structures.dashboard.no_performance_data")} />
             ) : (
               <div className="space-y-3">
                 {dashboardClassrooms.map((c) => (
@@ -632,13 +630,12 @@ export default function StructureDashboardPage() {
                       <div className="min-w-0">
                         <p className="font-semibold">{c.name}</p>
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          {c.students_count} étudiant{c.students_count !== 1 ? "s" : ""} ·{" "}
-                          {c.courses_count} cours
+                          {t("structures.dashboard.performance_row", { count: c.students_count, students: c.students_count, courses: c.courses_count })}
                         </p>
                       </div>
                       <div className="shrink-0 text-right">
                         <p className="text-2xl font-bold text-primary">{c.completion_pct}%</p>
-                        <p className="text-xs text-muted-foreground">complétion</p>
+                        <p className="text-xs text-muted-foreground">{t("structures.dashboard.completion_label")}</p>
                       </div>
                     </div>
                     <Progress value={c.completion_pct} className="mt-3 h-2" />
@@ -654,9 +651,9 @@ export default function StructureDashboardPage() {
           <div className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="font-semibold">Rapport d'impact</h2>
+                <h2 className="font-semibold">{t("structures.dashboard.report_title")}</h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Chiffres agrégés pour vos bailleurs et démarches d'accréditation.
+                  {t("structures.dashboard.report_hint")}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -685,37 +682,37 @@ export default function StructureDashboardPage() {
               <>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   <StatTile
-                    label="Classrooms"
+                    label={t("structures.dashboard.stat_classrooms")}
                     value={impactReport.classrooms_count}
                     Icon={GraduationCap}
                     color="bg-sky-100 text-sky-600"
                   />
                   <StatTile
-                    label="Enseignants"
+                    label={t("structures.dashboard.report_teachers_label")}
                     value={impactReport.teachers_count}
                     Icon={ShieldCheck}
                     color="bg-violet-100 text-violet-600"
                   />
                   <StatTile
-                    label="Étudiants touchés"
+                    label={t("structures.dashboard.report_students_touched")}
                     value={impactReport.students_count}
                     Icon={Users}
                     color="bg-blue-100 text-blue-600"
                   />
                   <StatTile
-                    label="Cours envoyés"
+                    label={t("structures.dashboard.report_courses_sent")}
                     value={impactReport.courses_count}
                     Icon={BookOpen}
                     color="bg-orange-100 text-orange-600"
                   />
                   <StatTile
-                    label="Plans personnalisés"
+                    label={t("structures.dashboard.report_personalized_plans")}
                     value={impactReport.evolution_plans_count}
                     Icon={BarChart3}
                     color="bg-pink-100 text-pink-600"
                   />
                   <StatTile
-                    label="Complétion globale"
+                    label={t("structures.dashboard.report_completion_label")}
                     value={`${impactReport.completion_pct}%`}
                     Icon={ShieldCheck}
                     color="bg-emerald-100 text-emerald-600"
@@ -725,7 +722,7 @@ export default function StructureDashboardPage() {
                 {impactReport.by_classroom.length > 0 && (
                   <div className="rounded-xl border bg-card p-5">
                     <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Par classroom
+                      {t("structures.dashboard.by_classroom_label")}
                     </p>
                     <div className="space-y-4">
                       {impactReport.by_classroom.map((c) => (
@@ -733,8 +730,7 @@ export default function StructureDashboardPage() {
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-medium">{c.name}</span>
                             <span className="text-xs text-muted-foreground">
-                              {c.students_count} étudiant{c.students_count !== 1 ? "s" : ""} ·{" "}
-                              {c.completion_pct}%
+                              {t("structures.dashboard.classroom_summary", { count: c.students_count, students: c.students_count, pct: c.completion_pct })}
                             </span>
                           </div>
                           <Progress value={c.completion_pct} className="mt-1.5 h-1.5" />
@@ -745,7 +741,7 @@ export default function StructureDashboardPage() {
                 )}
               </>
             ) : (
-              <SectionEmpty message="Aucune donnée de rapport pour l'instant." />
+              <SectionEmpty message={t("structures.dashboard.no_report_data")} />
             )}
           </div>
         )}
@@ -756,14 +752,14 @@ export default function StructureDashboardPage() {
         <BottomSheet
           open={showCreateClassroom}
           onClose={() => setShowCreateClassroom(false)}
-          title="Nouvelle classroom"
-          description="Crée une salle de classe pour organiser tes enseignements."
+          title={t("structures.dashboard.create_classroom_title")}
+          description={t("structures.dashboard.create_classroom_desc")}
           locked={createClassroom.isPending}
         >
           <form onSubmit={handleCreateClassroom} className="space-y-4 pt-2">
             <Input
               autoFocus
-              placeholder="Nom de la classroom (ex : Terminale A, Session Mars…)"
+              placeholder={t("structures.dashboard.classroom_name_placeholder")}
               value={newClassroomName}
               onChange={(e) => setNewClassroomName(e.target.value)}
             />
@@ -775,7 +771,7 @@ export default function StructureDashboardPage() {
               {createClassroom.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Créer la classroom
+              {t("structures.dashboard.create_classroom_submit")}
             </Button>
           </form>
         </BottomSheet>
@@ -786,31 +782,31 @@ export default function StructureDashboardPage() {
         <BottomSheet
           open={showInviteTeacher}
           onClose={() => setShowInviteTeacher(false)}
-          title="Inviter un(e) enseignant(e)"
-          description="L'invité(e) recevra un lien pour rejoindre la structure."
+          title={t("structures.dashboard.invite_teacher_title")}
+          description={t("structures.dashboard.invite_teacher_desc")}
           locked={createInvitation.isPending}
         >
           <form onSubmit={handleCreateInvitation} className="space-y-3 pt-2">
             <div className="flex gap-2">
               <Input
-                placeholder="Prénom"
+                placeholder={t("structures.dashboard.first_name_placeholder")}
                 value={inviteFirstName}
                 onChange={(e) => setInviteFirstName(e.target.value)}
               />
               <Input
-                placeholder="Nom"
+                placeholder={t("structures.dashboard.last_name_placeholder")}
                 value={inviteLastName}
                 onChange={(e) => setInviteLastName(e.target.value)}
               />
             </div>
             <Input
-              placeholder="Téléphone WhatsApp — facultatif"
+              placeholder={t("structures.dashboard.invite_contact_placeholder")}
               value={inviteContact}
               onChange={(e) => setInviteContact(e.target.value)}
             />
             <div>
               <p className="mb-2 text-xs font-medium text-muted-foreground">
-                Assigner à des classrooms :
+                {t("structures.dashboard.assign_classrooms_label")}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {(classrooms ?? []).map((c) => (
@@ -843,7 +839,7 @@ export default function StructureDashboardPage() {
               {createInvitation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Envoyer l'invitation
+              {t("structures.dashboard.send_invitation_submit")}
             </Button>
           </form>
         </BottomSheet>

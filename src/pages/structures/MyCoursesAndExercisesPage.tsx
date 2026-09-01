@@ -8,6 +8,7 @@
  */
 
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { BookOpen, ClipboardList, Loader2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -48,24 +49,25 @@ function DeliveryIcon({ kind }: { kind: DeliveryItem["kind"] }) {
   );
 }
 
-const KIND_LABELS: Record<DeliveryItem["kind"], string> = {
-  course: "Cours",
-  evolution_plan: "Plan personnalisé",
-  exercise: "Exercice",
-  evaluation: "Évaluation",
-};
-
 export default function MyCoursesAndExercisesPage() {
+  const { t } = useTranslation();
   const { data, isLoading } = useMyDeliveries();
   const items = data?.items ?? [];
+
+  const KIND_LABELS: Record<DeliveryItem["kind"], string> = {
+    course: t("structures.my_courses.kind_course"),
+    evolution_plan: t("structures.my_courses.kind_evolution_plan"),
+    exercise: t("structures.my_courses.kind_exercise"),
+    evaluation: t("structures.my_courses.kind_evaluation"),
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b px-6 py-4">
         <Link to="/app" className="mb-2 inline-block text-sm text-muted-foreground hover:text-foreground">
-          ← Retour à l'accueil
+          ← {t("structures.my_courses.back_home")}
         </Link>
-        <h1 className="text-xl font-bold">Mes cours & exercices</h1>
+        <h1 className="text-xl font-bold">{t("structures.my_courses.title")}</h1>
       </header>
 
       <main className="mx-auto max-w-2xl space-y-2 p-6">
@@ -75,7 +77,7 @@ export default function MyCoursesAndExercisesPage() {
           </div>
         ) : items.length === 0 ? (
           <p className="rounded-lg bg-muted/40 px-4 py-8 text-center text-sm text-muted-foreground">
-            Rien reçu pour l'instant. Ce qui t'est envoyé par un enseignant apparaîtra ici.
+            {t("structures.my_courses.empty")}
           </p>
         ) : (
           items.map((item) => (

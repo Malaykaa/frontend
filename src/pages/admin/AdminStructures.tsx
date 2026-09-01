@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import {
   AlertCircle, BookOpen, Building2, Check, Clock,
   GraduationCap, Inbox, Key, Loader2, Mail, MapPin,
@@ -22,32 +24,49 @@ import type {
 const STATUS_BADGE: Record<string, "warning" | "success" | "destructive"> = {
   pending: "warning", active: "success", rejected: "destructive",
 };
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente", active: "Active", rejected: "Refusée",
-};
 const STATUS_DOT: Record<string, string> = {
   pending: "bg-amber-500", active: "bg-emerald-500", rejected: "bg-red-500",
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  training_center: "Centre de formation",
-  independent_trainer: "Formateur indépendant",
-  school: "École",
-  university: "Université",
-  other: "Autre",
-};
-const ROLE_LABELS: Record<string, string> = {
-  super_admin: "Admin", teacher: "Enseignant",
-};
+function statusLabels(t: TFunction): Record<string, string> {
+  return {
+    pending: t("structures.admin.status_pending"),
+    active: t("structures.admin.status_active"),
+    rejected: t("structures.admin.status_rejected"),
+  };
+}
+
+function typeLabels(t: TFunction): Record<string, string> {
+  return {
+    training_center: t("structures.admin.type_training_center"),
+    independent_trainer: t("structures.admin.type_independent_trainer"),
+    school: t("structures.admin.type_school"),
+    university: t("structures.admin.type_university"),
+    other: t("structures.admin.type_other"),
+  };
+}
+
+function roleLabels(t: TFunction): Record<string, string> {
+  return {
+    super_admin: t("structures.admin.role_admin"),
+    teacher: t("structures.admin.role_teacher"),
+  };
+}
 
 const INV_BADGE: Record<string, "warning" | "success" | "destructive" | "secondary"> = {
   pending: "warning", accepted: "success", pending_review: "warning",
   rejected: "destructive", expired: "secondary",
 };
-const INV_LABELS: Record<string, string> = {
-  pending: "En attente", accepted: "Acceptée", pending_review: "En révision",
-  rejected: "Refusée", expired: "Expirée",
-};
+
+function invLabels(t: TFunction): Record<string, string> {
+  return {
+    pending: t("structures.admin.inv_status_pending"),
+    accepted: t("structures.admin.inv_status_accepted"),
+    pending_review: t("structures.admin.inv_status_pending_review"),
+    rejected: t("structures.admin.inv_status_rejected"),
+    expired: t("structures.admin.inv_status_expired"),
+  };
+}
 
 // ── Composants partagés ───────────────────────────────────────────────────────
 
@@ -127,6 +146,7 @@ function EmptyState({ icon: Icon, text }: { icon: React.ElementType; text: strin
 // ── Carte classroom ───────────────────────────────────────────────────────────
 
 function ClassroomCard({ c }: { c: AdminStructureClassroom }) {
+  const { t } = useTranslation();
   const hasPending = c.pending_members_count > 0;
   return (
     <div className={cn(
@@ -141,10 +161,10 @@ function ClassroomCard({ c }: { c: AdminStructureClassroom }) {
       </div>
       <div className="grid grid-cols-4 gap-1.5 text-[11px]">
         {[
-          { icon: Users,       label: "Profs",     value: c.teachers_count },
-          { icon: UserCheck,   label: "Étudiants", value: c.students_count },
-          { icon: BookOpen,    label: "Cours",     value: c.courses_count },
-          { icon: AlertCircle, label: "Attente",   value: c.pending_members_count, accent: hasPending },
+          { icon: Users,       label: t("structures.admin.col_teachers"), value: c.teachers_count },
+          { icon: UserCheck,   label: t("structures.admin.col_students"), value: c.students_count },
+          { icon: BookOpen,    label: t("structures.admin.col_courses"), value: c.courses_count },
+          { icon: AlertCircle, label: t("structures.admin.col_pending"), value: c.pending_members_count, accent: hasPending },
         ].map(({ icon: Icon, label, value, accent }) => (
           <div
             key={label}
@@ -161,7 +181,7 @@ function ClassroomCard({ c }: { c: AdminStructureClassroom }) {
       </div>
       {hasPending && (
         <p className="text-[10px] text-amber-600 font-medium">
-          {c.pending_members_count} demande{c.pending_members_count > 1 ? "s" : ""} en attente
+          {t("structures.admin.pending_members", { count: c.pending_members_count })}
         </p>
       )}
     </div>
@@ -171,6 +191,7 @@ function ClassroomCard({ c }: { c: AdminStructureClassroom }) {
 // ── Ligne d'invitation ────────────────────────────────────────────────────────
 
 function InvitationRow({ inv }: { inv: AdminStructureInvitation }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-3 px-3 py-2">
       <div className="flex-1 min-w-0">
@@ -181,7 +202,7 @@ function InvitationRow({ inv }: { inv: AdminStructureInvitation }) {
       </div>
       <div className="shrink-0 text-right space-y-0.5">
         <Badge variant={INV_BADGE[inv.status] ?? "secondary"} className="text-[10px] px-1.5 block">
-          {INV_LABELS[inv.status] ?? inv.status}
+          {invLabels(t)[inv.status] ?? inv.status}
         </Badge>
         <p className="text-[10px] text-muted-foreground">{formatRelativeTime(inv.created_at)}</p>
       </div>
@@ -195,6 +216,7 @@ function StructureDetail({ structureId, onClose }: {
   structureId: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const { data: s, isLoading } = useAdminStructure(structureId);
   const approve = useApproveAdminStructure();
   const reject  = useRejectAdminStructure();
@@ -216,16 +238,16 @@ function StructureDetail({ structureId, onClose }: {
   const totalPendingMembers = s.classrooms.reduce((acc, c) => acc + c.pending_members_count, 0);
 
   const handleDelete = () => {
-    if (!confirm(`Supprimer définitivement "${s.name}" ? Action irréversible.`)) return;
+    if (!confirm(t("structures.admin.delete_confirm", { name: s.name }))) return;
     del.mutate(s.id, { onSuccess: onClose });
   };
 
   const infoRows = [
-    { label: "Pays",      value: s.country,            Icon: MapPin },
-    { label: "Adresse",   value: s.address,            Icon: MapPin },
-    { label: "Email",     value: s.email,              Icon: Mail   },
-    { label: "Demandeur", value: s.requested_by_email, Icon: Mail   },
-    { label: "Soumis",    value: formatRelativeTime(s.created_at), Icon: Clock },
+    { label: t("structures.admin.info_country"),   value: s.country,            Icon: MapPin },
+    { label: t("structures.admin.info_address"),   value: s.address,            Icon: MapPin },
+    { label: t("structures.admin.info_email"),     value: s.email,              Icon: Mail   },
+    { label: t("structures.admin.info_requester"), value: s.requested_by_email, Icon: Mail   },
+    { label: t("structures.admin.info_submitted"), value: formatRelativeTime(s.created_at), Icon: Clock },
   ].filter(r => r.value);
 
   return (
@@ -241,7 +263,7 @@ function StructureDetail({ structureId, onClose }: {
               <h2 className="text-sm font-semibold leading-tight">{s.name}</h2>
               {s.structure_type && (
                 <p className="text-[11px] text-muted-foreground">
-                  {TYPE_LABELS[s.structure_type] ?? s.structure_type}
+                  {typeLabels(t)[s.structure_type] ?? s.structure_type}
                   {s.structure_type === "other" && s.structure_type_other && ` — ${s.structure_type_other}`}
                 </p>
               )}
@@ -249,7 +271,7 @@ function StructureDetail({ structureId, onClose }: {
           </div>
           <div className="mt-1.5 flex items-center gap-2">
             <Badge variant={STATUS_BADGE[s.status] ?? "secondary"} className="text-[10px]">
-              {STATUS_LABELS[s.status] ?? s.status}
+              {statusLabels(t)[s.status] ?? s.status}
             </Badge>
           </div>
         </div>
@@ -263,10 +285,10 @@ function StructureDetail({ structureId, onClose }: {
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-1.5 px-4 py-3 border-b shrink-0 bg-muted/10">
-        <StatChip icon={GraduationCap} label="Salles"    value={s.classrooms_count} />
-        <StatChip icon={Users}         label="Équipe"    value={s.members_count} />
-        <StatChip icon={UserCheck}     label="Étudiants" value={s.students_total} />
-        <StatChip icon={AlertCircle}   label="Attente"   value={totalPendingMembers} accent={totalPendingMembers > 0} />
+        <StatChip icon={GraduationCap} label={t("structures.admin.stat_classrooms_short")} value={s.classrooms_count} />
+        <StatChip icon={Users}         label={t("structures.admin.stat_team_short")}       value={s.members_count} />
+        <StatChip icon={UserCheck}     label={t("structures.admin.col_students")}          value={s.students_total} />
+        <StatChip icon={AlertCircle}   label={t("structures.admin.col_pending")}           value={totalPendingMembers} accent={totalPendingMembers > 0} />
       </div>
 
       {/* Corps scrollable */}
@@ -278,12 +300,12 @@ function StructureDetail({ structureId, onClose }: {
             <>
               <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" disabled={isBusy}
                 onClick={() => approve.mutate(s.id)}>
-                <Check className="mr-1.5 h-3.5 w-3.5" /> Valider
+                <Check className="mr-1.5 h-3.5 w-3.5" /> {t("structures.admin.validate")}
               </Button>
               <Button size="sm" variant="outline"
                 className="border-destructive/30 text-destructive hover:bg-destructive/5"
                 disabled={isBusy} onClick={() => reject.mutate(s.id)}>
-                <XCircle className="mr-1.5 h-3.5 w-3.5" /> Refuser
+                <XCircle className="mr-1.5 h-3.5 w-3.5" /> {t("structures.admin.reject")}
               </Button>
             </>
           )}
@@ -291,27 +313,27 @@ function StructureDetail({ structureId, onClose }: {
             <Button size="sm" variant="outline"
               className="border-amber-400/40 text-amber-600 hover:bg-amber-50"
               disabled={isBusy} onClick={() => reject.mutate(s.id)}>
-              <XCircle className="mr-1.5 h-3.5 w-3.5" /> Suspendre
+              <XCircle className="mr-1.5 h-3.5 w-3.5" /> {t("structures.admin.suspend")}
             </Button>
           )}
           {isRejected && (
             <Button size="sm" variant="outline"
               className="border-blue-400/40 text-blue-600 hover:bg-blue-50"
               disabled={isBusy} onClick={() => approve.mutate(s.id)}>
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Réactiver
+              <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> {t("structures.admin.reactivate")}
             </Button>
           )}
           <Button size="sm" variant="outline"
             className="border-destructive/30 text-destructive hover:bg-destructive/5 ml-auto"
             disabled={isBusy} onClick={handleDelete}>
-            <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Supprimer
+            <Trash2 className="mr-1.5 h-3.5 w-3.5" /> {t("structures.admin.delete")}
           </Button>
         </div>
 
         {/* Identité */}
         {infoRows.length > 0 && (
           <section>
-            <SectionTitle>Identité</SectionTitle>
+            <SectionTitle>{t("structures.admin.identity_title")}</SectionTitle>
             <div className="rounded-lg border bg-muted/20 divide-y text-sm">
               {infoRows.map(({ label, value, Icon }) => (
                 <div key={label} className="flex items-center gap-2 px-3 py-2">
@@ -326,9 +348,9 @@ function StructureDetail({ structureId, onClose }: {
 
         {/* Classrooms */}
         <section>
-          <SectionTitle badge={s.classrooms_count}>Salles de classe</SectionTitle>
+          <SectionTitle badge={s.classrooms_count}>{t("structures.admin.classrooms_title")}</SectionTitle>
           {s.classrooms.length === 0 ? (
-            <EmptyState icon={GraduationCap} text="Aucune salle créée pour l'instant." />
+            <EmptyState icon={GraduationCap} text={t("structures.admin.no_classrooms")} />
           ) : (
             <div className="space-y-2">
               {s.classrooms.map(c => <ClassroomCard key={c.id} c={c} />)}
@@ -340,7 +362,7 @@ function StructureDetail({ structureId, onClose }: {
         {s.invitations.length > 0 && (
           <section>
             <SectionTitle badge={s.pending_invitations_count || undefined} badgeAccent>
-              Invitations enseignants
+              {t("structures.admin.invitations_title")}
             </SectionTitle>
             <div className="rounded-lg border bg-muted/20 divide-y text-sm">
               {s.invitations.map(inv => (
@@ -352,9 +374,9 @@ function StructureDetail({ structureId, onClose }: {
 
         {/* Équipe */}
         <section>
-          <SectionTitle badge={s.members.length}>Équipe (admins & enseignants)</SectionTitle>
+          <SectionTitle badge={s.members.length}>{t("structures.admin.team_title")}</SectionTitle>
           {s.members.length === 0 ? (
-            <EmptyState icon={Users} text="Aucun membre enregistré." />
+            <EmptyState icon={Users} text={t("structures.admin.no_members")} />
           ) : (
             <div className="rounded-lg border bg-muted/20 divide-y text-sm">
               {s.members.map(m => {
@@ -383,7 +405,7 @@ function StructureDetail({ structureId, onClose }: {
                       variant={m.role === "super_admin" ? "default" : "secondary"}
                       className="text-[10px] px-1.5 shrink-0"
                     >
-                      {ROLE_LABELS[m.role] ?? m.role}
+                      {roleLabels(t)[m.role] ?? m.role}
                     </Badge>
                   </div>
                 );
@@ -399,6 +421,7 @@ function StructureDetail({ structureId, onClose }: {
 // ── Page principale ───────────────────────────────────────────────────────────
 
 export default function AdminStructures() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -443,29 +466,29 @@ export default function AdminStructures() {
         {/* Header */}
         <div className="border-b bg-background px-6 pt-5 pb-4 shrink-0 space-y-4">
           <div>
-            <h1 className="text-lg font-bold">Structures</h1>
-            <p className="text-xs text-muted-foreground">Organisations partenaires de Malayka</p>
+            <h1 className="text-lg font-bold">{t("structures.admin.page_title")}</h1>
+            <p className="text-xs text-muted-foreground">{t("structures.admin.page_subtitle")}</p>
           </div>
 
           {/* KPI strip */}
           <div className="grid grid-cols-4 gap-3">
-            <KpiCard label="Total" value={stats.total} />
+            <KpiCard label={t("structures.admin.kpi_total")} value={stats.total} />
             <KpiCard
-              label="En attente"
+              label={t("structures.admin.kpi_pending")}
               value={stats.pending}
               dot="bg-amber-500"
               active={statusFilter === "pending"}
               onClick={() => handleFilter("pending")}
             />
             <KpiCard
-              label="Actives"
+              label={t("structures.admin.kpi_active")}
               value={stats.active}
               dot="bg-emerald-500"
               active={statusFilter === "active"}
               onClick={() => handleFilter("active")}
             />
             <KpiCard
-              label="Refusées"
+              label={t("structures.admin.kpi_rejected")}
               value={stats.rejected}
               dot="bg-red-500"
               active={statusFilter === "rejected"}
@@ -479,16 +502,16 @@ export default function AdminStructures() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <input
                 className="h-9 w-full rounded-md border bg-muted/30 pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="Nom ou email demandeur…"
+                placeholder={t("structures.admin.search_placeholder")}
                 value={q}
                 onChange={e => { setQ(e.target.value); setPage(1); }}
               />
             </div>
             {data && (
               <span className="text-xs text-muted-foreground">
-                {data.total} résultat{data.total !== 1 ? "s" : ""}
+                {t("structures.admin.results_count", { count: data.total })}
                 {statusFilter && (
-                  <> · <button className="text-primary hover:underline" onClick={() => handleFilter("")}>Tout voir</button></>
+                  <> · <button className="text-primary hover:underline" onClick={() => handleFilter("")}>{t("structures.admin.view_all")}</button></>
                 )}
               </span>
             )}
@@ -504,29 +527,29 @@ export default function AdminStructures() {
           ) : items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
               <Inbox className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Aucune structure trouvée.</p>
+              <p className="text-sm text-muted-foreground">{t("structures.admin.no_structures_found")}</p>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead className="sticky top-0 z-10">
                 <tr className="border-b bg-muted/50">
                   <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Nom / Type
+                    {t("structures.admin.col_name_type")}
                   </th>
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Pays
+                    {t("structures.admin.col_country")}
                   </th>
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Statut
+                    {t("structures.admin.col_status")}
                   </th>
                   <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Membres
+                    {t("structures.admin.col_members")}
                   </th>
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">
-                    Demandeur
+                    {t("structures.admin.col_requester")}
                   </th>
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Créée
+                    {t("structures.admin.col_created")}
                   </th>
                 </tr>
               </thead>
@@ -549,8 +572,8 @@ export default function AdminStructures() {
                           <p className="font-medium leading-tight">{s.name}</p>
                           <p className="text-xs text-muted-foreground">
                             {s.structure_type
-                              ? (TYPE_LABELS[s.structure_type] ?? s.structure_type)
-                              : "Type non renseigné"}
+                              ? (typeLabels(t)[s.structure_type] ?? s.structure_type)
+                              : t("structures.admin.type_unspecified")}
                           </p>
                         </div>
                       </div>
@@ -564,7 +587,7 @@ export default function AdminStructures() {
                       <div className="flex items-center gap-1.5">
                         <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_DOT[s.status])} />
                         <Badge variant={STATUS_BADGE[s.status] ?? "secondary"} className="text-[10px]">
-                          {STATUS_LABELS[s.status] ?? s.status}
+                          {statusLabels(t)[s.status] ?? s.status}
                         </Badge>
                       </div>
                     </td>
