@@ -1,0 +1,465 @@
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { SiteImage } from "./media";
+import { light } from "./media";
+import { RevealLines, Reveal, Eyebrow, Section, SitePhoto, CountUp } from "./ui";
+import { useT } from "./lang";
+
+/**
+ * Scénarios de défilement.
+ *
+ * Chaque composant met en scène une idée différente : des blocs qui se
+ * superposent, une bande qui défile latéralement pendant qu'un titre reste
+ * fixe, des photos qui se rapprochent, une interface qui se construit.
+ * Tous reposent sur `transform` et `opacity` uniquement, et s'effacent
+ * sous `prefers-reduced-motion`.
+ */
+
+/** Progression de 0 à 1 pendant la traversée de l'élément par le viewport. */
+export function useScrollProgress<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [p, setP] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setP(1);
+      return;
+    }
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect();
+        const total = r.height + window.innerHeight;
+        setP(Math.max(0, Math.min(1, (window.innerHeight - r.top) / total)));
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return { ref, progress: p };
+}
+
+/* ── Scénario : trois photos qui se rapprochent puis s'alignent ───────── */
+
+export function ConvergingPhotos({
+  images,
+  eyebrow,
+  lines,
+  lead,
+}: {
+  images: [SiteImage, SiteImage, SiteImage];
+  eyebrow: string;
+  lines: ReactNode[];
+  lead?: string;
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+  // les photos partent écartées et en biais, puis se resserrent
+  const t = Math.min(1, Math.max(0, (progress - 0.15) / 0.5));
+  const spread = (1 - t) * 90;
+  const tilt = (1 - t) * 7;
+
+  return (
+    <Section size="large">
+      <div ref={ref}>
+        <div className="mx-auto max-w-3xl text-center">
+          <Reveal>
+            <div className="flex justify-center">
+              <Eyebrow>{eyebrow}</Eyebrow>
+            </div>
+          </Reveal>
+          <RevealLines lines={lines} className="type-h2 mt-8" />
+          {lead && (
+            <Reveal delay={200}>
+              <p className="type-lead mx-auto mt-8 max-w-xl text-muted-foreground">{lead}</p>
+            </Reveal>
+          )}
+        </div>
+
+        <div className="mt-24 flex items-center justify-center gap-4 sm:gap-6">
+          {images.map((img, i) => {
+            const dir = i === 0 ? -1 : i === 2 ? 1 : 0;
+            return (
+              <div
+                key={img.src}
+                className="w-1/3 max-w-[300px] overflow-hidden rounded-2xl border border-border"
+                style={{
+                  transform: `translateX(${dir * spread}px) translateY(${i === 1 ? -t * 24 : 0}px) rotate(${dir * tilt}deg) scale(${0.9 + t * 0.1})`,
+                  opacity: 0.25 + t * 0.75,
+                  transition: "opacity 0.4s linear",
+                  zIndex: i === 1 ? 2 : 1,
+                }}
+              >
+                <div style={{ aspectRatio: i === 1 ? "3/4" : "4/5" }}>
+                  <SitePhoto image={light(img)} className="h-full w-full object-cover grayscale" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ── Scénario : titre fixe, bande de cartes qui défile latéralement ───── */
+
+export function PinnedGallery({
+  eyebrow,
+  lines,
+  items,
+}: {
+  eyebrow: string;
+  lines: ReactNode[];
+  items: { image: SiteImage; label: string; note?: string }[];
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+  // la bande traverse l'écran pendant que la section reste épinglée
+  const shift = -(progress * 0.9 - 0.1) * (items.length * 150);
+
+  return (
+    <div ref={ref} className="relative" style={{ height: `${Math.max(2, items.length * 0.5)}00vh` }}>
+      <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
+        <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+          <Eyebrow>{eyebrow}</Eyebrow>
+          <RevealLines lines={lines} className="type-h2 mt-7 max-w-2xl" />
+        </div>
+
+        <div className="mt-14 w-full overflow-hidden">
+          <div
+            className="flex gap-6 px-5 sm:px-8"
+            style={{ transform: `translateX(${Math.min(0, shift)}px)`, willChange: "transform" }}
+          >
+            {items.map((it) => (
+              <figure key={it.image.src} className="w-[76vw] shrink-0 sm:w-[42vw] lg:w-[27vw]">
+                <div className="overflow-hidden rounded-2xl border border-border">
+                  <div style={{ aspectRatio: "4/3" }}>
+                    <SitePhoto image={light(it.image)} className="h-full w-full object-cover grayscale" />
+                  </div>
+                </div>
+                <figcaption className="mt-5">
+                  <p className="font-display text-lg font-semibold">{it.label}</p>
+                  {it.note && <p className="mt-1.5 text-sm text-muted-foreground">{it.note}</p>}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Scénario : deux blocs qui se rejoignent, l'un du bas, l'autre du haut ── */
+
+export function JoiningBlocks({
+  eyebrow,
+  lines,
+  top,
+  bottom,
+  image,
+}: {
+  eyebrow: string;
+  lines: ReactNode[];
+  top: { title: string; desc: string };
+  bottom: { title: string; desc: string };
+  image: SiteImage;
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+  const t = Math.min(1, Math.max(0, (progress - 0.2) / 0.45));
+  const gap = (1 - t) * 120;
+
+  return (
+    <Section size="large">
+      <div ref={ref} className="grid gap-16 lg:grid-cols-[1fr_0.85fr] lg:items-center">
+        <div>
+          <Reveal>
+            <Eyebrow>{eyebrow}</Eyebrow>
+          </Reveal>
+          <RevealLines lines={lines} className="type-h2 mt-7" />
+
+          <div className="mt-14 space-y-4">
+            <div
+              className="rounded-2xl border border-border bg-card p-7"
+              style={{ transform: `translateY(${-gap}px)`, opacity: 0.3 + t * 0.7 }}
+            >
+              <p className="font-display text-lg font-semibold">{top.title}</p>
+              <p className="mt-2.5 leading-relaxed text-muted-foreground">{top.desc}</p>
+            </div>
+            <div
+              className="rounded-2xl border border-border bg-card p-7"
+              style={{ transform: `translateY(${gap}px)`, opacity: 0.3 + t * 0.7 }}
+            >
+              <p className="font-display text-lg font-semibold">{bottom.title}</p>
+              <p className="mt-2.5 leading-relaxed text-muted-foreground">{bottom.desc}</p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="overflow-hidden rounded-2xl border border-border"
+          style={{ transform: `scale(${0.92 + t * 0.08})` }}
+        >
+          <div style={{ aspectRatio: "4/5" }}>
+            <SitePhoto image={light(image)} className="h-full w-full object-cover grayscale" />
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ── Scénario : grande photo qui se réduit, informations autour ───────── */
+
+export function ShrinkingPhoto({
+  image,
+  eyebrow,
+  lines,
+  facts,
+}: {
+  image: SiteImage;
+  eyebrow: string;
+  lines: ReactNode[];
+  facts: { label: string; value: string }[];
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+  const t = Math.min(1, Math.max(0, (progress - 0.1) / 0.55));
+
+  return (
+    <Section size="large">
+      <div ref={ref}>
+        <div className="mx-auto max-w-3xl text-center">
+          <Reveal>
+            <div className="flex justify-center">
+              <Eyebrow>{eyebrow}</Eyebrow>
+            </div>
+          </Reveal>
+          <RevealLines lines={lines} className="type-h2 mt-8" />
+        </div>
+
+        <div className="relative mt-20">
+          <div
+            className="mx-auto overflow-hidden rounded-2xl border border-border"
+            style={{ width: `${100 - t * 32}%`, maxWidth: 1100 }}
+          >
+            <div style={{ aspectRatio: "16/9" }}>
+              <SitePhoto image={image} className="h-full w-full object-cover grayscale" />
+            </div>
+          </div>
+
+          <div
+            className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
+            style={{ opacity: t, transform: `translateY(${(1 - t) * 30}px)` }}
+          >
+            {facts.map((f) => (
+              <div key={f.label} className="border-t border-border pt-5">
+                <p className="font-display text-2xl font-semibold tabular-nums">{f.value}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{f.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ── Scénario : interface noire qui se construit ligne après ligne ────── */
+
+export function BuildingInterface({
+  eyebrow,
+  lines,
+  rows,
+  footer,
+}: {
+  eyebrow: string;
+  lines: ReactNode[];
+  rows: { label: string; value: string }[];
+  footer?: string;
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+  const shown = Math.floor(Math.max(0, (progress - 0.2) / 0.5) * (rows.length + 1));
+  const t = useT();
+
+  return (
+    <Section tone="dark" size="large">
+      <div ref={ref} className="grid gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div>
+          <Reveal>
+            <Eyebrow>{eyebrow}</Eyebrow>
+          </Reveal>
+          <RevealLines lines={lines} className="type-h2 mt-7 text-foreground" />
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-border bg-black/40">
+          <div className="border-b border-border px-5 py-3.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              {t("Construction du jeu de données", "Building the dataset")}
+            </span>
+          </div>
+          <div className="divide-y divide-white/5">
+            {rows.map((r, i) => (
+              <div
+                key={r.label}
+                className="flex items-center justify-between gap-4 px-5 py-3.5 transition-all duration-500"
+                style={{
+                  opacity: i < shown ? 1 : 0.12,
+                  transform: i < shown ? "none" : "translateX(-12px)",
+                }}
+              >
+                <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                  {r.label}
+                </span>
+                <span className="font-mono text-[12.5px] tabular-nums text-foreground">{r.value}</span>
+              </div>
+            ))}
+          </div>
+          {footer && (
+            <div
+              className="border-t border-border px-5 py-4 transition-opacity duration-700"
+              style={{ opacity: shown > rows.length ? 1 : 0.15 }}
+            >
+              <p className="text-[13px] text-muted-foreground">{footer}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ── Scénario : composition circulaire autour d'un centre ─────────────── */
+
+export function CircularFlow({
+  eyebrow,
+  steps,
+  image,
+}: {
+  eyebrow: string;
+  steps: string[];
+  image?: SiteImage;
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+  const t = Math.min(1, Math.max(0, (progress - 0.2) / 0.5));
+
+  return (
+    <Section size="large">
+      <div ref={ref} className="mx-auto max-w-3xl text-center">
+        <Reveal>
+          <div className="flex justify-center">
+            <Eyebrow>{eyebrow}</Eyebrow>
+          </div>
+        </Reveal>
+
+        <div className="relative mx-auto mt-20 aspect-square w-full max-w-lg">
+          {/* Centre : la photo se suffit, aucun voile ni texte par-dessus */}
+          <div className="absolute inset-[26%] overflow-hidden rounded-full border border-border">
+            {image ? (
+              <SitePhoto image={light(image)} className="h-full w-full object-cover grayscale" />
+            ) : (
+              <div className="h-full w-full bg-muted" />
+            )}
+          </div>
+
+          {/* Étapes en orbite */}
+          {steps.map((s, i) => {
+            const angle = (i / steps.length) * Math.PI * 2 - Math.PI / 2;
+            const r = 46;
+            return (
+              <span
+                key={s}
+                className="absolute whitespace-nowrap rounded-full border border-border bg-background px-3.5 py-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.1em]"
+                style={{
+                  left: `${50 + Math.cos(angle) * r}%`,
+                  top: `${50 + Math.sin(angle) * r}%`,
+                  transform: `translate(-50%, -50%) scale(${0.7 + t * 0.3})`,
+                  opacity: t > i / steps.length ? 1 : 0.2,
+                  transition: "opacity 0.5s linear",
+                }}
+              >
+                {s}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ── Scénario : tableau de bord de performance, chiffres qui se posent ── */
+
+/**
+ * Grille de chiffres clés sur fond noir. Chaque cellule se pose à son propre
+ * rythme, ce qui évite l'effet « mur de statistiques » et laisse le regard
+ * parcourir la grille.
+ */
+export function MetricsBoard({
+  eyebrow,
+  lines,
+  lead,
+  metrics,
+}: {
+  eyebrow: string;
+  lines: ReactNode[];
+  lead?: string;
+  metrics: { value: string; label: string; count?: { to: number; prefix?: string; suffix?: string } }[];
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+
+  return (
+    <Section tone="dark" size="large">
+      <div ref={ref}>
+        <div className="max-w-3xl">
+          <Reveal>
+            <Eyebrow>{eyebrow}</Eyebrow>
+          </Reveal>
+          <RevealLines lines={lines} className="type-h2 mt-7 text-foreground" />
+          {lead && (
+            <Reveal delay={200}>
+              <p className="type-lead mt-7 text-muted-foreground">{lead}</p>
+            </Reveal>
+          )}
+        </div>
+
+        <div className="mt-20 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+          {metrics.map((m, i) => {
+            // chaque cellule se pose quand la progression atteint son rang
+            const seuil = 0.12 + (i / metrics.length) * 0.4;
+            const posee = progress > seuil;
+            return (
+              <div
+                key={m.label}
+                className="bg-[#0a0a0a] p-7 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] md:p-8"
+                style={{
+                  opacity: posee ? 1 : 0.18,
+                  transform: posee ? "none" : "translateY(18px)",
+                }}
+              >
+                {/* CountUp porte son propre déclencheur d'entrée dans le champ :
+                    le conditionner à `posee` désynchronise les deux et laisse
+                    apparaître un « 0 » transitoire. */}
+                <p className="font-display text-3xl font-semibold tabular-nums text-foreground sm:text-4xl">
+                  {m.count ? (
+                    <CountUp value={m.count.to} prefix={m.count.prefix} suffix={m.count.suffix} />
+                  ) : (
+                    m.value
+                  )}
+                </p>
+                <p className="mt-4 text-sm leading-snug text-muted-foreground">{m.label}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Section>
+  );
+}
