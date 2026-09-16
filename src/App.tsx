@@ -7,7 +7,20 @@ import { InstallBanner } from "@/components/app/InstallBanner";
 import { Suspense, useEffect } from "react";
 import { clearChunkReloadMark, lazyRoute } from "@/shared/lib/lazy-route";
 
-const LandingPage        = lazyRoute(() => import("@/pages/landing"));
+// ── Site public (marketing) ──
+const SiteLayout          = lazyRoute(() => import("@/pages/site/_shared/SiteLayout"));
+const HomePage            = lazyRoute(() => import("@/pages/site/HomePage"));
+const MalaykaIaPage       = lazyRoute(() => import("@/pages/site/products/MalaykaIaPage"));
+const MalaykaEducativePage = lazyRoute(() => import("@/pages/site/products/MalaykaEducativePage"));
+const MalaykaDataPage     = lazyRoute(() => import("@/pages/site/products/MalaykaDataPage"));
+const AiCompaniesPage     = lazyRoute(() => import("@/pages/site/solutions/AiCompaniesPage"));
+const GovernmentsPage     = lazyRoute(() => import("@/pages/site/solutions/GovernmentsPage"));
+const InstitutionsPage    = lazyRoute(() => import("@/pages/site/solutions/InstitutionsPage"));
+const IndividualsPage     = lazyRoute(() => import("@/pages/site/solutions/IndividualsPage"));
+const HowItWorksPage      = lazyRoute(() => import("@/pages/site/HowItWorksPage"));
+const SitePricingPage     = lazyRoute(() => import("@/pages/site/PricingPage"));
+const SiteResourcesPage   = lazyRoute(() => import("@/pages/site/ResourcesPage"));
+const SiteAboutPage       = lazyRoute(() => import("@/pages/site/AboutPage"));
 const PrivacyPolicy      = lazyRoute(() => import("@/pages/legal/PrivacyPolicy"));
 const TermsOfService     = lazyRoute(() => import("@/pages/legal/TermsOfService"));
 const LoginPage           = lazyRoute(() => import("@/pages/auth/LoginPage"));
@@ -113,7 +126,25 @@ export default function App() {
           <AuthProvider>
             <Suspense fallback={<FullScreenLoader />}>
               <Routes>
-                <Route path="/" element={<PublicOnlyRoute><LandingPage /></PublicOnlyRoute>} />
+                {/* ── Site public ──
+                    Contrairement à l'ancienne landing, ces pages ne sont plus
+                    derrière PublicOnlyRoute : un utilisateur connecté doit
+                    pouvoir consulter « À propos » ou « Tarification » sans
+                    être renvoyé vers /app. */}
+                <Route element={<SiteLayout />}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/produits/malayka-ia" element={<MalaykaIaPage />} />
+                  <Route path="/produits/malayka-educative" element={<MalaykaEducativePage />} />
+                  <Route path="/produits/malayka-data" element={<MalaykaDataPage />} />
+                  <Route path="/solutions/entreprises-ia" element={<AiCompaniesPage />} />
+                  <Route path="/solutions/gouvernements" element={<GovernmentsPage />} />
+                  <Route path="/solutions/etablissements" element={<InstitutionsPage />} />
+                  <Route path="/solutions/particuliers" element={<IndividualsPage />} />
+                  <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
+                  <Route path="/tarification" element={<SitePricingPage />} />
+                  <Route path="/ressources" element={<SiteResourcesPage />} />
+                  <Route path="/a-propos" element={<SiteAboutPage />} />
+                </Route>
                 <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
