@@ -281,9 +281,13 @@ export function SiteNav() {
         onMouseLeave={scheduleClose}
       >
         <div className="flex items-center justify-between gap-4 py-3.5">
-        {/* Logo */}
+        {/* Logo — la barre est toujours noire, d'où l'inversion.
+            `invert` SEUL : il échange le noir et le blanc et préserve donc
+            les deux carrés imbriqués de l'icône. Y ajouter `brightness-0`
+            aplatissait toute la matière en noir AVANT l'inversion, et le
+            logo se retrouvait réduit à un pavé blanc sans relief. */}
         <Link to="/" className="shrink-0">
-          <img src="/logo.png" alt="Malayka" className="h-7 w-auto brightness-0 invert" />
+          <img src="/logo.png" alt="Malayka" className="h-7 w-auto invert" />
         </Link>
 
         {/* Desktop */}
