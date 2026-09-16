@@ -9,6 +9,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA } from "../_shared/media";
 import { ShrinkingPhoto, CircularFlow } from "../_shared/scenes";
+import { Mark, Underline, Hatched } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 // Données
@@ -191,10 +192,19 @@ export default function MalaykaDataPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Profondeur historique", "Historical depth")}
-            title={t(
-              "Le présent nous montre où nous sommes. L'historique nous aide à comprendre où nous allons.",
-              "The present shows where we are. History helps us understand where we are going.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  The present shows where we are. History helps us understand{" "}
+                  <Underline variante="epais">where we are going</Underline>.
+                </>
+              ) : (
+                <>
+                  Le présent nous montre où nous sommes. L'historique nous aide à comprendre{" "}
+                  <Underline variante="epais">où nous allons</Underline>.
+                </>
+              )
+            }
             lead={t(
               "Une donnée isolée donne une photographie. Une donnée historique permet d'observer une évolution.",
               "A single record gives a snapshot. A historical record lets you watch something move.",
@@ -265,7 +275,13 @@ export default function MalaykaDataPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Nos datasets", "Our datasets")}
-            title={t("Des données prêtes à être utilisées.", "Data ready to be put to work.")}
+            title={
+              t.lang === "en" ? (
+                <>Data <Mark>ready to be put to work</Mark>.</>
+              ) : (
+                <>Des données <Mark>prêtes à être utilisées</Mark>.</>
+              )
+            }
           />
         </Reveal>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -383,7 +399,13 @@ export default function MalaykaDataPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("La dimension humaine", "The human dimension")}
-            title={t("L'IA donne l'échelle. L'humain donne le contexte.", "AI provides the scale. People provide the context.")}
+            title={
+              t.lang === "en" ? (
+                <>AI provides the scale. People provide <Hatched>the context</Hatched>.</>
+              ) : (
+                <>L'IA donne l'échelle. L'humain donne <Hatched>le contexte</Hatched>.</>
+              )
+            }
             lead={t(
               "Les réalités professionnelles africaines ne peuvent pas être comprises uniquement à partir de données automatisées. Nos systèmes automatisent la collecte et le traitement ; des experts annotent, vérifient et contextualisent ; et lorsque les données manquent, nous allons les chercher sur le terrain.",
               "African working realities cannot be understood from automated data alone. Our systems automate collection and processing; experts annotate, verify and contextualise; and where data is missing, we go and gather it in the field.",

@@ -3,6 +3,7 @@ import { Check, GraduationCap, Landmark, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal, Section, SectionHeading, PageHero, Card, mailto } from "./_shared/ui";
 import { useT, type Translate } from "./_shared/lang";
+import { Mark } from "./_shared/emphasis";
 
 const buildPlans = (t: Translate) => [
   {
@@ -121,10 +122,13 @@ export default function PricingPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Pour les particuliers", "For individuals")}
-            title={t(
-              "Commencez gratuitement, montez en puissance si besoin.",
-              "Start free, scale up when you need to.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>Start <Mark>free</Mark>, scale up when you need to.</>
+              ) : (
+                <>Commencez <Mark>gratuitement</Mark>, montez en puissance si besoin.</>
+              )
+            }
           />
         </Reveal>
         <div className="mt-14 grid gap-5 lg:grid-cols-3">

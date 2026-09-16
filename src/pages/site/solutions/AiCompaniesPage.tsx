@@ -8,6 +8,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA } from "../_shared/media";
 import { BuildingInterface, ConvergingPhotos } from "../_shared/scenes";
+import { Mark, Circled, StatementBand } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 // Ce que les entreprises d'IA peuvent en faire
@@ -198,6 +199,111 @@ export default function AiCompaniesPage() {
                 </div>
               ))}
             </div>
+          </Reveal>
+        </div>
+      </Section>
+
+      {/* La réponse au problème : la donnée est déjà faite. */}
+      <StatementBand
+        eyebrow={t("Prêt à l'emploi", "Ready to use")}
+        footer={t(
+          "Aucune collecte à lancer, aucune taxonomie à écrire, aucune campagne d'annotation à monter. Les jeux de données arrivent structurés, annotés et traçables — le travail long est déjà fait.",
+          "No collection to set up, no taxonomy to write, no annotation campaign to run. The datasets arrive structured, annotated and traceable — the long work is already done.",
+        )}
+      >
+        {t.lang === "en" ? (
+          <>
+            Data that is ready to use. Start training on{" "}
+            <Circled>day zero</Circled>.
+          </>
+        ) : (
+          <>
+            Des données prêtes à l'emploi. Commencez vos entraînements le{" "}
+            <Circled>jour zéro</Circled>.
+          </>
+        )}
+      </StatementBand>
+
+      {/* Les deux façons d'obtenir cette donnée */}
+      <Section tone="default">
+        <Reveal>
+          <SectionHeading
+            eyebrow={t("La matière", "The raw material")}
+            title={
+              t.lang === "en" ? (
+                <>
+                  Data of <Mark>high quality</Mark>, for specialised and
+                  high-performing AI.
+                </>
+              ) : (
+                <>
+                  Des données de <Mark>haute qualité</Mark>, pour des IA
+                  spécialisées et performantes.
+                </>
+              )
+            }
+            lead={t(
+              "Entraînez et améliorez les modèles généraux pour en faire des modèles performants, adaptés à vos besoins et à vos métiers.",
+              "Train and refine general-purpose models into high-performing ones, fitted to your needs and your industry.",
+            )}
+          />
+        </Reveal>
+
+        <div className="mt-14 grid gap-5 lg:grid-cols-2">
+          <Reveal>
+            <Card className="flex h-full flex-col">
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                {t("Option 01", "Option 01")}
+              </span>
+              <h3 className="font-display mt-4 type-h3">
+                {t.lang === "en" ? (
+                  <>
+                    We annotate <Mark>your</Mark> data.
+                  </>
+                ) : (
+                  <>
+                    Nous annotons <Mark>vos</Mark> données.
+                  </>
+                )}
+              </h3>
+              <p className="mt-5 flex-1 leading-relaxed text-muted-foreground">
+                {t(
+                  "Vous détenez déjà des corpus, mais bruts, hétérogènes, inexploitables tels quels. Nos experts africains les nettoient, les qualifient et les alignent sur notre taxonomie — sans que la donnée quitte votre périmètre.",
+                  "You already hold corpora — raw, heterogeneous, unusable as they stand. Our African experts clean, qualify and align them against our taxonomy, without the data leaving your perimeter.",
+                )}
+              </p>
+              <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground/60">
+                {t("Vos corpus · notre taxonomie · nos annotateurs", "Your corpora · our taxonomy · our annotators")}
+              </p>
+            </Card>
+          </Reveal>
+
+          <Reveal delay={120}>
+            <Card className="flex h-full flex-col border-primary/25 bg-primary/[0.02]">
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                {t("Option 02", "Option 02")}
+              </span>
+              <h3 className="font-display mt-4 type-h3">
+                {t.lang === "en" ? (
+                  <>
+                    Or take data <Mark>already annotated</Mark>.
+                  </>
+                ) : (
+                  <>
+                    Ou partez de données <Mark>déjà annotées</Mark>.
+                  </>
+                )}
+              </h3>
+              <p className="mt-5 flex-1 leading-relaxed text-muted-foreground">
+                {t(
+                  "Nous vous livrons des jeux de données déjà constitués et annotés pour vos métiers : santé, agritech, énergie, finance, logistique, éducation. Rien à préparer — l'entraînement peut commencer immédiatement.",
+                  "We deliver datasets already built and annotated for your industry: healthcare, agritech, energy, finance, logistics, education. Nothing to prepare — training can start immediately.",
+                )}
+              </p>
+              <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground/60">
+                {t("Livré prêt · par métier · dès le jour zéro", "Delivered ready · by industry · from day zero")}
+              </p>
+            </Card>
           </Reveal>
         </div>
       </Section>

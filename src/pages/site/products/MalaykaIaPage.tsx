@@ -8,6 +8,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA, MEDIA_ALIASES } from "../_shared/media";
 import { JoiningBlocks } from "../_shared/scenes";
+import { Mark, Underline } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 const buildCapabilities = (t: Translate) => [
@@ -111,7 +112,13 @@ export default function MalaykaIaPage() {
           <Reveal>
             <SectionHeading
               eyebrow={t("Comment ça marche", "How it works")}
-              title={t("Votre intelligence personnelle du marché.", "Your personal intelligence on the market.")}
+              title={
+                t.lang === "en" ? (
+                  <>Your <Mark>personal</Mark> intelligence on the market.</>
+                ) : (
+                  <>Votre intelligence <Mark>personnelle</Mark> du marché.</>
+                )
+              }
               lead={t(
                 "Vous décrivez votre objectif une fois. Malayka fait le reste : elle observe le marché à votre place, en continu, et ne vous sollicite que lorsqu'il y a quelque chose qui compte pour vous.",
                 "You describe your goal once. Malayka does the rest: it watches the market for you, continuously, and only comes back to you when something actually matters.",
@@ -282,10 +289,19 @@ export default function MalaykaIaPage() {
           <div className="text-center">
             <SectionHeading
               align="center"
-              title={t(
-                "Votre prochaine opportunité existe déjà. Encore faut-il la voir.",
-                "Your next opportunity already exists. You still have to see it.",
-              )}
+              title={
+                t.lang === "en" ? (
+                  <>
+                    Your next opportunity <Underline variante="epais">already exists</Underline>.
+                    You still have to see it.
+                  </>
+                ) : (
+                  <>
+                    Votre prochaine opportunité <Underline variante="epais">existe déjà</Underline>.
+                    Encore faut-il la voir.
+                  </>
+                )
+              }
               lead={t(
                 "Créez votre profil en quelques minutes. Malayka commence à observer le marché pour vous immédiatement.",
                 "Create your profile in a few minutes. Malayka starts watching the market for you straight away.",

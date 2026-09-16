@@ -15,6 +15,7 @@ import { DataConstellation } from "./_shared/DataConstellation";
 import { SkillsTerminal } from "./_shared/SkillsTerminal";
 import { HeroEngine } from "./_shared/HeroEngine";
 import { ShapingManifesto } from "./_shared/statements";
+import { Mark, Underline, Circled, Hatched, StatementBand } from "./_shared/emphasis";
 import { MEDIA, MEDIA_ALIASES, light } from "./_shared/media";
 import { useT, type Translate } from "./_shared/lang";
 
@@ -98,16 +99,27 @@ function Problem() {
       <RevealLines
         lines={
           t.lang === "en"
-            ? ["Human capital is everywhere.", <span key="b" className="text-muted-foreground">The intelligence is fragmented.</span>]
-            : ["Le capital humain est partout.", <span key="b" className="text-muted-foreground">L'intelligence est fragmentée.</span>]
+            ? ["Human capital is everywhere.", <span key="b" className="text-muted-foreground">The intelligence is <Hatched>fragmented</Hatched>.</span>]
+            : ["Le capital humain est partout.", <span key="b" className="text-muted-foreground">L'intelligence est <Hatched>fragmentée</Hatched>.</span>]
         }
         className="type-h2 max-w-4xl text-foreground"
       />
       <Reveal delay={260}>
         <p className="type-lead mt-10 max-w-2xl text-muted-foreground">
-          {t(
-            "Les signaux du marché du travail sont dispersés entre plateformes professionnelles, sites d'emploi, réseaux sociaux, plateformes freelance, sites institutionnels, groupes Telegram et communautés.",
-            "Labour-market signals are scattered across professional networks, job boards, social media, freelance platforms, institutional sites, Telegram groups and communities.",
+          {t.lang === "en" ? (
+            <>
+              Labour-market signals are{" "}
+              <Underline variante="trait" className="text-foreground">scattered</Underline> across
+              professional networks, job boards, social media, freelance platforms, institutional
+              sites, Telegram groups and communities.
+            </>
+          ) : (
+            <>
+              Les signaux du marché du travail sont{" "}
+              <Underline variante="trait" className="text-foreground">dispersés</Underline> entre
+              plateformes professionnelles, sites d'emploi, réseaux sociaux, plateformes freelance,
+              sites institutionnels, groupes Telegram et communautés.
+            </>
           )}
         </p>
       </Reveal>
@@ -316,8 +328,8 @@ function Products() {
         eyebrow={t("Les produits", "The products")}
         lines={
           t.lang === "en"
-            ? ["One intelligence.", "Several ways to use it."]
-            : ["Une intelligence.", "Plusieurs façons de l'utiliser."]
+            ? [<span key="p"><Hatched>One</Hatched> intelligence.</span>, "Several ways to use it."]
+            : [<span key="p"><Hatched>Une</Hatched> intelligence.</span>, "Plusieurs façons de l'utiliser."]
         }
       />
 
@@ -443,8 +455,8 @@ function Solutions() {
         eyebrow="Solutions"
         lines={
           t.lang === "en"
-            ? ["One infrastructure.", "Many users."]
-            : ["Une infrastructure.", "Plusieurs utilisateurs."]
+            ? ["One infrastructure.", <span key="s"><Hatched>Many</Hatched> users.</span>]
+            : ["Une infrastructure.", <span key="s"><Hatched>Plusieurs</Hatched> utilisateurs.</span>]
         }
         lead={t(
           "La même couche de données sert celles et ceux qui construisent des modèles d'IA, qui pilotent des politiques publiques, qui forment, et qui cherchent leur prochaine opportunité.",
@@ -579,8 +591,8 @@ function HumanFirst() {
         <RevealLines
           lines={
             t.lang === "en"
-              ? ["Data is the engine.", "People are the point."]
-              : ["Les données sont le moteur.", "L'humain est la finalité."]
+              ? ["Data is the engine.", <span key="h">People are <Mark>the point</Mark>.</span>]
+              : ["Les données sont le moteur.", <span key="h">L'humain est <Mark>la finalité</Mark>.</span>]
           }
           className="type-h2"
         />
@@ -692,7 +704,7 @@ function Shaping() {
       lines={
         t.lang === "en"
           ? ["We are shaping", "the next generations of", "specialised AI for Africa."]
-          : ["Nous façonnons pour l'Afrique", "les prochaines générations", "d'IA spécialisées."]
+          : ["Nous façonnons pour l'Afrique,", "les prochaines générations", "d'IA spécialisées."]
       }
       lead={t(
         "Les modèles généralistes ne connaissent ni nos métiers, ni nos diplômes, ni nos marchés. Nous constituons la matière — données annotées, référentiels, profondeur historique — qui permet de les spécialiser pour le continent.",
@@ -728,6 +740,42 @@ function Shaping() {
   );
 }
 
+/* Prêt à l'emploi — la promesse faite aux entreprises d'IA */
+
+function ReadyData() {
+  const t = useT();
+  return (
+    <StatementBand
+      eyebrow={t("Pour les entreprises d'IA", "For AI companies")}
+      footer={
+        <>
+          {t(
+            "Nous annotons vos corpus, ou nous vous livrons des jeux de données déjà annotés pour vos métiers. Rien à collecter, rien à préparer.",
+            "We annotate your corpora, or we deliver datasets already annotated for your industry. Nothing to collect, nothing to prepare.",
+          )}{" "}
+          <Link
+            to="/solutions/entreprises-ia"
+            className="font-semibold text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            {t("Voir les données d'entraînement", "See the training data")}
+          </Link>
+        </>
+      }
+    >
+      {t.lang === "en" ? (
+        <>
+          Data that is ready to use. Start training on <Circled>day zero</Circled>.
+        </>
+      ) : (
+        <>
+          Des données prêtes à l'emploi. Commencez vos entraînements le{" "}
+          <Circled>jour zéro</Circled>.
+        </>
+      )}
+    </StatementBand>
+  );
+}
+
 /* Traction */
 
 function Traction() {
@@ -736,7 +784,11 @@ function Traction() {
     <Section tone="muted" size="large">
       <SectionHeading
         eyebrow={t("Résultats", "Results")}
-        lines={t.lang === "en" ? ["Already in use", "on the ground."] : ["Déjà utilisé", "sur le terrain."]}
+        lines={
+          t.lang === "en"
+            ? ["Already in use", <span key="t"><Mark>on the ground</Mark>.</span>]
+            : ["Déjà utilisé", <span key="t"><Mark>sur le terrain</Mark>.</span>]
+        }
       />
 
       <div className="mt-20 grid gap-14 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-20">
@@ -788,8 +840,8 @@ function Vision() {
         <RevealLines
           lines={
             t.lang === "en"
-              ? ["Build the infrastructure", "that will let Africa", "understand its human capital."]
-              : ["Construire l'infrastructure", "qui permettra à l'Afrique", "de comprendre son capital humain."]
+              ? ["Build the infrastructure", "that will let Africa", <span key="v">understand its <Mark>human capital</Mark>.</span>]
+              : ["Construire l'infrastructure", "qui permettra à l'Afrique", <span key="v">de comprendre son <Mark>capital humain</Mark>.</span>]
           }
           className="type-h2 mt-10"
         />
@@ -826,6 +878,7 @@ export default function HomePage() {
       <SourceMarquee />
       <DataConstellation />
       <Shaping />
+      <ReadyData />
       <DataEngine />
       <IntelligenceTerminal />
       <Products />

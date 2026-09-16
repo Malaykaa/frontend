@@ -5,6 +5,7 @@ import {
 import { MEDIA, MEDIA_ALIASES } from "./_shared/media";
 import { ConvergingPhotos } from "./_shared/scenes";
 import { InfrastructureStatement } from "./_shared/statements";
+import { Mark, Underline, Hatched } from "./_shared/emphasis";
 import { useT, type Translate } from "./_shared/lang";
 
 const VALUES = (t: Translate) => [
@@ -88,10 +89,21 @@ export default function AboutPage() {
           <SectionHeading
             align="center"
             eyebrow={t("Notre mission", "Our mission")}
-            title={t(
-              "Permettre à chaque personne, chaque institution et chaque décideur de mieux comprendre les transformations du capital humain — et d'agir au bon moment.",
-              "Enable every person, every institution and every decision-maker to better understand how human capital is changing — and to act at the right moment.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  Enable every person, every institution and every decision-maker to better
+                  understand how human capital is changing — and to{" "}
+                  <Underline variante="double">act at the right moment</Underline>.
+                </>
+              ) : (
+                <>
+                  Permettre à chaque personne, chaque institution et chaque décideur de mieux
+                  comprendre les transformations du capital humain — et d'
+                  <Underline variante="double">agir au bon moment</Underline>.
+                </>
+              )
+            }
           />
         </Reveal>
       </Section>
@@ -194,10 +206,19 @@ export default function AboutPage() {
           <SectionHeading
             align="center"
             eyebrow={t("Notre vision", "Our vision")}
-            title={t(
-              "Un continent où chaque talent peut comprendre où il se situe, où vont les opportunités et comment s'y préparer.",
-              "A continent where every talent can see where they stand, where opportunity is heading, and how to get ready for it.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  A continent where <Hatched>every talent</Hatched> can see where they stand, where
+                  opportunity is heading, and how to get ready for it.
+                </>
+              ) : (
+                <>
+                  Un continent où <Hatched>chaque talent</Hatched> peut comprendre où il se situe,
+                  où vont les opportunités et comment s'y préparer.
+                </>
+              )
+            }
           />
         </Reveal>
         <Reveal delay={150}>
@@ -216,8 +237,8 @@ export default function AboutPage() {
         image={MEDIA.ciel}
         lines={
           t.lang === "en"
-            ? ["Scale comes from machines.", "Meaning comes from people."]
-            : ["L'échelle vient des machines.", "Le sens vient des humains."]
+            ? ["Scale comes from machines.", <span key="a">Meaning comes from <Mark>people</Mark>.</span>]
+            : ["L'échelle vient des machines.", <span key="a">Le sens vient des <Mark>humains</Mark>.</span>]
         }
         lead={t(
           "Des experts africains annotent, vérifient et contextualisent. Et lorsque la donnée manque, nous allons la chercher sur le terrain.",

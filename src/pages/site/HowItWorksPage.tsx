@@ -5,6 +5,7 @@ import {
 } from "./_shared/ui";
 import { MEDIA, MEDIA_ALIASES } from "./_shared/media";
 import { CircularFlow } from "./_shared/scenes";
+import { Mark } from "./_shared/emphasis";
 import { useT, type Translate } from "./_shared/lang";
 
 /** Les cinq verbes de la chaîne, réutilisés au hero et dans la boucle. */
@@ -114,7 +115,13 @@ export default function HowItWorksPage() {
           <SectionHeading
             align="center"
             eyebrow={t("La chaîne complète", "The full chain")}
-            title={t("Sources → Intelligence → Résultats", "Sources → Intelligence → Results")}
+            title={
+              t.lang === "en" ? (
+                <>Sources → Intelligence → <Mark>Results</Mark></>
+              ) : (
+                <>Sources → Intelligence → <Mark>Résultats</Mark></>
+              )
+            }
           />
         </Reveal>
         <Reveal delay={120}>

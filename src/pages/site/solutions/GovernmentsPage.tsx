@@ -9,6 +9,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA, MEDIA_ALIASES } from "../_shared/media";
 import { PinnedGallery, JoiningBlocks } from "../_shared/scenes";
+import { Mark, Underline, Hatched } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 /* Observatoire — panneau temps réel */
@@ -110,12 +111,12 @@ const buildAudiences = (t: Translate) => [
     Icon: HeartHandshake,
     title: t("ONG", "NGOs"),
     desc: t(
-      "Mesurer l'impact réel de vos programmes sur le terrain avec des données actualisées en continu — pas seulement un rapport annuel produit six mois après les faits.",
-      "Measure the real ground-level impact of your programmes with continuously refreshed data — not just an annual report written six months after the fact.",
+      "Financer et mesurer l'impact réel de vos programmes sur le terrain avec des données actualisées en continu — pas seulement un rapport annuel produit six mois après les faits.",
+      "Fund and measure the real ground-level impact of your programmes with continuously refreshed data — not just an annual report written six months after the fact.",
     ),
     meta: t(
-      "Programmes · monitoring · insertion · reporting",
-      "Programmes · monitoring · placement · reporting",
+      "Financement · monitoring · insertion · reporting",
+      "Funding · monitoring · placement · reporting",
     ),
   },
   {
@@ -191,7 +192,13 @@ export default function GovernmentsPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Pour qui", "Who it is for")}
-            title={t("Trois usages, une même couche de données.", "Three uses, one data layer.")}
+            title={
+              t.lang === "en" ? (
+                <>Three uses, <Hatched>one</Hatched> data layer.</>
+              ) : (
+                <>Trois usages, <Hatched>une même</Hatched> couche de données.</>
+              )
+            }
             lead={t(
               "Les institutions qui pilotent, financent ou évaluent des programmes liés à l'emploi et à la formation partagent le même angle mort : elles décident sur des données qui décrivent le passé.",
               "The institutions that steer, fund or evaluate employment and training programmes share one blind spot: they decide on data that describes the past.",
@@ -213,7 +220,13 @@ export default function GovernmentsPage() {
           <Reveal>
             <SectionHeading
               eyebrow={t("Historique + temps réel", "History + real time")}
-              title={t("Le passé explique. Le temps réel permet d'agir.", "The past explains. Real time lets you act.")}
+              title={
+                t.lang === "en" ? (
+                  <>The past explains. <Mark>Real time</Mark> lets you act.</>
+                ) : (
+                  <>Le passé explique. <Mark>Le temps réel</Mark> permet d'agir.</>
+                )
+              }
               lead={t(
                 "Notre profondeur historique montre d'où l'on vient. Notre surveillance continue montre ce qui change maintenant — pour que vos décisions s'appuient sur la réalité du marché.",
                 "Our historical depth shows where things came from. Our continuous monitoring shows what is changing now — so your decisions rest on the market as it is.",
@@ -337,10 +350,19 @@ export default function GovernmentsPage() {
           <SectionHeading
             align="center"
             eyebrow={t("Les questions auxquelles nous répondons", "The questions we answer")}
-            title={t(
-              "Six questions que toute politique de compétences devrait pouvoir trancher.",
-              "Six questions any skills policy should be able to settle.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  Six questions any skills policy should be able to{" "}
+                  <Underline variante="trait">settle</Underline>.
+                </>
+              ) : (
+                <>
+                  Six questions que toute politique de compétences devrait pouvoir{" "}
+                  <Underline variante="trait">trancher</Underline>.
+                </>
+              )
+            }
           />
         </Reveal>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

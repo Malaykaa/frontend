@@ -8,6 +8,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA } from "../_shared/media";
 import { ConvergingPhotos } from "../_shared/scenes";
+import { Mark, Underline } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 const buildPipeline = (t: Translate) => [
@@ -135,7 +136,13 @@ export default function MalaykaEducativePage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Le parcours", "The pathway")}
-            title={t("Du cours déposé à l'intervention utile.", "From uploaded course to useful intervention.")}
+            title={
+              t.lang === "en" ? (
+                <>From uploaded course to <Mark>useful intervention</Mark>.</>
+              ) : (
+                <>Du cours déposé à <Mark>l'intervention utile</Mark>.</>
+              )
+            }
             lead={t(
               "Chaque étape produit de l'information exploitable pour l'étape suivante — et pour l'enseignant.",
               "Each step produces information the next step — and the teacher — can act on.",
@@ -190,10 +197,19 @@ export default function MalaykaEducativePage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Pour l'établissement", "For the institution")}
-            title={t(
-              "L'intelligence du marché au service de l'éducation.",
-              "Market intelligence in the service of education.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  Market intelligence in the service of{" "}
+                  <Underline variante="epais">education</Underline>.
+                </>
+              ) : (
+                <>
+                  L'intelligence du marché au service de{" "}
+                  <Underline variante="epais">l'éducation</Underline>.
+                </>
+              )
+            }
             lead={t(
               "Les données ne servent pas uniquement à trouver un emploi. Elles permettent aussi de mieux former — et d'aligner les programmes sur ce que le marché demande réellement.",
               "Data is not only for finding a job. It also makes for better teaching — and for programmes aligned with what the market actually asks for.",
