@@ -93,14 +93,14 @@ export default function AboutPage() {
               t.lang === "en" ? (
                 <>
                   Enable every person, every institution and every decision-maker to better
-                  understand how human capital is changing — and to{" "}
-                  <Underline variante="double">act at the right moment</Underline>.
+                  understand how human capital is changing, and to{" "}
+                  <Underline variante="trait">act at the right moment</Underline>.
                 </>
               ) : (
                 <>
                   Permettre à chaque personne, chaque institution et chaque décideur de mieux
-                  comprendre les transformations du capital humain — et d'
-                  <Underline variante="double">agir au bon moment</Underline>.
+                  comprendre les transformations du capital humain, et d'
+                  <Underline variante="trait">agir au bon moment</Underline>.
                 </>
               )
             }
@@ -116,8 +116,8 @@ export default function AboutPage() {
             : ["Nous construisons l'infrastructure", "qui définit le futur de la formation", "et de l'emploi en Afrique avec l'IA."]
         }
         lead={t(
-          "Une infrastructure, pas une application de plus : une couche de données et d'intelligence sur laquelle reposent nos produits — et, demain, ceux des institutions et des entreprises qui bâtissent avec nous.",
-          "An infrastructure, not one more app: a layer of data and intelligence our own products rest on — and, tomorrow, those of the institutions and companies building alongside us.",
+          "Une infrastructure, pas une application de plus : une couche de données et d'intelligence sur laquelle reposent nos produits, et demain ceux des institutions et des entreprises qui bâtissent avec nous.",
+          "An infrastructure, not one more app: a layer of data and intelligence our own products rest on, and tomorrow those of the institutions and companies building alongside us.",
         )}
         pillars={[
           {
@@ -155,8 +155,8 @@ export default function AboutPage() {
               eyebrow={t("Notre approche", "Our approach")}
               title={t("Pourquoi Malayka existe.", "Why Malayka exists.")}
               lead={t(
-                "Les opportunités et les signaux du marché du travail africain sont dispersés entre plateformes, institutions, réseaux sociaux et communautés — largement fragmentés et difficiles à mesurer. Les décisions, elles, se prennent souvent sur des données qui décrivent le passé.",
-                "Opportunities and labour-market signals across Africa are scattered between platforms, institutions, social networks and communities — largely fragmented and hard to measure. Decisions, meanwhile, are often made on data that describes the past.",
+                "Les opportunités et les signaux du marché du travail africain sont dispersés entre plateformes, institutions, réseaux sociaux et communautés, largement fragmentés et difficiles à mesurer. Les décisions, elles, se prennent souvent sur des données qui décrivent le passé.",
+                "Opportunities and labour-market signals across Africa are scattered between platforms, institutions, social networks and communities, largely fragmented and hard to measure. Decisions, meanwhile, are often made on data that describes the past.",
               )}
             />
           </Reveal>
@@ -291,8 +291,8 @@ export default function AboutPage() {
               align="center"
               title={t("Envie de construire avec nous ?", "Want to build with us?")}
               lead={t(
-                "Nous recrutons des profils data, IA, terrain et produit — à Abidjan et à distance.",
-                "We are hiring across data, AI, field research and product — in Abidjan and remotely.",
+                "Nous recrutons des profils data, IA, terrain et produit, à Abidjan et à distance.",
+                "We are hiring across data, AI, field research and product, in Abidjan and remotely.",
               )}
             />
             <div className="mt-10 flex justify-center">

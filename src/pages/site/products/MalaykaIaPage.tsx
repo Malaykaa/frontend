@@ -135,7 +135,7 @@ export default function MalaykaIaPage() {
                   {t("Nouvelle opportunité détectée", "New opportunity detected")}
                 </span>
               </div>
-              <h3 className="font-display mt-4 text-xl font-extrabold">Data Analyst — Abidjan</h3>
+              <h3 className="font-display mt-4 text-xl font-extrabold">Data Analyst, Abidjan</h3>
               <p className="mt-1 font-mono text-sm font-bold text-primary">{t("92 % de correspondance", "92% match")}</p>
               <div className="mt-5 space-y-2">
                 {["Python", "SQL", t("Analyse de données", "Data analysis")].map((s) => (
@@ -233,7 +233,7 @@ export default function MalaykaIaPage() {
                 </p>
                 <div className="rounded-xl bg-card p-3.5">
                   <p className="text-sm font-bold text-foreground">
-                    {t("Stage Data Analyst — Abidjan", "Data Analyst internship — Abidjan")}
+                    {t("Stage Data Analyst, Abidjan", "Data Analyst internship, Abidjan")}
                   </p>
                   <p className="mt-1 font-mono text-[11px] font-semibold text-primary">
                     {t("Match : 94 %", "Match: 94%")}

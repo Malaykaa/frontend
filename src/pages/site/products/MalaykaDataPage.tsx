@@ -114,8 +114,8 @@ export default function MalaykaDataPage() {
               ]
         }
         lead={t(
-          "Malayka collecte, structure, annote et transforme des millions de données sur l'emploi, les compétences, les métiers et la formation en Afrique — en datasets, API et intelligence exploitables.",
-          "Malayka collects, structures, annotates and transforms millions of records on employment, skills, occupations and training across Africa — into usable datasets, APIs and intelligence.",
+          "Malayka collecte, structure, annote et transforme des millions de données sur l'emploi, les compétences, les métiers et la formation en Afrique : datasets, API et intelligence exploitables.",
+          "Malayka collects, structures, annotates and transforms millions of records on employment, skills, occupations and training across Africa: usable datasets, APIs and intelligence.",
         )}
         chain={
           t.lang === "en"
@@ -123,7 +123,7 @@ export default function MalaykaDataPage() {
             : ["Des données africaines", "Structurées par l'IA", "Enrichies par l'humain"]
         }
         primary={{ label: t("Explorer nos données", "Explore our data"), href: mailto("Explorer Malayka Data") }}
-        secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Malayka Data — parler à l'équipe") }}
+        secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Malayka Data : parler à l'équipe") }}
       >
         <div className="mt-16 grid gap-8 border-t border-border pt-10 sm:grid-cols-2 lg:grid-cols-4">
           <Stat value={t("10+ ans", "10+ years")} label={t("de données historiques", "of historical data")} />
@@ -170,7 +170,7 @@ export default function MalaykaDataPage() {
         </div>
       </Section>
 
-      {/* Data engine — storytelling sticky */}
+      {/* Data engine, en récit défilant */}
       <div id="data-engine">
         <StickySteps
           eyebrow={t("Notre Data Engine", "Our Data Engine")}
@@ -264,8 +264,8 @@ export default function MalaykaDataPage() {
             : ["Nous ne collectons pas", "seulement des offres."]
         }
         lead={t(
-          "Nous construisons les relations entre les données — un graphe métiers, compétences, formations et opportunités, exploitable par des moteurs de matching et par des modèles d'IA.",
-          "We build the relations between records — a graph of occupations, skills, training and opportunities, usable by matching engines and by AI models.",
+          "Nous construisons les relations entre les données : un graphe métiers, compétences, formations et opportunités, exploitable par des moteurs de matching et par des modèles d'IA.",
+          "We build the relations between records: a graph of occupations, skills, training and opportunities, usable by matching engines and by AI models.",
         )}
         cta={{ label: t("Données d'entraînement pour l'IA", "Training data for AI"), to: "/solutions/entreprises-ia" }}
       />
@@ -321,8 +321,8 @@ export default function MalaykaDataPage() {
             </div>
             <p className="mt-5 text-sm text-muted-foreground">
               {t(
-                "Un graphe de relations, pas une simple liste — c'est ce qui rend les données utilisables par des moteurs de matching, de recommandation et par des modèles d'IA.",
-                "A graph of relations, not a flat list — that is what makes the data usable by matching engines, recommendation engines and AI models.",
+                "Un graphe de relations, pas une simple liste, et c'est ce qui rend les données utilisables par des moteurs de matching, de recommandation et par des modèles d'IA.",
+                "A graph of relations, not a flat list, and that is what makes the data usable by matching engines, recommendation engines and AI models.",
               )}
             </p>
           </div>
@@ -348,7 +348,7 @@ export default function MalaykaDataPage() {
               </div>
               <CtaGroup
                 className="shrink-0"
-                primary={{ label: t("Voir la documentation API", "See the API documentation"), href: mailto("Documentation API — Malayka Data") }}
+                primary={{ label: t("Voir la documentation API", "See the API documentation"), href: mailto("Documentation API : Malayka Data") }}
               />
             </div>
           </div>
@@ -474,7 +474,7 @@ export default function MalaykaDataPage() {
             <div className="mt-10 flex justify-center">
               <CtaGroup
                 primary={{ label: t("Commencer avec Malayka", "Get started with Malayka"), to: "/onboarding" }}
-                secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Malayka Data — parler à l'équipe") }}
+                secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Malayka Data : parler à l'équipe") }}
               />
             </div>
             <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-muted-foreground">

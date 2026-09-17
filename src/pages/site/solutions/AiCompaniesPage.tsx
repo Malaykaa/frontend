@@ -138,15 +138,15 @@ export default function AiCompaniesPage() {
               ]
         }
         lead={t(
-          "Les modèles d'IA ont besoin de données représentatives des populations, des langues, des métiers et des contextes dans lesquels ils seront utilisés. Malayka produit ces données pour l'Afrique — collectées à grande échelle, annotées par des experts, validées et traçables.",
-          "AI models need data that represents the populations, languages, occupations and contexts they will be used in. Malayka produces that data for Africa — collected at scale, annotated by experts, validated and traceable.",
+          "Les modèles d'IA ont besoin de données représentatives des populations, des langues, des métiers et des contextes dans lesquels ils seront utilisés. Malayka produit ces données pour l'Afrique : collectées à grande échelle, annotées par des experts, validées et traçables.",
+          "AI models need data that represents the populations, languages, occupations and contexts they will be used in. Malayka produces that data for Africa: collected at scale, annotated by experts, validated and traceable.",
         )}
         chain={
           t.lang === "en"
             ? ["Sources", "AI structuring", "Human annotation", "Validation", "Datasets & API"]
             : ["Sources", "Structuration IA", "Annotation humaine", "Validation", "Datasets & API"]
         }
-        primary={{ label: t("Parler à l'équipe Data", "Talk to the Data team"), href: mailto("Données d'entraînement IA — Malayka Data") }}
+        primary={{ label: t("Parler à l'équipe Data", "Talk to the Data team"), href: mailto("Données d'entraînement IA : Malayka Data") }}
         secondary={{ label: t("Explorer Malayka Data", "Explore Malayka Data"), to: "/produits/malayka-data" }}
       >
         <div className="mt-16 grid gap-8 border-t border-border pt-10 sm:grid-cols-2 lg:grid-cols-4">
@@ -207,8 +207,8 @@ export default function AiCompaniesPage() {
       <StatementBand
         eyebrow={t("Prêt à l'emploi", "Ready to use")}
         footer={t(
-          "Aucune collecte à lancer, aucune taxonomie à écrire, aucune campagne d'annotation à monter. Les jeux de données arrivent structurés, annotés et traçables — le travail long est déjà fait.",
-          "No collection to set up, no taxonomy to write, no annotation campaign to run. The datasets arrive structured, annotated and traceable — the long work is already done.",
+          "Aucune collecte à lancer, aucune taxonomie à écrire, aucune campagne d'annotation à monter. Les jeux de données arrivent structurés, annotés et traçables, et le travail long est déjà fait.",
+          "No collection to set up, no taxonomy to write, no annotation campaign to run. The datasets arrive structured, annotated and traceable, and the long work is already done.",
         )}
       >
         {t.lang === "en" ? (
@@ -268,8 +268,8 @@ export default function AiCompaniesPage() {
               </h3>
               <p className="mt-5 flex-1 leading-relaxed text-muted-foreground">
                 {t(
-                  "Vous détenez déjà des corpus, mais bruts, hétérogènes, inexploitables tels quels. Nos experts africains les nettoient, les qualifient et les alignent sur notre taxonomie — sans que la donnée quitte votre périmètre.",
-                  "You already hold corpora — raw, heterogeneous, unusable as they stand. Our African experts clean, qualify and align them against our taxonomy, without the data leaving your perimeter.",
+                  "Vous détenez déjà des corpus, mais bruts, hétérogènes, inexploitables tels quels. Nos experts africains les nettoient, les qualifient et les alignent sur notre taxonomie, sans que la donnée quitte votre périmètre.",
+                  "You already hold corpora: raw, heterogeneous, unusable as they stand. Our African experts clean, qualify and align them against our taxonomy, without the data leaving your perimeter.",
                 )}
               </p>
               <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground/60">
@@ -296,8 +296,8 @@ export default function AiCompaniesPage() {
               </h3>
               <p className="mt-5 flex-1 leading-relaxed text-muted-foreground">
                 {t(
-                  "Nous vous livrons des jeux de données déjà constitués et annotés pour vos métiers : santé, agritech, énergie, finance, logistique, éducation. Rien à préparer — l'entraînement peut commencer immédiatement.",
-                  "We deliver datasets already built and annotated for your industry: healthcare, agritech, energy, finance, logistics, education. Nothing to prepare — training can start immediately.",
+                  "Nous vous livrons des jeux de données déjà constitués et annotés pour vos métiers : santé, agritech, énergie, finance, logistique, éducation. Rien à préparer, l'entraînement peut commencer immédiatement.",
+                  "We deliver datasets already built and annotated for your industry: healthcare, agritech, energy, finance, logistics, education. Nothing to prepare, training can start immediately.",
                 )}
               </p>
               <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground/60">
@@ -340,7 +340,7 @@ export default function AiCompaniesPage() {
             title={t("L'IA donne l'échelle. L'humain donne le contexte.", "AI provides the scale. People provide the context.")}
             lead={t(
               "Le scraping et l'automatisation permettent de collecter à grande échelle. Mais les réalités professionnelles africaines ne se comprennent pas uniquement à partir de données automatisées : des experts annotent, vérifient et contextualisent, et lorsque les données manquent, nous allons les chercher sur le terrain.",
-              "Scraping and automation collect at scale. But African working realities cannot be understood from automated data alone: experts annotate, verify and contextualise — and where data is missing, we go and gather it in the field.",
+              "Scraping and automation collect at scale. But African working realities cannot be understood from automated data alone: experts annotate, verify and contextualise; and where data is missing, we go and gather it in the field.",
             )}
           />
         </Reveal>
@@ -417,8 +417,8 @@ export default function AiCompaniesPage() {
           { label: t("Provenance conservée", "Provenance retained"), value: t("100 %", "100%") },
         ]}
         footer={t(
-          "Chiffres d'illustration d'un cycle de production — les volumes réels dépendent du périmètre commandé.",
-          "Illustrative figures for one production cycle — actual volumes depend on the scope commissioned.",
+          "Chiffres d'illustration d'un cycle de production, les volumes réels dépendent du périmètre commandé.",
+          "Illustrative figures for one production cycle, actual volumes depend on the scope commissioned.",
         )}
       />
 
@@ -469,7 +469,7 @@ export default function AiCompaniesPage() {
               </div>
               <CtaGroup
                 className="shrink-0"
-                primary={{ label: t("Voir la documentation API", "See the API documentation"), href: mailto("Documentation API — Malayka Data") }}
+                primary={{ label: t("Voir la documentation API", "See the API documentation"), href: mailto("Documentation API : Malayka Data") }}
               />
             </div>
           </div>
@@ -507,7 +507,7 @@ export default function AiCompaniesPage() {
             />
             <div className="mt-10 flex justify-center">
               <CtaGroup
-                primary={{ label: t("Parler à l'équipe Data", "Talk to the Data team"), href: mailto("Entreprise d'IA — parler à l'équipe Data") }}
+                primary={{ label: t("Parler à l'équipe Data", "Talk to the Data team"), href: mailto("Entreprise d'IA : parler à l'équipe Data") }}
                 secondary={{ label: t("Découvrir Malayka Data", "Discover Malayka Data"), to: "/produits/malayka-data" }}
               />
             </div>

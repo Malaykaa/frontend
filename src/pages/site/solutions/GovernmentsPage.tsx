@@ -12,7 +12,7 @@ import { PinnedGallery, JoiningBlocks } from "../_shared/scenes";
 import { Mark, Underline, Hatched } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
-/* Observatoire — panneau temps réel */
+/* Observatoire : panneau temps réel */
 
 function LiveObservatory() {
   const t = useT();
@@ -111,8 +111,8 @@ const buildAudiences = (t: Translate) => [
     Icon: HeartHandshake,
     title: t("ONG", "NGOs"),
     desc: t(
-      "Financer et mesurer l'impact réel de vos programmes sur le terrain avec des données actualisées en continu — pas seulement un rapport annuel produit six mois après les faits.",
-      "Fund and measure the real ground-level impact of your programmes with continuously refreshed data — not just an annual report written six months after the fact.",
+      "Financer et mesurer l'impact réel de vos programmes sur le terrain avec des données actualisées en continu, pas seulement un rapport annuel produit six mois après les faits.",
+      "Fund and measure the real ground-level impact of your programmes with continuously refreshed data, not just an annual report written six months after the fact.",
     ),
     meta: t(
       "Financement · monitoring · insertion · reporting",
@@ -183,7 +183,7 @@ export default function GovernmentsPage() {
             ? ["Observe", "Analyse", "Anticipate", "Decide", "Measure"]
             : ["Observer", "Analyser", "Anticiper", "Décider", "Mesurer"]
         }
-        primary={{ label: t("Construire un observatoire", "Build an observatory"), href: mailto("Observatoire — Gouvernement / ONG / Bailleur de fonds") }}
+        primary={{ label: t("Construire un observatoire", "Build an observatory"), href: mailto("Observatoire : Gouvernement / ONG / Bailleur de fonds") }}
         secondary={{ label: t("Découvrir Malayka Data", "Discover Malayka Data"), to: "/produits/malayka-data" }}
       />
 
@@ -228,8 +228,8 @@ export default function GovernmentsPage() {
                 )
               }
               lead={t(
-                "Notre profondeur historique montre d'où l'on vient. Notre surveillance continue montre ce qui change maintenant — pour que vos décisions s'appuient sur la réalité du marché.",
-                "Our historical depth shows where things came from. Our continuous monitoring shows what is changing now — so your decisions rest on the market as it is.",
+                "Notre profondeur historique montre d'où l'on vient. Notre surveillance continue montre ce qui change maintenant, pour que vos décisions s'appuient sur la réalité du marché.",
+                "Our historical depth shows where things came from. Our continuous monitoring shows what is changing now, so your decisions rest on the market as it is.",
               )}
             />
             <ul className="mt-8 space-y-3">
@@ -237,7 +237,7 @@ export default function GovernmentsPage() {
                 t("Quels métiers recrutent en ce moment", "Which occupations are hiring right now"),
                 t("Quelles compétences progressent cette semaine", "Which skills are growing this week"),
                 t("Où se situent les déficits, en direct", "Where the shortfalls are, live"),
-                t("Comment les besoins évoluent — pas seulement où ils en étaient hier", "How needs are moving — not just where they stood yesterday"),
+                t("Comment les besoins évoluent, pas seulement où ils en étaient hier", "How needs are moving, not just where they stood yesterday"),
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
@@ -260,8 +260,8 @@ export default function GovernmentsPage() {
             : ["Anticiper les métiers de demain", "avant qu'ils ne deviennent", "les problèmes d'aujourd'hui."]
         }
         lead={t(
-          "Observer, analyser, anticiper, décider, mesurer — puis recommencer, avec des données qui se rafraîchissent en continu.",
-          "Observe, analyse, anticipate, decide, measure — then start again, on data that refreshes continuously.",
+          "Observer, analyser, anticiper, décider, mesurer, puis recommencer, avec des données qui se rafraîchissent en continu.",
+          "Observe, analyse, anticipate, decide, measure, then start again, on data that refreshes continuously.",
         )}
       />
 
@@ -397,7 +397,7 @@ export default function GovernmentsPage() {
             />
             <div className="mt-10 flex justify-center">
               <CtaGroup
-                primary={{ label: t("Demander une présentation", "Request a walkthrough"), href: mailto("Observatoire — demande de présentation") }}
+                primary={{ label: t("Demander une présentation", "Request a walkthrough"), href: mailto("Observatoire : demande de présentation") }}
                 secondary={{ label: t("Voir nos données", "See our data"), to: "/produits/malayka-data" }}
               />
             </div>

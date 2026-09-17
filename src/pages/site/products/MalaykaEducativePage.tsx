@@ -118,7 +118,7 @@ export default function MalaykaEducativePage() {
             ? ["Course", "Pathway", "Assessment", "Gaps", "Intervention"]
             : ["Cours", "Parcours", "Évaluation", "Lacunes", "Intervention"]
         }
-        primary={{ label: t("Demander une démonstration", "Request a demo"), href: mailto("Démonstration — Malayka Éducative") }}
+        primary={{ label: t("Demander une démonstration", "Request a demo"), href: mailto("Démonstration : Malayka Éducative") }}
         secondary={{ label: t("Voir la tarification", "See pricing"), to: "/tarification" }}
       >
         <div className="mt-16 grid gap-8 border-t border-border pt-10 sm:grid-cols-3">
@@ -144,8 +144,8 @@ export default function MalaykaEducativePage() {
               )
             }
             lead={t(
-              "Chaque étape produit de l'information exploitable pour l'étape suivante — et pour l'enseignant.",
-              "Each step produces information the next step — and the teacher — can act on.",
+              "Chaque étape produit de l'information exploitable pour l'étape suivante, et pour l'enseignant.",
+              "Each step produces information the next step (and the teacher) can act on.",
             )}
           />
         </Reveal>
@@ -187,8 +187,8 @@ export default function MalaykaEducativePage() {
             : ["Malayka ne remplace pas", "l'enseignant."]
         }
         lead={t(
-          "Elle lui donne davantage de visibilité et de capacité d'action — là où son intervention change vraiment quelque chose.",
-          "It gives them more visibility and more room to act — exactly where stepping in genuinely matters.",
+          "Elle lui donne davantage de visibilité et de capacité d'action, là où son intervention change vraiment quelque chose.",
+          "It gives them more visibility and more room to act, exactly where stepping in genuinely matters.",
         )}
       />
 
@@ -211,8 +211,8 @@ export default function MalaykaEducativePage() {
               )
             }
             lead={t(
-              "Les données ne servent pas uniquement à trouver un emploi. Elles permettent aussi de mieux former — et d'aligner les programmes sur ce que le marché demande réellement.",
-              "Data is not only for finding a job. It also makes for better teaching — and for programmes aligned with what the market actually asks for.",
+              "Les données ne servent pas uniquement à trouver un emploi. Elles permettent aussi de mieux former, et d'aligner les programmes sur ce que le marché demande réellement.",
+              "Data is not only for finding a job. It also makes for better teaching, and for programmes aligned with what the market actually asks for.",
             )}
           />
         </Reveal>
@@ -243,8 +243,8 @@ export default function MalaykaEducativePage() {
             : ["L'enseignant décide.", "L'IA prépare le terrain."]
         }
         lead={t(
-          "Le cours reste celui de l'enseignant. Malayka s'occupe de la préparation, du suivi et de la détection — pour que l'intervention humaine arrive au bon moment.",
-          "The course stays the teacher's own. Malayka handles preparation, tracking and detection — so that the human intervention lands at the right moment.",
+          "Le cours reste celui de l'enseignant. Malayka s'occupe de la préparation, du suivi et de la détection, pour que l'intervention humaine arrive au bon moment.",
+          "The course stays the teacher's own. Malayka handles preparation, tracking and detection, so that the human intervention lands at the right moment.",
         )}
         images={[MEDIA.classe, MEDIA.formation, MEDIA.entraide]}
       />
@@ -266,7 +266,7 @@ export default function MalaykaEducativePage() {
             />
             <div className="mt-10 flex justify-center">
               <CtaGroup
-                primary={{ label: t("Demander une démonstration", "Request a demo"), href: mailto("Démonstration — Malayka Éducative") }}
+                primary={{ label: t("Demander une démonstration", "Request a demo"), href: mailto("Démonstration : Malayka Éducative") }}
                 secondary={{ label: t("Solutions établissements", "Solutions for institutions"), to: "/solutions/etablissements" }}
               />
             </div>

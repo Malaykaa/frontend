@@ -50,8 +50,8 @@ const buildSteps = (t: Translate) => [
     Icon: UserCheck,
     title: t("Personnaliser", "Personalise"),
     desc: t(
-      "L'intelligence est croisée avec le profil, les objectifs et les compétences de chaque utilisateur — ou avec le périmètre d'une institution : territoire, secteur, programme.",
-      "The intelligence is matched against each user's profile, goals and skills — or against an institution's scope: territory, sector, programme.",
+      "L'intelligence est croisée avec le profil, les objectifs et les compétences de chaque utilisateur, ou avec le périmètre d'une institution : territoire, secteur, programme.",
+      "The intelligence is matched against each user's profile, goals and skills, or against an institution's scope: territory, sector, programme.",
     ),
     meta: t("individus et institutions", "individuals and institutions"),
   },
@@ -81,8 +81,8 @@ export default function HowItWorksPage() {
             : ["De la donnée", <span key="a" className="text-muted-foreground">à l'action.</span>]
         }
         lead={t(
-          "Malayka n'est pas un scraper, ni une job board, ni seulement un chatbot. C'est une chaîne complète, de la collecte des signaux jusqu'à la décision concrète — pour une personne comme pour une institution.",
-          "Malayka is not a scraper, nor a job board, nor merely a chatbot. It is a complete chain, from gathering signals to the concrete decision — for a person as much as for an institution.",
+          "Malayka n'est pas un scraper, ni une job board, ni seulement un chatbot. C'est une chaîne complète, de la collecte des signaux jusqu'à la décision concrète, pour une personne comme pour une institution.",
+          "Malayka is not a scraper, nor a job board, nor merely a chatbot. It is a complete chain, from gathering signals to the concrete decision, for a person as much as for an institution.",
         )}
         chain={CHAIN(t)}
         primary={{ label: t("Commencer avec Malayka", "Get started with Malayka"), to: "/onboarding" }}
@@ -98,8 +98,8 @@ export default function HowItWorksPage() {
             : ["Collecter.", "Structurer.", "Comprendre.", "Personnaliser.", "Agir."]
         }
         lead={t(
-          "Chaque étape produit la matière de la suivante. C'est cette chaîne — et pas un modèle isolé — qui rend l'intelligence exploitable.",
-          "Each step produces the raw material for the next. It is that chain — not any single model — that makes the intelligence usable.",
+          "Chaque étape produit la matière de la suivante. C'est cette chaîne, et pas un modèle isolé, qui rend l'intelligence exploitable.",
+          "Each step produces the raw material for the next. It is that chain, not any single model, that makes the intelligence usable.",
         )}
         steps={STEPS}
       />
@@ -161,7 +161,7 @@ export default function HowItWorksPage() {
           <div className="flex justify-center">
             <CtaGroup
               primary={{ label: t("Commencer avec Malayka", "Get started with Malayka"), to: "/onboarding" }}
-              secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Comment ça marche — question") }}
+              secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Comment ça marche : question") }}
             />
           </div>
         </Reveal>

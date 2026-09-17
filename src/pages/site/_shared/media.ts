@@ -2,12 +2,12 @@
  * Visuels du site public.
  *
  * Règles tenues ici :
- *  — chaque photo n'apparaît qu'à UN seul endroit du site ;
- *  — tout visuel montrant des personnes montre des personnes africaines ;
- *  — deux variantes existent pour chaque fichier : `nom.webp` (2000 px, pour
+ *  · chaque photo n'apparaît qu'à UN seul endroit du site ;
+ *  · tout visuel montrant des personnes montre des personnes africaines ;
+ *  · deux variantes existent pour chaque fichier : `nom.webp` (2000 px, pour
  *    les bannières) et `nom@sm.webp` (1100 px, pour les photos de corps).
  *    `light()` bascule automatiquement sur la variante légère ;
- *  — le texte alternatif est fourni dans les deux langues du site.
+ *  · le texte alternatif est fourni dans les deux langues du site.
  *
  * Ajouter une photo : la déposer dans `public/media/`, lancer
  * `node scripts/optimize-media.mjs` (compression + variantes), puis l'ajouter ici.
@@ -17,7 +17,7 @@ export type SiteImage = {
   src: string;
   /** Texte alternatif français. */
   alt: string;
-  /** Texte alternatif anglais — `SitePhoto` choisit selon la langue active. */
+  /** Texte alternatif anglais : `SitePhoto` choisit selon la langue active. */
   altEn: string;
   position?: string;
 };
@@ -27,63 +27,63 @@ const p = (file: string) => `/media/${file}.webp`;
 export const MEDIA = {
   /* ── Bannières de page ─────────────────────────────────────────────── */
 
-  /** Accueil — équipe d'ingénieurs devant leurs écrans */
+  /** Accueil : équipe d'ingénieurs devant leurs écrans */
   home: {
     src: p("teamworking-engineers-talking-server-room-doin"),
     alt: "Équipe d'ingénieurs africains en échange devant leurs écrans",
     altEn: "African engineering team talking in front of their screens",
     position: "center 40%",
   },
-  /** Malayka Data — supervision d'infrastructure */
+  /** Malayka Data : supervision d'infrastructure */
   data: {
     src: p("data-center-expert-doing-software-updates-veri"),
     alt: "Experts supervisant une infrastructure de données",
     altEn: "Experts overseeing a data infrastructure",
     position: "center 45%",
   },
-  /** Entreprises d'IA — réseaux de neurones à l'écran */
+  /** Entreprises d'IA : réseaux de neurones à l'écran */
   aiCompanies: {
     src: p("black-person-programming-neural-network-code-w"),
     alt: "Développeur travaillant sur un réseau de neurones",
     altEn: "Developer working on a neural network",
     position: "center 45%",
   },
-  /** Gouvernements, ONG, bailleurs — quartier d'affaires */
+  /** Gouvernements, ONG, bailleurs : quartier d'affaires */
   governments: {
     src: p("hight-rise-condominium-office-buildings"),
     alt: "Quartier d'affaires vu du ciel",
     altEn: "Business district seen from above",
     position: "center 55%",
   },
-  /** Malayka Éducative — groupe d'étude */
+  /** Malayka Éducative : groupe d'étude */
   education: {
     src: p("study-group-african-people"),
     alt: "Groupe d'étudiants travaillant ensemble",
     altEn: "Group of students working together",
     position: "center 40%",
   },
-  /** Établissements & EdTech — étudiantes sur le campus */
+  /** Établissements & EdTech : étudiantes sur le campus */
   institutions: {
     src: p("three-african-students-female-posed-with-backp"),
     alt: "Étudiantes dans la cour de leur université",
     altEn: "Students in their university courtyard",
     position: "center 35%",
   },
-  /** Particuliers — jeune professionnelle en ville */
+  /** Particuliers : jeune professionnelle en ville */
   individuals: {
     src: p("positive-young-woman-holds-digital-tablet-uses"),
     alt: "Jeune professionnelle avec sa tablette en ville",
     altEn: "Young professional with a tablet in the city",
     position: "center 30%",
   },
-  /** À propos — Abidjan, Le Plateau */
+  /** À propos : Abidjan, Le Plateau */
   about: {
     src: "/media/abidjan-plateau.jpg",
     alt: "Le Plateau, quartier d'affaires d'Abidjan",
     altEn: "Le Plateau, the business district of Abidjan",
     position: "center 45%",
   },
-  /** Comment ça marche — supervision d'un système d'IA */
+  /** Comment ça marche : supervision d'un système d'IA */
   howItWorks: {
     src: p("tech-support-oversees-ai-neural-network"),
     alt: "Supervision d'un système d'intelligence artificielle",
@@ -145,7 +145,7 @@ export const MEDIA = {
 
   /* ── Compositions et séquences ─────────────────────────────────────── */
 
-  /** Observatoire — données démographiques à l'écran */
+  /** Observatoire : données démographiques à l'écran */
   observatoire: {
     src: p("governmental-hacker-woman-working-with-tablet-"),
     alt: "Analyste consultant un tableau de bord démographique",
@@ -333,7 +333,7 @@ export function light(image: SiteImage): SiteImage {
 export const PHOTO_CREDITS = [
   {
     file: "/media/abidjan-plateau.jpg",
-    title: "Le Plateau depuis le Pont ADO — Abidjan",
+    title: "Le Plateau depuis le Pont ADO, Abidjan",
     author: "Edison McCullen",
     license: "CC BY 4.0",
     source: "Wikimedia Commons",

@@ -70,7 +70,7 @@ const buildOrgPlans = (t: Translate) => [
       "Priced on the number of students, classes and features enabled. Live in 48 hours, onboarding included.",
     ),
     cta: t("Demander une démonstration", "Request a demo"),
-    subject: "Tarification — Éducation",
+    subject: "Tarification : Éducation",
   },
   {
     Icon: Landmark,
@@ -81,7 +81,7 @@ const buildOrgPlans = (t: Translate) => [
       "Real-time dashboards, tracking indicators, periodic reports and API access, sized to your scope and your territories.",
     ),
     cta: t("Demander une présentation", "Request a walkthrough"),
-    subject: "Tarification — Observatoire",
+    subject: "Tarification : Observatoire",
   },
   {
     Icon: Cpu,
@@ -92,7 +92,7 @@ const buildOrgPlans = (t: Translate) => [
       "Bespoke datasets, dedicated annotation, benchmarks and API access. Priced on volume, freshness and annotation depth.",
     ),
     cta: t("Parler à l'équipe Data", "Talk to the Data team"),
-    subject: "Tarification — Datasets & API",
+    subject: "Tarification : Datasets & API",
   },
 ];
 
@@ -179,8 +179,8 @@ export default function PricingPage() {
             eyebrow={t("Organisations", "Organisations")}
             title={t("Sur mesure, selon votre périmètre.", "Bespoke, sized to your scope.")}
             lead={t(
-              "Data · API · Observatoire · Intelligence — nous dimensionnons l'accompagnement à votre échelle.",
-              "Data · API · Observatory · Intelligence — we size the engagement to your scale.",
+              "Data · API · Observatoire · Intelligence. Nous dimensionnons l'accompagnement à votre échelle.",
+              "Data · API · Observatory · Intelligence. We size the engagement to your scale.",
             )}
           />
         </Reveal>

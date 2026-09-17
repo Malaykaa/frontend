@@ -6,7 +6,7 @@ import { useInView } from "./ui";
  * Typologie de mise en avant.
  *
  * Cinq façons de faire ressortir un mot dans une phrase. Elles ne jouent
- * jamais sur la couleur — uniquement sur la forme — pour tenir la palette
+ * jamais sur la couleur, uniquement sur la forme, pour tenir la palette
  * noir et blanc du site : un accent coloré suffirait à faire basculer une
  * page monochrome dans le décoratif.
  *
@@ -21,16 +21,16 @@ import { useInView } from "./ui";
  * qui est en `overflow: hidden` pour faire glisser la ligne depuis son
  * masque. Tout tracé qui déborde du texte y serait rogné :
  *
- *   — dans un titre `lines={...}` (RevealLines) : `Mark` et `Hatched` seuls,
+ *   · dans un titre `lines={...}` (RevealLines) : `Mark` et `Hatched` seuls,
  *     ils restent à l'intérieur de la boîte ;
- *   — dans un titre `title={...}`, un paragraphe ou `StatementBand` : les
+ *   · dans un titre `title={...}`, un paragraphe ou `StatementBand` : les
  *     cinq, `Underline`, `Boxed` et `Circled` ayant besoin de déborder.
  *
  * `Mark`, `Hatched` et `Underline` sont peints en fond avec
  * `box-decoration-break: clone` : ils suivent donc le texte quand la phrase
  * passe à la ligne, et conviennent à une phrase entière. `Boxed` et
  * `Circled` gardent un tracé SVG, qui ne peut envelopper qu'une boîte d'un
- * seul tenant — ils sont donc `nowrap`, à réserver à un ou deux mots.
+ * seul tenant, ils sont donc `nowrap`, à réserver à un ou deux mots.
  */
 
 /** Durée commune, pour que deux marques voisines ne se désynchronisent pas. */
@@ -44,12 +44,12 @@ type Commun = { children: ReactNode; className?: string; delay?: number };
 /* ── 1. Le bloc plein ──────────────────────────────────────────────────── */
 
 /**
- * Texte inversé sur bloc plein — la marque la plus forte, à réserver au mot
+ * Texte inversé sur bloc plein : la marque la plus forte, à réserver au mot
  * qui porte la phrase.
  *
  * Le bloc est un fond que le balayage élargit ; la couleur du texte ne
  * bascule qu'à mi-parcours, lorsque le noir couvre déjà l'essentiel du mot.
- * Le mot reste donc lisible du début à la fin — jamais de blanc sur blanc.
+ * Le mot reste donc lisible du début à la fin, jamais de blanc sur blanc.
  */
 export function Mark({ children, className, delay = 0 }: Commun) {
   const { ref, inView } = useInView<HTMLSpanElement>();
@@ -69,7 +69,7 @@ export function Mark({ children, className, delay = 0 }: Commun) {
     >
       {/* La couleur du texte est portée par un enfant, jamais par le parent :
           `currentColor` sert ici à peindre le bloc, et inverser la couleur du
-          parent peindrait le bloc en blanc — le mot disparaîtrait sur le fond
+          parent peindrait le bloc en blanc, et le mot disparaîtrait sur le fond
           clair. Elle bascule à mi-balayage, quand le noir couvre déjà
           l'essentiel du mot, pour qu'il reste lisible du début à la fin. */}
       <span
@@ -97,15 +97,18 @@ export function Mark({ children, className, delay = 0 }: Commun) {
  * `box-decoration-break: clone` donne son propre trait à chaque fragment
  * de ligne, au lieu d'un seul trait étiré sur toute la boîte.
  *
- * `trait` souligne d'un filet, `double` de deux — comme une relecture —,
- * `epais` d'une barre large, façon marqueur.
+ * `trait` souligne d'un filet, `epais` d'une barre large, façon marqueur.
+ *
+ * Il n'y a volontairement pas de variante à deux traits : sur un titre en
+ * grand corps, le second filet passe si près du premier qu'il se lit comme
+ * une rature.
  */
 export function Underline({
   children,
   className,
   delay = 0,
   variante = "trait",
-}: Commun & { variante?: "trait" | "double" | "epais" }) {
+}: Commun & { variante?: "trait" | "epais" }) {
   const { ref, inView } = useInView<HTMLSpanElement>();
   const tire = inView ? 100 : 0;
 
@@ -118,11 +121,6 @@ export function Underline({
       backgroundImage: FOND,
       backgroundSize: `${tire}% 0.07em`,
       backgroundPosition: "0 100%",
-    },
-    double: {
-      backgroundImage: `${FOND}, ${FOND}`,
-      backgroundSize: `${tire}% 0.05em, ${tire}% 0.05em`,
-      backgroundPosition: "0 100%, 0 calc(100% - 0.13em)",
     },
     epais: {
       backgroundImage: FOND,
@@ -152,7 +150,7 @@ export function Underline({
 /* ── 3. L'encadré ──────────────────────────────────────────────────────── */
 
 /**
- * Cadre tracé autour du mot, très légèrement de travers — l'inclinaison
+ * Cadre tracé autour du mot, très légèrement de travers : l'inclinaison
  * suffit à le faire lire comme une annotation à la main plutôt que comme
  * une bordure CSS.
  */
@@ -262,7 +260,7 @@ export function Circled({ children, className, delay = 0 }: Commun) {
 
 /**
  * Bloc noir pleine largeur portant une phrase courte en très grand. Sert
- * les rares affirmations qu'on veut voir avant de lire le reste — pas un
+ * les rares affirmations qu'on veut voir avant de lire le reste. Pas un
  * conteneur de contenu, une ponctuation dans la page.
  */
 export function StatementBand({

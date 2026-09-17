@@ -130,8 +130,8 @@ function Problem() {
             k: t("Collecter", "Collect"),
             t: t("Nous trouvons les signaux.", "We find the signals."),
             d: t(
-              "Offres, métiers, compétences, formations, financements et opportunités — y compris hors des canaux officiels.",
-              "Openings, occupations, skills, training, funding and opportunities — including outside official channels.",
+              "Offres, métiers, compétences, formations, financements et opportunités, y compris hors des canaux officiels.",
+              "Openings, occupations, skills, training, funding and opportunities, including outside official channels.",
             ),
             img: MEDIA_ALIASES.focus,
           },
@@ -163,7 +163,7 @@ function Problem() {
   );
 }
 
-/** Ce que le moteur produit, en chiffres — le « comment » avant le « pourquoi ». */
+/** Ce que le moteur produit, en chiffres : le « comment » avant le « pourquoi ». */
 function Performance() {
   const t = useT();
   return (
@@ -582,7 +582,7 @@ function ProductDemo() {
   );
 }
 
-/** L'humain comme finalité — composition diagonale, aucun texte superflu. */
+/** L'humain comme finalité : composition diagonale, aucun texte superflu. */
 function HumanFirst() {
   const t = useT();
   return (
@@ -666,7 +666,7 @@ function WhatsApp() {
               </p>
               <div className="rounded-2xl bg-muted/60 p-5">
                 <p className="font-display text-lg font-semibold">
-                  {t("Stage Data Analyst — Abidjan", "Data Analyst internship — Abidjan")}
+                  {t("Stage Data Analyst, Abidjan", "Data Analyst internship, Abidjan")}
                 </p>
                 <p className="mt-2 font-mono text-sm font-semibold text-primary">
                   {t("Match : 94 %", "Match: 94%")}
@@ -694,7 +694,7 @@ function WhatsApp() {
   );
 }
 
-/* Ce que nous façonnons — énoncé de tête */
+/* Ce que nous façonnons : énoncé de tête */
 
 function Shaping() {
   const t = useT();
@@ -707,8 +707,8 @@ function Shaping() {
           : ["Nous façonnons pour l'Afrique,", "les prochaines générations", "d'IA spécialisées."]
       }
       lead={t(
-        "Les modèles généralistes ne connaissent ni nos métiers, ni nos diplômes, ni nos marchés. Nous constituons la matière — données annotées, référentiels, profondeur historique — qui permet de les spécialiser pour le continent.",
-        "General-purpose models know neither our occupations, nor our qualifications, nor our markets. We build the raw material — annotated data, taxonomies, historical depth — that makes it possible to specialise them for the continent.",
+        "Les modèles généralistes ne connaissent ni nos métiers, ni nos diplômes, ni nos marchés. Nous constituons la matière (données annotées, référentiels, profondeur historique) qui permet de les spécialiser pour le continent.",
+        "General-purpose models know neither our occupations, nor our qualifications, nor our markets. We build the raw material (annotated data, taxonomies, historical depth) that makes it possible to specialise them for the continent.",
       )}
       items={[
         {
@@ -740,7 +740,7 @@ function Shaping() {
   );
 }
 
-/* Prêt à l'emploi — la promesse faite aux entreprises d'IA */
+/* Prêt à l'emploi : la promesse faite aux entreprises d'IA */
 
 function ReadyData() {
   const t = useT();
@@ -813,8 +813,8 @@ function Traction() {
             image={light(MEDIA.reussite)}
             ratio="4/5"
             caption={t(
-              "Abidjan — accompagnement d'une promotion partenaire.",
-              "Abidjan — supporting a partner cohort.",
+              "Abidjan, accompagnement d'une promotion partenaire.",
+              "Abidjan, supporting a partner cohort.",
             )}
             className="w-full lg:w-72"
           />

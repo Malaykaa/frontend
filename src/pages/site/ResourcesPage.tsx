@@ -21,8 +21,8 @@ const buildTopics = (t: Translate) => [
       "Which occupations will hire the most in Africa?",
     ),
     desc: t(
-      "Ce que dix ans de signaux disent des secteurs qui accélèrent — et de ceux qui ralentissent.",
-      "What ten years of signals say about the sectors picking up — and those slowing down.",
+      "Ce que dix ans de signaux disent des secteurs qui accélèrent, et de ceux qui ralentissent.",
+      "What ten years of signals say about the sectors picking up, and those slowing down.",
     ),
   },
   {
@@ -68,8 +68,8 @@ export default function ResourcesPage() {
         eyebrow={t("Ressources", "Resources")}
         lines={["Malayka", <span key="a" className="text-muted-foreground">Insights.</span>]}
         lead={t(
-          "Comprendre les transformations du travail, des compétences et de l'éducation en Afrique — à partir de nos propres données.",
-          "Understanding how work, skills and education are changing across Africa — from our own data.",
+          "Comprendre les transformations du travail, des compétences et de l'éducation en Afrique, à partir de nos propres données.",
+          "Understanding how work, skills and education are changing across Africa, from our own data.",
         )}
       />
 
@@ -133,7 +133,7 @@ export default function ResourcesPage() {
               <CtaGroup
                 primary={{
                   label: t("Contacter l'équipe Data", "Contact the Data team"),
-                  href: mailto("Malayka Insights — demande d'analyse"),
+                  href: mailto("Malayka Insights : demande d'analyse"),
                 }}
                 secondary={{ label: t("Explorer Malayka Data", "Explore Malayka Data"), to: "/produits/malayka-data" }}
               />

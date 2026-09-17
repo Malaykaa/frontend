@@ -167,8 +167,8 @@ export default function IndividualsPage() {
                 )
               }
               lead={t(
-                "Créez votre profil, définissez votre objectif, et laissez Malayka observer le marché — les opportunités pertinentes arrivent jusque sur WhatsApp.",
-                "Create your profile, set your goal, and let Malayka watch the market — the relevant opportunities arrive right on WhatsApp.",
+                "Créez votre profil, définissez votre objectif, et laissez Malayka observer le marché, les opportunités pertinentes arrivent jusque sur WhatsApp.",
+                "Create your profile, set your goal, and let Malayka watch the market, the relevant opportunities arrive right on WhatsApp.",
               )}
             />
             <FlowChain

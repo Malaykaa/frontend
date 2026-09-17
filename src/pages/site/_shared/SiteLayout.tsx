@@ -6,7 +6,7 @@ import { useHtmlLang } from "./lang";
 
 /**
  * Coquille commune à toutes les pages publiques : navigation, contenu, footer.
- * Gère aussi le scroll — haut de page au changement de route, ancre si présente.
+ * Gère aussi le scroll : haut de page au changement de route, ancre si présente.
  */
 export default function SiteLayout() {
   const location = useLocation();
