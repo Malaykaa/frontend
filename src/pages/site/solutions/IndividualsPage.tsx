@@ -4,6 +4,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA, MEDIA_ALIASES } from "../_shared/media";
 import { ShrinkingPhoto } from "../_shared/scenes";
+import { Mark, Underline } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 const buildProfiles = (t: Translate) => [
@@ -100,10 +101,19 @@ export default function IndividualsPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Pour qui", "Who it is for")}
-            title={t(
-              "Quel que soit votre parcours, le point de départ est le même : savoir où vous en êtes.",
-              "Whatever your path, the starting point is the same: knowing where you stand.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  Whatever your path, the starting point is the same:{" "}
+                  <Underline variante="trait">knowing where you stand</Underline>.
+                </>
+              ) : (
+                <>
+                  Quel que soit votre parcours, le point de départ est le même :{" "}
+                  <Underline variante="trait">savoir où vous en êtes</Underline>.
+                </>
+              )
+            }
             lead={t(
               "Malayka s'adapte à votre situation et à votre objectif, puis surveille en continu ce qui peut vous faire avancer.",
               "Malayka adapts to your situation and your goal, then watches continuously for whatever can move you forward.",
@@ -149,10 +159,16 @@ export default function IndividualsPage() {
           <div className="text-center">
             <SectionHeading
               align="center"
-              title={t("Les opportunités viennent à vous.", "Opportunities come to you.")}
+              title={
+                t.lang === "en" ? (
+                  <>Opportunities come <Mark>to you</Mark>.</>
+                ) : (
+                  <>Les opportunités viennent <Mark>à vous</Mark>.</>
+                )
+              }
               lead={t(
-                "Créez votre profil, définissez votre objectif, et laissez Malayka observer le marché — les opportunités pertinentes arrivent jusque sur WhatsApp.",
-                "Create your profile, set your goal, and let Malayka watch the market — the relevant opportunities arrive right on WhatsApp.",
+                "Créez votre profil, définissez votre objectif, et laissez Malayka observer le marché, les opportunités pertinentes arrivent jusque sur WhatsApp.",
+                "Create your profile, set your goal, and let Malayka watch the market, the relevant opportunities arrive right on WhatsApp.",
               )}
             />
             <FlowChain

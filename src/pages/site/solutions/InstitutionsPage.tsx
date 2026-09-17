@@ -5,6 +5,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA, MEDIA_ALIASES } from "../_shared/media";
 import { PinnedGallery } from "../_shared/scenes";
+import { Mark, Underline } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 const buildAudiences = (t: Translate) => [
@@ -30,8 +31,8 @@ const buildAudiences = (t: Translate) => [
     Icon: Cpu,
     title: "EdTech",
     desc: t(
-      "Alimenter vos produits avec des données structurées de compétences, métiers et formations — et des modèles ancrés sur le marché africain.",
-      "Feed your products with structured data on skills, occupations and training — and models grounded in the African market.",
+      "Alimenter vos produits avec des données structurées de compétences, métiers et formations, et des modèles ancrés sur le marché africain.",
+      "Feed your products with structured data on skills, occupations and training, and models grounded in the African market.",
     ),
     meta: t("data · API · matching", "data · API · matching"),
     to: "/solutions/entreprises-ia",
@@ -100,7 +101,7 @@ export default function InstitutionsPage() {
         }
         primary={{
           label: t("Demander une démonstration", "Request a demo"),
-          href: mailto("Démonstration — Établissement / EdTech"),
+          href: mailto("Démonstration : Établissement / EdTech"),
         }}
         secondary={{ label: t("Découvrir Malayka Éducative", "Discover Malayka Éducative"), to: "/produits/malayka-educative" }}
       />
@@ -132,13 +133,16 @@ export default function InstitutionsPage() {
           <Reveal>
             <SectionHeading
               eyebrow={t("Data pour l'éducation", "Data for education")}
-              title={t(
-                "Former pour un marché que l'on observe vraiment.",
-                "Train for a market you can actually observe.",
-              )}
+              title={
+                t.lang === "en" ? (
+                  <>Train for a market you can <Mark>actually observe</Mark>.</>
+                ) : (
+                  <>Former pour un marché que l'on observe <Mark>vraiment</Mark>.</>
+                )
+              }
               lead={t(
-                "Un programme se construit sur plusieurs années ; le marché du travail, lui, bouge chaque mois. Nos données servent à réduire cet écart — et, pour les EdTech, à construire des produits ancrés sur des données africaines réelles.",
-                "A programme takes years to build; the labour market moves every month. Our data exists to close that gap — and, for EdTech, to build products grounded in real African data.",
+                "Un programme se construit sur plusieurs années ; le marché du travail, lui, bouge chaque mois. Nos données servent à réduire cet écart, et pour les EdTech à construire des produits ancrés sur des données africaines réelles.",
+                "A programme takes years to build; the labour market moves every month. Our data exists to close that gap, and for EdTech to build products grounded in real African data.",
               )}
             />
             <Link
@@ -198,7 +202,13 @@ export default function InstitutionsPage() {
           <div className="text-center">
             <SectionHeading
               align="center"
-              title={t("Déployé en 48h, accompagnement inclus.", "Live in 48 hours, onboarding included.")}
+              title={
+                t.lang === "en" ? (
+                  <>Live in <Underline variante="trait">48 hours</Underline>, onboarding included.</>
+                ) : (
+                  <>Déployé en <Underline variante="trait">48h</Underline>, accompagnement inclus.</>
+                )
+              }
               lead={t(
                 "Nous configurons votre espace, formons vos équipes et restons disponibles pendant toute la prise en main.",
                 "We set up your workspace, train your teams and stay available throughout the rollout.",
@@ -208,7 +218,7 @@ export default function InstitutionsPage() {
               <CtaGroup
                 primary={{
                   label: t("Demander une démonstration", "Request a demo"),
-                  href: mailto("Démonstration — Établissement / EdTech"),
+                  href: mailto("Démonstration : Établissement / EdTech"),
                 }}
                 secondary={{ label: t("Voir la tarification", "See pricing"), to: "/tarification" }}
               />

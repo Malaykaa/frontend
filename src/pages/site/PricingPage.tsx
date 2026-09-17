@@ -3,6 +3,7 @@ import { Check, GraduationCap, Landmark, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal, Section, SectionHeading, PageHero, Card, mailto } from "./_shared/ui";
 import { useT, type Translate } from "./_shared/lang";
+import { Mark } from "./_shared/emphasis";
 
 const buildPlans = (t: Translate) => [
   {
@@ -69,7 +70,7 @@ const buildOrgPlans = (t: Translate) => [
       "Priced on the number of students, classes and features enabled. Live in 48 hours, onboarding included.",
     ),
     cta: t("Demander une démonstration", "Request a demo"),
-    subject: "Tarification — Éducation",
+    subject: "Tarification : Éducation",
   },
   {
     Icon: Landmark,
@@ -80,7 +81,7 @@ const buildOrgPlans = (t: Translate) => [
       "Real-time dashboards, tracking indicators, periodic reports and API access, sized to your scope and your territories.",
     ),
     cta: t("Demander une présentation", "Request a walkthrough"),
-    subject: "Tarification — Observatoire",
+    subject: "Tarification : Observatoire",
   },
   {
     Icon: Cpu,
@@ -91,7 +92,7 @@ const buildOrgPlans = (t: Translate) => [
       "Bespoke datasets, dedicated annotation, benchmarks and API access. Priced on volume, freshness and annotation depth.",
     ),
     cta: t("Parler à l'équipe Data", "Talk to the Data team"),
-    subject: "Tarification — Datasets & API",
+    subject: "Tarification : Datasets & API",
   },
 ];
 
@@ -121,10 +122,13 @@ export default function PricingPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Pour les particuliers", "For individuals")}
-            title={t(
-              "Commencez gratuitement, montez en puissance si besoin.",
-              "Start free, scale up when you need to.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>Start <Mark>free</Mark>, scale up when you need to.</>
+              ) : (
+                <>Commencez <Mark>gratuitement</Mark>, montez en puissance si besoin.</>
+              )
+            }
           />
         </Reveal>
         <div className="mt-14 grid gap-5 lg:grid-cols-3">
@@ -175,8 +179,8 @@ export default function PricingPage() {
             eyebrow={t("Organisations", "Organisations")}
             title={t("Sur mesure, selon votre périmètre.", "Bespoke, sized to your scope.")}
             lead={t(
-              "Data · API · Observatoire · Intelligence — nous dimensionnons l'accompagnement à votre échelle.",
-              "Data · API · Observatory · Intelligence — we size the engagement to your scale.",
+              "Data · API · Observatoire · Intelligence. Nous dimensionnons l'accompagnement à votre échelle.",
+              "Data · API · Observatory · Intelligence. We size the engagement to your scale.",
             )}
           />
         </Reveal>

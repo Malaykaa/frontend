@@ -16,7 +16,7 @@ import { useT, type Translate } from "./lang";
  * les yeux du visiteur au lieu d'être affiché d'un bloc.
  *
  * La profondeur est simulée par trois plans (échelle, opacité, décalage au
- * défilement) — pas de WebGL, uniquement `transform` et `opacity`.
+ * défilement). Pas de WebGL, uniquement `transform` et `opacity`.
  */
 
 type Node = {
@@ -234,7 +234,7 @@ export function DataConstellation() {
         <Reveal delay={200}>
           <p className={cn("type-lead mx-auto mt-16 max-w-2xl text-center text-muted-foreground")}>
             Des millions de signaux dispersés sur les compétences, les formations, les opportunités et le marché du
-            travail — reliés, structurés, et transformés en intelligence exploitable.
+            travail : reliés, structurés et transformés en intelligence exploitable.
           </p>
         </Reveal>
       </div>

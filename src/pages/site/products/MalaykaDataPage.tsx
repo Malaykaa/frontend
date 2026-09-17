@@ -9,6 +9,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA } from "../_shared/media";
 import { ShrinkingPhoto, CircularFlow } from "../_shared/scenes";
+import { Mark, Underline, Hatched } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 // Données
@@ -113,8 +114,8 @@ export default function MalaykaDataPage() {
               ]
         }
         lead={t(
-          "Malayka collecte, structure, annote et transforme des millions de données sur l'emploi, les compétences, les métiers et la formation en Afrique — en datasets, API et intelligence exploitables.",
-          "Malayka collects, structures, annotates and transforms millions of records on employment, skills, occupations and training across Africa — into usable datasets, APIs and intelligence.",
+          "Malayka collecte, structure, annote et transforme des millions de données sur l'emploi, les compétences, les métiers et la formation en Afrique : datasets, API et intelligence exploitables.",
+          "Malayka collects, structures, annotates and transforms millions of records on employment, skills, occupations and training across Africa: usable datasets, APIs and intelligence.",
         )}
         chain={
           t.lang === "en"
@@ -122,7 +123,7 @@ export default function MalaykaDataPage() {
             : ["Des données africaines", "Structurées par l'IA", "Enrichies par l'humain"]
         }
         primary={{ label: t("Explorer nos données", "Explore our data"), href: mailto("Explorer Malayka Data") }}
-        secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Malayka Data — parler à l'équipe") }}
+        secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Malayka Data : parler à l'équipe") }}
       >
         <div className="mt-16 grid gap-8 border-t border-border pt-10 sm:grid-cols-2 lg:grid-cols-4">
           <Stat value={t("10+ ans", "10+ years")} label={t("de données historiques", "of historical data")} />
@@ -169,7 +170,7 @@ export default function MalaykaDataPage() {
         </div>
       </Section>
 
-      {/* Data engine — storytelling sticky */}
+      {/* Data engine, en récit défilant */}
       <div id="data-engine">
         <StickySteps
           eyebrow={t("Notre Data Engine", "Our Data Engine")}
@@ -191,10 +192,19 @@ export default function MalaykaDataPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Profondeur historique", "Historical depth")}
-            title={t(
-              "Le présent nous montre où nous sommes. L'historique nous aide à comprendre où nous allons.",
-              "The present shows where we are. History helps us understand where we are going.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  The present shows where we are. History helps us understand{" "}
+                  <Underline variante="epais">where we are going</Underline>.
+                </>
+              ) : (
+                <>
+                  Le présent nous montre où nous sommes. L'historique nous aide à comprendre{" "}
+                  <Underline variante="epais">où nous allons</Underline>.
+                </>
+              )
+            }
             lead={t(
               "Une donnée isolée donne une photographie. Une donnée historique permet d'observer une évolution.",
               "A single record gives a snapshot. A historical record lets you watch something move.",
@@ -254,8 +264,8 @@ export default function MalaykaDataPage() {
             : ["Nous ne collectons pas", "seulement des offres."]
         }
         lead={t(
-          "Nous construisons les relations entre les données — un graphe métiers, compétences, formations et opportunités, exploitable par des moteurs de matching et par des modèles d'IA.",
-          "We build the relations between records — a graph of occupations, skills, training and opportunities, usable by matching engines and by AI models.",
+          "Nous construisons les relations entre les données : un graphe métiers, compétences, formations et opportunités, exploitable par des moteurs de matching et par des modèles d'IA.",
+          "We build the relations between records: a graph of occupations, skills, training and opportunities, usable by matching engines and by AI models.",
         )}
         cta={{ label: t("Données d'entraînement pour l'IA", "Training data for AI"), to: "/solutions/entreprises-ia" }}
       />
@@ -265,7 +275,13 @@ export default function MalaykaDataPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("Nos datasets", "Our datasets")}
-            title={t("Des données prêtes à être utilisées.", "Data ready to be put to work.")}
+            title={
+              t.lang === "en" ? (
+                <>Data <Mark>ready to be put to work</Mark>.</>
+              ) : (
+                <>Des données <Mark>prêtes à être utilisées</Mark>.</>
+              )
+            }
           />
         </Reveal>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -305,8 +321,8 @@ export default function MalaykaDataPage() {
             </div>
             <p className="mt-5 text-sm text-muted-foreground">
               {t(
-                "Un graphe de relations, pas une simple liste — c'est ce qui rend les données utilisables par des moteurs de matching, de recommandation et par des modèles d'IA.",
-                "A graph of relations, not a flat list — that is what makes the data usable by matching engines, recommendation engines and AI models.",
+                "Un graphe de relations, pas une simple liste, et c'est ce qui rend les données utilisables par des moteurs de matching, de recommandation et par des modèles d'IA.",
+                "A graph of relations, not a flat list, and that is what makes the data usable by matching engines, recommendation engines and AI models.",
               )}
             </p>
           </div>
@@ -332,7 +348,7 @@ export default function MalaykaDataPage() {
               </div>
               <CtaGroup
                 className="shrink-0"
-                primary={{ label: t("Voir la documentation API", "See the API documentation"), href: mailto("Documentation API — Malayka Data") }}
+                primary={{ label: t("Voir la documentation API", "See the API documentation"), href: mailto("Documentation API : Malayka Data") }}
               />
             </div>
           </div>
@@ -383,7 +399,13 @@ export default function MalaykaDataPage() {
         <Reveal>
           <SectionHeading
             eyebrow={t("La dimension humaine", "The human dimension")}
-            title={t("L'IA donne l'échelle. L'humain donne le contexte.", "AI provides the scale. People provide the context.")}
+            title={
+              t.lang === "en" ? (
+                <>AI provides the scale. People provide <Hatched>the context</Hatched>.</>
+              ) : (
+                <>L'IA donne l'échelle. L'humain donne <Hatched>le contexte</Hatched>.</>
+              )
+            }
             lead={t(
               "Les réalités professionnelles africaines ne peuvent pas être comprises uniquement à partir de données automatisées. Nos systèmes automatisent la collecte et le traitement ; des experts annotent, vérifient et contextualisent ; et lorsque les données manquent, nous allons les chercher sur le terrain.",
               "African working realities cannot be understood from automated data alone. Our systems automate collection and processing; experts annotate, verify and contextualise; and where data is missing, we go and gather it in the field.",
@@ -452,7 +474,7 @@ export default function MalaykaDataPage() {
             <div className="mt-10 flex justify-center">
               <CtaGroup
                 primary={{ label: t("Commencer avec Malayka", "Get started with Malayka"), to: "/onboarding" }}
-                secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Malayka Data — parler à l'équipe") }}
+                secondary={{ label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Malayka Data : parler à l'équipe") }}
               />
             </div>
             <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-muted-foreground">

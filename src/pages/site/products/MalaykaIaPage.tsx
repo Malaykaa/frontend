@@ -8,6 +8,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA, MEDIA_ALIASES } from "../_shared/media";
 import { JoiningBlocks } from "../_shared/scenes";
+import { Mark, Underline } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 const buildCapabilities = (t: Translate) => [
@@ -111,7 +112,13 @@ export default function MalaykaIaPage() {
           <Reveal>
             <SectionHeading
               eyebrow={t("Comment ça marche", "How it works")}
-              title={t("Votre intelligence personnelle du marché.", "Your personal intelligence on the market.")}
+              title={
+                t.lang === "en" ? (
+                  <>Your <Mark>personal</Mark> intelligence on the market.</>
+                ) : (
+                  <>Votre intelligence <Mark>personnelle</Mark> du marché.</>
+                )
+              }
               lead={t(
                 "Vous décrivez votre objectif une fois. Malayka fait le reste : elle observe le marché à votre place, en continu, et ne vous sollicite que lorsqu'il y a quelque chose qui compte pour vous.",
                 "You describe your goal once. Malayka does the rest: it watches the market for you, continuously, and only comes back to you when something actually matters.",
@@ -128,7 +135,7 @@ export default function MalaykaIaPage() {
                   {t("Nouvelle opportunité détectée", "New opportunity detected")}
                 </span>
               </div>
-              <h3 className="font-display mt-4 text-xl font-extrabold">Data Analyst — Abidjan</h3>
+              <h3 className="font-display mt-4 text-xl font-extrabold">Data Analyst, Abidjan</h3>
               <p className="mt-1 font-mono text-sm font-bold text-primary">{t("92 % de correspondance", "92% match")}</p>
               <div className="mt-5 space-y-2">
                 {["Python", "SQL", t("Analyse de données", "Data analysis")].map((s) => (
@@ -226,7 +233,7 @@ export default function MalaykaIaPage() {
                 </p>
                 <div className="rounded-xl bg-card p-3.5">
                   <p className="text-sm font-bold text-foreground">
-                    {t("Stage Data Analyst — Abidjan", "Data Analyst internship — Abidjan")}
+                    {t("Stage Data Analyst, Abidjan", "Data Analyst internship, Abidjan")}
                   </p>
                   <p className="mt-1 font-mono text-[11px] font-semibold text-primary">
                     {t("Match : 94 %", "Match: 94%")}
@@ -282,10 +289,19 @@ export default function MalaykaIaPage() {
           <div className="text-center">
             <SectionHeading
               align="center"
-              title={t(
-                "Votre prochaine opportunité existe déjà. Encore faut-il la voir.",
-                "Your next opportunity already exists. You still have to see it.",
-              )}
+              title={
+                t.lang === "en" ? (
+                  <>
+                    Your next opportunity <Underline variante="epais">already exists</Underline>.
+                    You still have to see it.
+                  </>
+                ) : (
+                  <>
+                    Votre prochaine opportunité <Underline variante="epais">existe déjà</Underline>.
+                    Encore faut-il la voir.
+                  </>
+                )
+              }
               lead={t(
                 "Créez votre profil en quelques minutes. Malayka commence à observer le marché pour vous immédiatement.",
                 "Create your profile in a few minutes. Malayka starts watching the market for you straight away.",

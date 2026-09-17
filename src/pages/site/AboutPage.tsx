@@ -5,6 +5,7 @@ import {
 import { MEDIA, MEDIA_ALIASES } from "./_shared/media";
 import { ConvergingPhotos } from "./_shared/scenes";
 import { InfrastructureStatement } from "./_shared/statements";
+import { Mark, Underline, Hatched } from "./_shared/emphasis";
 import { useT, type Translate } from "./_shared/lang";
 
 const VALUES = (t: Translate) => [
@@ -88,10 +89,21 @@ export default function AboutPage() {
           <SectionHeading
             align="center"
             eyebrow={t("Notre mission", "Our mission")}
-            title={t(
-              "Permettre à chaque personne, chaque institution et chaque décideur de mieux comprendre les transformations du capital humain — et d'agir au bon moment.",
-              "Enable every person, every institution and every decision-maker to better understand how human capital is changing — and to act at the right moment.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  Enable every person, every institution and every decision-maker to better
+                  understand how human capital is changing, and to{" "}
+                  <Underline variante="trait">act at the right moment</Underline>.
+                </>
+              ) : (
+                <>
+                  Permettre à chaque personne, chaque institution et chaque décideur de mieux
+                  comprendre les transformations du capital humain, et d'
+                  <Underline variante="trait">agir au bon moment</Underline>.
+                </>
+              )
+            }
           />
         </Reveal>
       </Section>
@@ -104,8 +116,8 @@ export default function AboutPage() {
             : ["Nous construisons l'infrastructure", "qui définit le futur de la formation", "et de l'emploi en Afrique avec l'IA."]
         }
         lead={t(
-          "Une infrastructure, pas une application de plus : une couche de données et d'intelligence sur laquelle reposent nos produits — et, demain, ceux des institutions et des entreprises qui bâtissent avec nous.",
-          "An infrastructure, not one more app: a layer of data and intelligence our own products rest on — and, tomorrow, those of the institutions and companies building alongside us.",
+          "Une infrastructure, pas une application de plus : une couche de données et d'intelligence sur laquelle reposent nos produits, et demain ceux des institutions et des entreprises qui bâtissent avec nous.",
+          "An infrastructure, not one more app: a layer of data and intelligence our own products rest on, and tomorrow those of the institutions and companies building alongside us.",
         )}
         pillars={[
           {
@@ -143,8 +155,8 @@ export default function AboutPage() {
               eyebrow={t("Notre approche", "Our approach")}
               title={t("Pourquoi Malayka existe.", "Why Malayka exists.")}
               lead={t(
-                "Les opportunités et les signaux du marché du travail africain sont dispersés entre plateformes, institutions, réseaux sociaux et communautés — largement fragmentés et difficiles à mesurer. Les décisions, elles, se prennent souvent sur des données qui décrivent le passé.",
-                "Opportunities and labour-market signals across Africa are scattered between platforms, institutions, social networks and communities — largely fragmented and hard to measure. Decisions, meanwhile, are often made on data that describes the past.",
+                "Les opportunités et les signaux du marché du travail africain sont dispersés entre plateformes, institutions, réseaux sociaux et communautés, largement fragmentés et difficiles à mesurer. Les décisions, elles, se prennent souvent sur des données qui décrivent le passé.",
+                "Opportunities and labour-market signals across Africa are scattered between platforms, institutions, social networks and communities, largely fragmented and hard to measure. Decisions, meanwhile, are often made on data that describes the past.",
               )}
             />
           </Reveal>
@@ -194,10 +206,19 @@ export default function AboutPage() {
           <SectionHeading
             align="center"
             eyebrow={t("Notre vision", "Our vision")}
-            title={t(
-              "Un continent où chaque talent peut comprendre où il se situe, où vont les opportunités et comment s'y préparer.",
-              "A continent where every talent can see where they stand, where opportunity is heading, and how to get ready for it.",
-            )}
+            title={
+              t.lang === "en" ? (
+                <>
+                  A continent where <Hatched>every talent</Hatched> can see where they stand, where
+                  opportunity is heading, and how to get ready for it.
+                </>
+              ) : (
+                <>
+                  Un continent où <Hatched>chaque talent</Hatched> peut comprendre où il se situe,
+                  où vont les opportunités et comment s'y préparer.
+                </>
+              )
+            }
           />
         </Reveal>
         <Reveal delay={150}>
@@ -216,8 +237,8 @@ export default function AboutPage() {
         image={MEDIA.ciel}
         lines={
           t.lang === "en"
-            ? ["Scale comes from machines.", "Meaning comes from people."]
-            : ["L'échelle vient des machines.", "Le sens vient des humains."]
+            ? ["Scale comes from machines.", <span key="a">Meaning comes from <Mark>people</Mark>.</span>]
+            : ["L'échelle vient des machines.", <span key="a">Le sens vient des <Mark>humains</Mark>.</span>]
         }
         lead={t(
           "Des experts africains annotent, vérifient et contextualisent. Et lorsque la donnée manque, nous allons la chercher sur le terrain.",
@@ -270,8 +291,8 @@ export default function AboutPage() {
               align="center"
               title={t("Envie de construire avec nous ?", "Want to build with us?")}
               lead={t(
-                "Nous recrutons des profils data, IA, terrain et produit — à Abidjan et à distance.",
-                "We are hiring across data, AI, field research and product — in Abidjan and remotely.",
+                "Nous recrutons des profils data, IA, terrain et produit, à Abidjan et à distance.",
+                "We are hiring across data, AI, field research and product, in Abidjan and remotely.",
               )}
             />
             <div className="mt-10 flex justify-center">

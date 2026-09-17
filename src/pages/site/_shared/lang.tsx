@@ -8,7 +8,7 @@ import { cn } from "@/shared/lib/utils";
  *
  * L'application (espace connecté, admin) passe par des clés i18next et des
  * fichiers `locales/*.json` : c'est adapté à des libellés courts et réutilisés.
- * Le site vitrine, lui, est fait de prose — des titres de trois lignes, des
+ * Le site vitrine, lui, est fait de prose : des titres de trois lignes, des
  * paragraphes d'accroche. Sortir ces phrases dans un fichier de clés rendrait
  * les pages illisibles (`t("home.hero.line2")` ne dit rien de ce qu'on lit)
  * et ferait diverger le texte de sa mise en forme.

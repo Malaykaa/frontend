@@ -8,7 +8,7 @@ import { useScrollProgress } from "./scenes";
  *
  * Ce ne sont pas des sections de contenu mais des prises de position : elles
  * disent ce que fait Malayka avant d'expliquer comment. Elles ont donc droit
- * à la plus grande typographie du site et à une mise en scène propre — mais
+ * à la plus grande typographie du site et à une mise en scène propre, mais
  * restent sur fond clair, le noir étant réservé aux bannières.
  *
  * Chacune porte son propre scénario, pour qu'on ne lise pas deux fois la
@@ -23,7 +23,7 @@ const lerp = (from: number, to: number, t: number) => from + (to - from) * t;
 /**
  * Les trois photos démarrent superposées et légèrement pivotées, puis
  * s'écartent en diagonale à mesure qu'on descend : la matière brute se sépare
- * et se met en ordre. C'est le geste que décrit la phrase — façonner.
+ * et se met en ordre. C'est le geste que décrit la phrase : façonner.
  */
 export function ShapingManifesto({
   eyebrow,
@@ -46,7 +46,7 @@ export function ShapingManifesto({
    * de départ est exprimé en pourcentage de la largeur du visuel lui-même :
    * la composition tient donc à toutes les largeurs d'écran.
    *
-   * Les colonnes sont une vraie grille — pas un positionnement absolu dans un
+   * Les colonnes sont une vraie grille, pas un positionnement absolu dans un
    * cadre à ratio fixe : c'est ce qui garantit qu'aucune légende ne passe sous
    * le visuel voisin, quelle que soit la longueur du texte.
    */

@@ -61,8 +61,8 @@ const buildMenus = (t: Translate): MenuDef[] => [
     ],
     footer: {
       label: t(
-        "Comment ça marche — Data → Intelligence → Action",
-        "How it works — Data → Intelligence → Action",
+        "Comment ça marche : Data → Intelligence → Action",
+        "How it works: Data → Intelligence → Action",
       ),
       to: "/comment-ca-marche",
     },
@@ -281,7 +281,7 @@ export function SiteNav() {
         onMouseLeave={scheduleClose}
       >
         <div className="flex items-center justify-between gap-4 py-3.5">
-        {/* Logo — la barre est toujours noire, d'où l'inversion.
+        {/* Logo : la barre est toujours noire, d'où l'inversion.
             `invert` SEUL : il échange le noir et le blanc et préserve donc
             les deux carrés imbriqués de l'icône. Y ajouter `brightness-0`
             aplatissait toute la matière en noir AVANT l'inversion, et le
@@ -351,7 +351,7 @@ export function SiteNav() {
         </div>
         </div>
 
-        {/* Panneau mega-menu — ancré au conteneur, jamais clippé */}
+        {/* Panneau mega-menu, ancré au conteneur, jamais clippé */}
         {openMenu && (
           <div onMouseEnter={cancelClose}>
             <MegaPanel

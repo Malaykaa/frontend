@@ -7,7 +7,7 @@ import type { SiteImage } from "./media";
 import { useT } from "./lang";
 
 /* Observateur d'entrée dans le viewport, partagé par toutes les animations. */
-function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
+export function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T>(null);
   const [inView, setInView] = useState(false);
 

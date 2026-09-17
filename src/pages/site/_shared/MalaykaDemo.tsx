@@ -70,7 +70,7 @@ export function MalaykaDemo({ className }: { className?: string }) {
         </div>
 
         <div className="space-y-4 p-5">
-          {/* 1 — la demande */}
+          {/* 1. la demande */}
           <div
             className={cn(
               "flex justify-end transition-all duration-700",
@@ -85,7 +85,7 @@ export function MalaykaDemo({ className }: { className?: string }) {
             </p>
           </div>
 
-          {/* 2 — analyse */}
+          {/* 2. analyse */}
           <div
             className={cn(
               "transition-all duration-700",
@@ -122,7 +122,7 @@ export function MalaykaDemo({ className }: { className?: string }) {
             </div>
           </div>
 
-          {/* 3 — matching */}
+          {/* 3. matching */}
           <div
             className={cn(
               "transition-all duration-700",
@@ -160,7 +160,7 @@ export function MalaykaDemo({ className }: { className?: string }) {
             </div>
           </div>
 
-          {/* 4 — recommandation */}
+          {/* 4. recommandation */}
           <div
             className={cn(
               "rounded-xl bg-muted px-4 py-3.5 transition-all duration-700",
