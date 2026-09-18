@@ -43,18 +43,26 @@ function Hero() {
             <RevealLines
               as="h1"
               stagger={120}
-              className="type-display mt-9"
+              /* Ce titre compte une cinquantaine de signes de plus que celui
+                 qu'il remplace. À la taille de `type-display`, chacune de ses
+                 lignes se repliait en deux et poussait les boutons sous la
+                 ligne de flottaison, à toutes les tailles d'écran. Une échelle
+                 propre à ce hero le ramène à trois lignes pleines. */
+              className="mt-9 text-[clamp(2.375rem,4.1vw,3.625rem)] font-semibold leading-[0.98] tracking-[-0.035em]"
+              /* Le gris porte la ligne du milieu, pas la dernière : ici c'est
+                 « prêtes à l'emploi » qui vend, et l'atténuer l'enterrerait.
+                 Fort, atténué, fort. */
               lines={
                 t.lang === "en"
                   ? [
-                      "The intelligence",
-                      "of African human",
-                      <span key="a" className="text-muted-foreground">capital.</span>,
+                      "African data,",
+                      <span key="a" className="text-muted-foreground">structured, annotated</span>,
+                      "and ready to use.",
                     ]
                   : [
-                      "L'intelligence",
-                      "du capital humain",
-                      <span key="a" className="text-muted-foreground">africain.</span>,
+                      "Des données africaines",
+                      <span key="a" className="text-muted-foreground">structurées, annotées</span>,
+                      "et prêtes à l'emploi.",
                     ]
               }
             />
@@ -62,8 +70,8 @@ function Hero() {
             <Reveal delay={420}>
               <p className="type-lead mt-10 max-w-lg text-muted-foreground">
                 {t(
-                  "Comprendre ce qui change. Anticiper les opportunités. Agir au bon moment.",
-                  "Understand what is changing. Anticipate opportunity. Act at the right moment.",
+                  "Pour entraîner, évaluer et alimenter vos IA, plateformes et outils de décision.",
+                  "To train, evaluate and power your AI, your platforms and your decision-making tools.",
                 )}
               </p>
               <CtaGroup
