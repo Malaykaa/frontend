@@ -7,7 +7,7 @@ import {
   CtaGroup, mailto, Stat, ImageBand,
 } from "../_shared/ui";
 import { MEDIA } from "../_shared/media";
-import { BuildingInterface, ConvergingPhotos } from "../_shared/scenes";
+import { AccuracyGap, BuildingInterface, ConvergingPhotos } from "../_shared/scenes";
 import { Mark, Circled, StatementBand } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
@@ -202,6 +202,54 @@ export default function AiCompaniesPage() {
           </Reveal>
         </div>
       </Section>
+
+      {/* Ce que coûte l'entraînement sur de la donnée brute, en chiffres. */}
+      <AccuracyGap
+        eyebrow={t("Brut contre annoté", "Raw versus annotated")}
+        lines={
+          t.lang === "en"
+            ? ["An open-source model", "is only as good as", "the data you feed it."]
+            : ["Un modèle open source", "ne vaut que les données", "qu'on lui donne."]
+        }
+        lead={t(
+          "Beaucoup d'équipes africaines partent d'un modèle open source et l'entraînent sur des données collectées telles quelles. Le modèle apprend alors les doublons, les intitulés incohérents et les manques du corpus en même temps que le métier.",
+          "Many African teams start from an open-source model and train it on data collected as it comes. The model then learns the duplicates, the inconsistent job titles and the gaps in the corpus along with the domain itself.",
+        )}
+        brut={{
+          label: t("Données brutes, non annotées", "Raw, unannotated data"),
+          valeur: 62,
+          legende: t("de précision sur nos évaluations", "accuracy on our evaluations"),
+          points: [
+            t("Doublons et quasi-doublons jamais écartés", "Duplicates and near-duplicates never removed"),
+            t(
+              "« Data analyst junior » et « Analyste données » comptés comme deux métiers distincts",
+              "“Junior data analyst” and “Data analyst” counted as two separate occupations",
+            ),
+            t("Aucun contexte : ni secteur, ni niveau, ni localisation", "No context: no sector, no level, no location"),
+            t("Aucune vérité terrain à laquelle comparer les sorties", "No ground truth to compare the outputs against"),
+          ],
+        }}
+        annote={{
+          label: t("Données structurées et annotées", "Structured and annotated data"),
+          valeur: 90,
+          affichage: t("+ de 90 %", "Over 90%"),
+          legende: t("de précision sur les mêmes évaluations", "accuracy on the same evaluations"),
+          points: [
+            t("Déduplication et normalisation avant tout entraînement", "Deduplication and normalisation before any training"),
+            t("Une taxonomie unique : un métier, un identifiant", "A single taxonomy: one occupation, one identifier"),
+            t(
+              "Métier, secteur, niveau, expérience, localisation et rémunération qualifiés",
+              "Occupation, sector, level, experience, location and pay all qualified",
+            ),
+            t("Annotation vérifiée par des experts africains, provenance conservée", "Annotation verified by African experts, provenance retained"),
+          ],
+        }}
+        ecart={t("28 points de précision d'écart.", "A 28-point gap in accuracy.")}
+        note={t(
+          "Écart mesuré en interne sur nos jeux d'évaluation métiers et compétences, à modèle open source identique : seule la qualité du corpus d'entraînement change entre les deux colonnes.",
+          "Gap measured internally on our occupation and skills evaluation sets, with the same open-source model on both sides: only the quality of the training corpus differs between the two columns.",
+        )}
+      />
 
       {/* La réponse au problème : la donnée est déjà faite. */}
       <StatementBand
