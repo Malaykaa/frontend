@@ -208,12 +208,12 @@ export default function AiCompaniesPage() {
         eyebrow={t("Brut contre annoté", "Raw versus annotated")}
         lines={
           t.lang === "en"
-            ? ["An open-source model", "is only as good as", "the data you feed it."]
-            : ["Un modèle open source", "ne vaut que les données", "qu'on lui donne."]
+            ? ["An AI", "is only as good as", "the data you feed it."]
+            : ["Une IA", "ne vaut que les données", "qu'on lui donne."]
         }
         lead={t(
-          "Beaucoup d'équipes africaines partent d'un modèle open source et l'entraînent sur des données collectées telles quelles. Le modèle apprend alors les doublons, les intitulés incohérents et les manques du corpus en même temps que le métier.",
-          "Many African teams start from an open-source model and train it on data collected as it comes. The model then learns the duplicates, the inconsistent job titles and the gaps in the corpus along with the domain itself.",
+          "Les résultats obtenus par une IA dépendent des données sur lesquelles elle est entraînée. Les données brutes n'offrent pas le même rendement que les données annotées et structurées.",
+          "What an AI produces depends on the data it is trained on. Raw data does not yield the same results as annotated, structured data.",
         )}
         brut={{
           label: t("Données brutes, non annotées", "Raw, unannotated data"),
