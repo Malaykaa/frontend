@@ -463,3 +463,134 @@ export function MetricsBoard({
     </Section>
   );
 }
+
+/* ── Scénario : l'écart de précision entre donnée brute et donnée annotée ── */
+
+type Colonne = {
+  label: string;
+  /** Valeur en pourcentage, sert aussi à la longueur de la jauge. */
+  valeur: number;
+  /** Affichage du chiffre, quand il diffère de la valeur brute (« > 90 % »). */
+  affichage?: string;
+  legende: string;
+  points: string[];
+};
+
+/**
+ * Deux jauges face à face : le même modèle, entraîné sur de la donnée brute
+ * puis sur de la donnée annotée.
+ *
+ * L'argument est chiffré, donc la démonstration doit l'être aussi : les
+ * jauges sont à l'échelle l'une de l'autre, et l'écart est annoncé en points
+ * plutôt qu'en pourcentage relatif, qui gonflerait artificiellement le
+ * résultat.
+ *
+ * Monochrome, comme le reste du corps de page : la donnée brute est hachurée
+ * et grise, la donnée annotée est un aplat noir. C'est le contraste de
+ * matière qui porte la comparaison, pas une couleur.
+ */
+export function AccuracyGap({
+  eyebrow,
+  lines,
+  lead,
+  brut,
+  annote,
+  ecart,
+  note,
+}: {
+  eyebrow: string;
+  lines: ReactNode[];
+  lead: string;
+  brut: Colonne;
+  annote: Colonne;
+  /** Texte de l'écart, déjà formulé en points par l'appelant. */
+  ecart: string;
+  /** Provenance du chiffre. Une mesure publiée sans son origine n'engage rien. */
+  note: string;
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+  // Les jauges ne se remplissent qu'une fois le titre passé.
+  const t = Math.min(1, Math.max(0, (progress - 0.22) / 0.4));
+
+  const colonnes: { c: Colonne; fort: boolean }[] = [
+    { c: brut, fort: false },
+    { c: annote, fort: true },
+  ];
+
+  return (
+    <Section tone="muted" size="large">
+      <div ref={ref}>
+        <div className="max-w-3xl">
+          <Reveal>
+            <Eyebrow>{eyebrow}</Eyebrow>
+          </Reveal>
+          <RevealLines lines={lines} className="type-h2 mt-7 text-foreground" />
+          <Reveal delay={200}>
+            <p className="type-lead mt-8 text-muted-foreground">{lead}</p>
+          </Reveal>
+        </div>
+
+        <div className="mt-16 grid gap-6 lg:grid-cols-2">
+          {colonnes.map(({ c, fort }) => (
+            <div
+              key={c.label}
+              className={`rounded-2xl border p-8 ${
+                fort ? "border-foreground/25 bg-background" : "border-border bg-background/40"
+              }`}
+            >
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                {c.label}
+              </p>
+
+              <p
+                className={`font-display mt-5 text-[clamp(3rem,6vw,4.5rem)] font-semibold leading-none tabular-nums ${
+                  fort ? "text-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {c.affichage ?? <CountUp value={c.valeur} suffix=" %" />}
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">{c.legende}</p>
+
+              {/* Jauge : les deux partagent la même échelle, sinon la
+                  comparaison ne voudrait rien dire. */}
+              <div className="mt-7 h-3 w-full overflow-hidden rounded-full bg-foreground/[0.07]">
+                <div
+                  className="h-full rounded-full transition-[width] duration-700 ease-out"
+                  style={{
+                    width: `${c.valeur * t}%`,
+                    backgroundColor: fort ? "hsl(var(--foreground))" : "transparent",
+                    backgroundImage: fort
+                      ? undefined
+                      : "repeating-linear-gradient(-52deg, hsl(var(--foreground) / 0.45) 0 2px, transparent 2px 7px)",
+                  }}
+                />
+              </div>
+
+              <ul className="mt-8 space-y-3">
+                {c.points.map((point) => (
+                  <li key={point} className="flex items-start gap-2.5 text-[13.5px] leading-relaxed">
+                    <span
+                      className={`mt-[0.45em] h-1 w-1 shrink-0 rounded-full ${
+                        fort ? "bg-foreground" : "bg-muted-foreground/50"
+                      }`}
+                    />
+                    <span className={fort ? "text-foreground/80" : "text-muted-foreground"}>
+                      {point}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <Reveal delay={260}>
+          <div className="mt-10 flex flex-col gap-4 border-t border-border pt-8 sm:flex-row sm:items-baseline sm:justify-between">
+            <p className="font-display text-xl font-semibold text-foreground sm:text-2xl">{ecart}</p>
+            <p className="max-w-xl text-[13px] leading-relaxed text-muted-foreground">{note}</p>
+          </div>
+        </Reveal>
+      </div>
+    </Section>
+  );
+}
