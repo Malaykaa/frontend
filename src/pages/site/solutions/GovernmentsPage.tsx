@@ -9,7 +9,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA, MEDIA_ALIASES } from "../_shared/media";
 import { PinnedGallery, JoiningBlocks } from "../_shared/scenes";
-import { Mark, Underline, Hatched } from "../_shared/emphasis";
+import { Mark, Underline, Hatched, StatementBand } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 /* Observatoire : panneau temps réel */
@@ -213,6 +213,25 @@ export default function GovernmentsPage() {
           ))}
         </div>
       </Section>
+
+      {/* Sans donnée locale, pas d'IA locale : l'argument souveraineté. */}
+      <StatementBand
+        eyebrow={t("Souveraineté des données", "Data sovereignty")}
+        footer={t(
+          "Les États et les institutions veulent des IA locales et spécialisées. Mais sans données locales, sans nos jargons, nos codes et nos façons de nommer les choses, aucune IA locale ne peut vraiment performer : elle hérite des données d'ailleurs, et des angles morts qui vont avec.",
+          "Governments and institutions want local, specialised AI. But without local data, without our own jargon, our codes and the way we name things, no local AI can genuinely perform: it inherits data from elsewhere, and the blind spots that come with it.",
+        )}
+      >
+        {t.lang === "en" ? (
+          <>
+            No local data, <Mark>no performant local AI</Mark>.
+          </>
+        ) : (
+          <>
+            Sans données locales, <Mark>pas d'IA locales performantes</Mark>.
+          </>
+        )}
+      </StatementBand>
 
       {/* Temps réel */}
       <Section id="observatoire">
