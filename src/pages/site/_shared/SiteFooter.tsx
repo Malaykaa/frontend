@@ -43,6 +43,7 @@ const buildColumns = (t: Translate): { title: string; links: FooterLink[] }[] =>
       { label: "Malayka IA", to: "/produits/malayka-ia" },
       { label: "Malayka Éducative", to: "/produits/malayka-educative" },
       { label: "Malayka Data", to: "/produits/malayka-data" },
+      { label: "Malayka Services", to: "/produits/malayka-services" },
     ],
   },
   {
@@ -53,6 +54,7 @@ const buildColumns = (t: Translate): { title: string; links: FooterLink[] }[] =>
       { label: t("Bailleurs de fonds", "Funders"), to: "/solutions/gouvernements#bailleurs" },
       { label: t("Établissements & EdTech", "Institutions & EdTech"), to: "/solutions/etablissements" },
       { label: t("Particuliers", "Individuals"), to: "/solutions/particuliers" },
+      { label: t("Autres services", "Other services"), to: "/produits/malayka-services" },
     ],
   },
   {

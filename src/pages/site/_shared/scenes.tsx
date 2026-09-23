@@ -594,3 +594,139 @@ export function AccuracyGap({
     </Section>
   );
 }
+
+/* ── Scénario : le parcours d'une donnée, de brute à exploitée ────────── */
+
+type Etape = {
+  Icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  hint: string;
+};
+
+/**
+ * Chaîne de sept étapes qui se câble au défilement : la ligne se trace
+ * segment par segment, chaque nœud s'allume à son tour. C'est la même
+ * mécanique que la frise historique de Malayka Data, étendue à sept points
+ * et animée plutôt que statique. Le repère visuel qui permet de comprendre
+ * l'offre de services sans connaître l'IA.
+ *
+ * Empilée verticalement sous `md`, avec la ligne qui descend au lieu de
+ * traverser : sept nœuds de front sur un écran de téléphone deviendraient
+ * illisibles.
+ */
+export function DataJourney({
+  eyebrow,
+  lines,
+  lead,
+  steps,
+}: {
+  eyebrow: string;
+  lines: ReactNode[];
+  lead?: string;
+  steps: Etape[];
+}) {
+  const { ref, progress } = useScrollProgress<HTMLDivElement>();
+  const t = Math.min(1, Math.max(0, (progress - 0.15) / 0.6));
+  const n = steps.length;
+
+  return (
+    <Section size="large">
+      <div ref={ref}>
+        <div className="max-w-3xl">
+          <Reveal>
+            <div className="flex justify-center md:justify-start">
+              <Eyebrow>{eyebrow}</Eyebrow>
+            </div>
+          </Reveal>
+          <RevealLines
+            lines={lines}
+            className="type-h2 mt-7 text-center text-foreground md:text-left"
+          />
+          {lead && (
+            <Reveal delay={200}>
+              <p className="type-lead mx-auto mt-7 text-center text-muted-foreground md:mx-0 md:text-left">
+                {lead}
+              </p>
+            </Reveal>
+          )}
+        </div>
+
+        {/* ── Desktop : chaîne horizontale ── */}
+        <div className="relative mt-20 hidden md:grid md:grid-cols-7 md:gap-2">
+          <div className="pointer-events-none absolute left-0 right-0 top-[22px] h-px bg-border" />
+          <div
+            className="pointer-events-none absolute left-0 top-[22px] h-px bg-foreground transition-[width] duration-300 ease-out"
+            style={{ width: `${t * 100}%` }}
+          />
+          {steps.map((s, i) => {
+            const seuil = i / (n - 1);
+            const pose = t >= seuil - 0.02;
+            return (
+              <div key={s.label} className="relative flex flex-col items-center text-center">
+                <div
+                  className={`relative z-10 flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-500 ${
+                    pose
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-background text-muted-foreground"
+                  }`}
+                >
+                  <s.Icon className="h-4.5 w-4.5" />
+                </div>
+                <p
+                  className={`mt-4 text-[12.5px] font-semibold leading-tight transition-colors duration-500 ${
+                    pose ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {s.label}
+                </p>
+                <p className="mt-1 px-1 font-mono text-[10px] uppercase leading-tight tracking-[0.06em] text-muted-foreground/60">
+                  {s.hint}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Mobile : chaîne verticale ── */}
+        <div className="relative mt-16 md:hidden">
+          <div className="pointer-events-none absolute bottom-0 left-[21px] top-0 w-px bg-border" />
+          <div
+            className="pointer-events-none absolute left-[21px] top-0 w-px bg-foreground transition-[height] duration-300 ease-out"
+            style={{ height: `${t * 100}%` }}
+          />
+          <div className="space-y-8">
+            {steps.map((s, i) => {
+              const seuil = i / (n - 1);
+              const pose = t >= seuil - 0.02;
+              return (
+                <div key={s.label} className="relative flex items-start gap-4">
+                  <div
+                    className={`relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ${
+                      pose
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border bg-background text-muted-foreground"
+                    }`}
+                  >
+                    <s.Icon className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="pt-2">
+                    <p
+                      className={`text-[13.5px] font-semibold transition-colors duration-500 ${
+                        pose ? "text-foreground" : "text-muted-foreground"
+                      }`}
+                    >
+                      {s.label}
+                    </p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.06em] text-muted-foreground/60">
+                      {s.hint}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}
