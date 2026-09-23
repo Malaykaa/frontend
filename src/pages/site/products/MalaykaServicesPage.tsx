@@ -9,7 +9,7 @@ import {
 } from "../_shared/ui";
 import { MEDIA } from "../_shared/media";
 import { DataJourney, ProfileRows } from "../_shared/scenes";
-import { Mark, Underline } from "../_shared/emphasis";
+import { Mark, Underline, StatementBand } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
 
 const buildDepartments = (t: Translate) => [
@@ -297,6 +297,21 @@ export default function MalaykaServicesPage() {
           ))}
         </div>
       </Section>
+
+      {/* L'argument économique : pourquoi un agent plutôt qu'un recrutement. */}
+      <StatementBand
+        eyebrow={t("Optimisation des dépenses", "Cost optimisation")}
+        footer={t(
+          "Vous n'avez pas encore les moyens d'ouvrir un poste ? Un agent IA peut l'occuper dès aujourd'hui, au coût d'un abonnement plutôt que d'un salaire, et libère vos équipes pour ce qui compte vraiment.",
+          "Can't yet afford to open a position? An AI agent can fill it today, for the cost of a subscription rather than a salary, and frees your teams to focus on what matters most.",
+        )}
+      >
+        {t.lang === "en" ? (
+          <>More productivity for your teams, <Mark>without a new hire</Mark>.</>
+        ) : (
+          <>Plus de productivité pour vos équipes, <Mark>sans recrutement</Mark>.</>
+        )}
+      </StatementBand>
 
       {/* Nos services */}
       <Section tone="default" id="services">
