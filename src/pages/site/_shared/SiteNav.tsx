@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Menu, X, ChevronDown, Sparkles, GraduationCap, Database, Cpu, Landmark,
-  Users, Building2, Radar, Network, ArrowRight,
+  Users, Building2, Radar, Network, ArrowRight, Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -57,6 +57,15 @@ const buildMenus = (t: Translate): MenuDef[] => [
           "The data and intelligence infrastructure for African human capital.",
         ),
         to: "/produits/malayka-data",
+      },
+      {
+        Icon: Wrench,
+        title: "Malayka Services",
+        desc: t(
+          "Données, IA et solutions sur mesure pour votre organisation.",
+          "Data, AI and bespoke solutions for your organisation.",
+        ),
+        to: "/produits/malayka-services",
       },
     ],
     footer: {

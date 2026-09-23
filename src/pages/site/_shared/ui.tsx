@@ -475,6 +475,51 @@ export function PageHero({
   );
 }
 
+/**
+ * Mot qui change au fil du temps dans une phrase. Un seul mot est rendu à la
+ * fois : la largeur suit le mot courant plutôt que de se caler sur le plus
+ * long du lot. Réserver la largeur maximale laissait un vide disproportionné
+ * derrière les mots courts (« RH » suivi d'un blanc de la taille de
+ * « Informatique » avant le reste de la phrase). Le texte qui suit se décale
+ * donc légèrement à chaque changement, ce qui reste discret sur un seul mot
+ * au fil d'une phrase.
+ */
+export function RotatingWord({
+  words,
+  interval = 2200,
+  className,
+}: {
+  words: string[];
+  interval?: number;
+  className?: string;
+}) {
+  const [i, setI] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => {
+      setVisible(false);
+      const swap = setTimeout(() => {
+        setI((n) => (n + 1) % words.length);
+        setVisible(true);
+      }, 260);
+      return () => clearTimeout(swap);
+    }, interval);
+    return () => clearInterval(id);
+  }, [words.length, interval]);
+
+  return (
+    <span
+      className={cn("inline-block transition-all duration-300 ease-out", className)}
+      style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(0.15em)" }}
+      aria-live="polite"
+    >
+      {words[i]}
+    </span>
+  );
+}
+
 export function ScrollCue({ label }: { label?: string }) {
   const t = useT();
   const texte = label ?? t("Explorer", "Explore");

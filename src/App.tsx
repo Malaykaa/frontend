@@ -13,6 +13,7 @@ const HomePage            = lazyRoute(() => import("@/pages/site/HomePage"));
 const MalaykaIaPage       = lazyRoute(() => import("@/pages/site/products/MalaykaIaPage"));
 const MalaykaEducativePage = lazyRoute(() => import("@/pages/site/products/MalaykaEducativePage"));
 const MalaykaDataPage     = lazyRoute(() => import("@/pages/site/products/MalaykaDataPage"));
+const MalaykaServicesPage = lazyRoute(() => import("@/pages/site/products/MalaykaServicesPage"));
 const AiCompaniesPage     = lazyRoute(() => import("@/pages/site/solutions/AiCompaniesPage"));
 const GovernmentsPage     = lazyRoute(() => import("@/pages/site/solutions/GovernmentsPage"));
 const InstitutionsPage    = lazyRoute(() => import("@/pages/site/solutions/InstitutionsPage"));
@@ -136,6 +137,7 @@ export default function App() {
                   <Route path="/produits/malayka-ia" element={<MalaykaIaPage />} />
                   <Route path="/produits/malayka-educative" element={<MalaykaEducativePage />} />
                   <Route path="/produits/malayka-data" element={<MalaykaDataPage />} />
+                  <Route path="/produits/malayka-services" element={<MalaykaServicesPage />} />
                   <Route path="/solutions/entreprises-ia" element={<AiCompaniesPage />} />
                   <Route path="/solutions/gouvernements" element={<GovernmentsPage />} />
                   <Route path="/solutions/etablissements" element={<InstitutionsPage />} />

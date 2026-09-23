@@ -43,6 +43,7 @@ const buildColumns = (t: Translate): { title: string; links: FooterLink[] }[] =>
       { label: "Malayka IA", to: "/produits/malayka-ia" },
       { label: "Malayka Éducative", to: "/produits/malayka-educative" },
       { label: "Malayka Data", to: "/produits/malayka-data" },
+      { label: "Malayka Services", to: "/produits/malayka-services" },
     ],
   },
   {
