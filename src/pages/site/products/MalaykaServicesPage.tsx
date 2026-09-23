@@ -1,16 +1,61 @@
 import {
   ClipboardCheck, Bot, Server, RefreshCw, Building2, HeartHandshake,
   Briefcase, Landmark, GraduationCap, Database, UserCheck, Layers,
-  Cpu, Rocket, Users, Check,
+  Cpu, Rocket, Users, Check, ShieldCheck, Sparkles, Clock,
 } from "lucide-react";
 import {
   Reveal, Section, SectionHeading, PageHero, FeatureCard, FlowChain,
-  CtaGroup, mailto, StickySteps,
+  CtaGroup, mailto, StickySteps, RotatingWord,
 } from "../_shared/ui";
 import { MEDIA } from "../_shared/media";
-import { DataJourney } from "../_shared/scenes";
+import { DataJourney, ProfileRows } from "../_shared/scenes";
 import { Mark, Underline } from "../_shared/emphasis";
 import { useT, type Translate } from "../_shared/lang";
+
+const buildDepartments = (t: Translate) => [
+  t("RH", "HR"),
+  t("Comptabilité & Finance", "Accounting & Finance"),
+  t("Marketing", "Marketing"),
+  t("Design", "Design"),
+  t("Management", "Management"),
+  t("Juridique", "Legal"),
+  t("Informatique", "IT"),
+  t("Data Analyste", "Data Analyst"),
+  t("Support client", "Customer support"),
+  t("Ventes & Commercial", "Sales"),
+];
+
+const buildRotatingRoles = (t: Translate) =>
+  t.lang === "en"
+    ? ["HR", "Finance", "Marketing", "Design", "Legal", "IT", "Data", "Sales"]
+    : ["RH", "Finance", "Marketing", "Design", "Juridique", "Informatique", "Data", "Ventes"];
+
+const buildAgentFeatures = (t: Translate) => [
+  {
+    Icon: ShieldCheck,
+    title: t("Souveraineté des données", "Data sovereignty"),
+    desc: t(
+      "Vous gardez le contrôle sur vos données. Rien ne sort de votre périmètre sans votre accord.",
+      "You keep control of your data. Nothing leaves your perimeter without your consent.",
+    ),
+  },
+  {
+    Icon: Sparkles,
+    title: t("Toujours les meilleurs modèles", "Always the best models"),
+    desc: t(
+      "Nous nous connectons aux modèles les plus performants du moment, et les mettons à jour régulièrement. Plusieurs modèles combinés, choisis selon leurs performances sur chaque tâche.",
+      "We connect to the best-performing models available, and update them regularly. Several models combined, chosen for how they perform on each task.",
+    ),
+  },
+  {
+    Icon: Clock,
+    title: t("Disponible 24h/24, 7j/7", "Available 24/7"),
+    desc: t(
+      "Vos agents ne dorment pas. Ils respectent vos process internes, votre jargon et vos codes.",
+      "Your agents never sleep. They follow your internal processes, your jargon and your codes.",
+    ),
+  },
+];
 
 const buildServices = (t: Translate) => [
   {
@@ -69,7 +114,7 @@ const buildJourney = (t: Translate) => [
   { Icon: Layers, label: t("Données structurées", "Structured data"), hint: t("taxonomie", "taxonomy") },
   { Icon: Cpu, label: t("RAG / fine-tuning", "RAG / fine-tuning"), hint: t("adaptation", "adaptation") },
   { Icon: Bot, label: t("Modèle IA", "AI model"), hint: t("intelligence", "intelligence") },
-  { Icon: Rocket, label: t("Déploiement", "Deployment") , hint: t("mise en service", "go-live") },
+  { Icon: Rocket, label: t("Déploiement", "Deployment"), hint: t("mise en service", "go-live") },
   { Icon: Users, label: t("Utilisateur final", "End user"), hint: t("usage", "usage") },
 ];
 
@@ -205,8 +250,56 @@ export default function MalaykaServicesPage() {
         steps={buildJourney(t)}
       />
 
+      {/* Pas une IA : une équipe d'agents, un par métier. */}
+      <Section tone="muted" size="large">
+        <Reveal>
+          <SectionHeading
+            eyebrow={t("Vos agents spécialisés", "Your specialised agents")}
+            title={
+              t.lang === "en" ? (
+                <>We do not deploy one AI. We deploy <Mark>a team of agents</Mark>.</>
+              ) : (
+                <>Nous ne déployons pas une IA. Nous déployons <Mark>une équipe d'agents</Mark>.</>
+              )
+            }
+            lead={t(
+              "Chaque agent agit aux côtés d'un membre de votre équipe, ou le remplace sur certaines tâches.",
+              "Each agent works alongside a member of your team, or replaces them on certain tasks.",
+            )}
+          />
+        </Reveal>
+
+        <Reveal delay={180}>
+          <p className="font-display type-h3 mt-12 text-foreground">
+            {t.lang === "en" ? (
+              <>Your next agent: <RotatingWord words={buildRotatingRoles(t)} className="text-muted-foreground" />.</>
+            ) : (
+              <>Votre prochain agent : <RotatingWord words={buildRotatingRoles(t)} className="text-muted-foreground" />.</>
+            )}
+          </p>
+        </Reveal>
+
+        <div className="mt-10 flex flex-wrap gap-2.5">
+          {buildDepartments(t).map((d, i) => (
+            <Reveal key={d} delay={280 + i * 45}>
+              <span className="inline-block rounded-full border border-border bg-card px-4 py-2 text-[13px] font-medium text-foreground/80">
+                {d}
+              </span>
+            </Reveal>
+          ))}
+        </div>
+
+        <div className="mt-16 grid gap-5 md:grid-cols-3">
+          {buildAgentFeatures(t).map((f, i) => (
+            <Reveal key={f.title} delay={i * 100}>
+              <FeatureCard {...f} />
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
       {/* Nos services */}
-      <Section tone="muted" id="services">
+      <Section tone="default" id="services">
         <Reveal>
           <SectionHeading
             eyebrow={t("Nos services", "Our services")}
@@ -244,21 +337,15 @@ export default function MalaykaServicesPage() {
       />
 
       {/* Pour qui */}
-      <Section tone="default">
-        <Reveal>
-          <SectionHeading
-            eyebrow={t("Pour votre organisation", "For your organisation")}
-            title={t("Une offre, cinq façons de s'en servir.", "One offering, five ways to use it.")}
-          />
-        </Reveal>
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-          {buildProfiles(t).map((p, i) => (
-            <Reveal key={p.title} delay={i * 80}>
-              <FeatureCard {...p} />
-            </Reveal>
-          ))}
-        </div>
-      </Section>
+      <ProfileRows
+        eyebrow={t("Pour votre organisation", "For your organisation")}
+        lines={
+          t.lang === "en"
+            ? ["One offering,", "several ways to use it."]
+            : ["Une offre,", "plusieurs façons de s'en servir."]
+        }
+        items={buildProfiles(t)}
+      />
 
       {/* Positionnement */}
       <Section tone="muted">

@@ -54,7 +54,6 @@ const buildColumns = (t: Translate): { title: string; links: FooterLink[] }[] =>
       { label: t("Bailleurs de fonds", "Funders"), to: "/solutions/gouvernements#bailleurs" },
       { label: t("Établissements & EdTech", "Institutions & EdTech"), to: "/solutions/etablissements" },
       { label: t("Particuliers", "Individuals"), to: "/solutions/particuliers" },
-      { label: t("Autres services", "Other services"), to: "/produits/malayka-services" },
     ],
   },
   {

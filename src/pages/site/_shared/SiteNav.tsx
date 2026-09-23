@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Menu, X, ChevronDown, Sparkles, GraduationCap, Database, Cpu, Landmark,
-  Users, Building2, Radar, Network, ArrowRight, Wrench, Boxes,
+  Users, Building2, Radar, Network, ArrowRight, Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -117,15 +117,6 @@ const buildMenus = (t: Translate): MenuDef[] => [
           "Students, graduates, job seekers, freelancers, professionals.",
         ),
         to: "/solutions/particuliers",
-      },
-      {
-        Icon: Boxes,
-        title: t("Autres services", "Other services"),
-        desc: t(
-          "Annotation de données, IA sur mesure et déploiement pour entreprises, organisations, cabinets et consultants.",
-          "Data annotation, bespoke AI and deployment for companies, organisations, firms and consultants.",
-        ),
-        to: "/produits/malayka-services",
       },
     ],
     footer: { label: t("Parler à notre équipe", "Talk to our team"), href: mailto("Solutions Malayka") },
